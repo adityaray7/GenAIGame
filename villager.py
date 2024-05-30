@@ -34,33 +34,59 @@ class Villager:
         self.task_start_time = time.time()
         self.task_end_time = self.task_start_time + time_to_complete_task
 
-    def update(self):
-        if self.task_location:
-            dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
-            dist = (dx**2 + dy**2)**0.5
+    # def update(self):
+    #     if self.task_location:
+    #         dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
+    #         dist = (dx**2 + dy**2)**0.5
 
-            if dist > 1:
-                self.x += dx / dist
-                self.y += dy / dist
-            else:
-                self.destination = None  # Reached destination
-        else:
-            if self.task_running:
-                if self.task_complete():
-                    print(f"{self.agent_id} has completed the task '{self.current_task}'!")
-                    self.current_task = None
-                    self.task_location = None
-                    self.task_running = False
-                    self.time_to_complete_task = None
+    #         if dist > 1:
+    #             self.x += dx / dist
+    #             self.y += dy / dist
+    #         else:
+    #             self.destination = None  # Reached destination
+    #     else:
+    #         if self.task_running:
+    #             if self.task_complete():
+    #                 print(f"{self.agent_id} has completed the task '{self.current_task}'!")
+    #                 self.current_task = None
+    #                 self.task_location = None
+    #                 self.task_running = False
+    #                 self.time_to_complete_task = None
+    #             else:
+    #                 # Still completing the task
+    #                 pass
+
+
+    def update(self):
+            if self.task_location:
+                dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
+                dist = (dx**2 + dy**2)**0.5
+                if dist > 1:
+                    self.x += dx / dist
+                    self.y += dy / dist
                 else:
-                    # Still completing the task
-                    pass
+                    self.start_task(self.time_to_complete_task)  # Start the task after reaching the destination
+                    self.task_location = None  # Reached destination
+            else:
+                if self.task_running:
+                    if self.task_complete():
+                        print(f"\n{self.agent_id} has completed the task '{self.current_task}'!")
+                        self.current_task = None
+                        self.task_running = False
+                        self.time_to_complete_task = None
+                    else:
+                        # Still completing the task
+                        pass
 
     def draw(self, screen):
-        color = (0, 255, 0) if self.current_task else (255, 0, 0)
+        color = (0, 0, 0) if self.task_running else (255, 0, 0)
         pygame.draw.circle(screen, color, (int(self.x), int(self.y)), 5)
-        agent_id_text = self.font.render(self.agent_id, True, (255, 255, 255))
+        agent_id_text = self.font.render(self.agent_id, True, (0, 0, 0))
         screen.blit(agent_id_text, (self.x + 10, self.y))
         if self.current_task:
-            task_text = self.font.render(self.current_task, True, (255, 255, 255))
-            screen.blit(task_text, (self.x + 10, self.y + 20))
+            task_text = self.font.render(self.current_task, True, (0, 0, 0))
+            screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the villager
+        vil_image = pygame.image.load('images/vil.png')
+        vil_image = pygame.transform.scale(vil_image, (75, 75))
+        screen.blit(vil_image, (self.x, self.y))
+            

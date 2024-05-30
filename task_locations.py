@@ -9,6 +9,6 @@ class TaskLocation:
         self.font = pygame.font.SysFont(None, 24)
 
     def draw(self, screen):
-        pygame.draw.rect(screen, (0, 0, 255), (self.x - 5, self.y - 5, 10, 10))
-        task_text = self.font.render(self.task, True, (255, 255, 255))
+        pygame.draw.rect(screen, (255, 0, 0), (self.x - 5, self.y - 5, 10, 10))
+        task_text = self.font.render(self.task, True, (0, 0, 0), (255, 255, 255))  # Set white background color
         screen.blit(task_text, (self.x + 10, self.y - 10))

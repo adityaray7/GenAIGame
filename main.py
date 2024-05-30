@@ -4,13 +4,19 @@ from villager import Villager
 from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task
 import json
 # Constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
 
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
+
+
+# Load background image
+background_image = pygame.image.load("images/map2.png")
+background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
 
 # Predefined backgrounds for villagers
 backgrounds = [
@@ -28,7 +34,7 @@ backgrounds = [
 
 # Initialize villagers
 villagers = []
-for i in range(len(backgrounds):
+for i in range(len(backgrounds)):
     x = random.randint(50, SCREEN_WIDTH - 50)
     y = random.randint(50, SCREEN_HEIGHT - 50)
     background_texts = backgrounds[i]
@@ -75,7 +81,7 @@ while running:
             task_name, task_location = assign_next_task(villager, task_locations,villager.current_task)
             task_time = task_location.task_period  # Time required for the task
             villager.assign_task(task_name, task_location, task_time)  # Assign new task
-            print(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
+            print(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
             
         villager.update()
     
@@ -83,7 +89,8 @@ while running:
     save_game_state(villagers)
 
     # Render game state
-    screen.fill((0, 0, 0))
+    screen.blit(background_image, (0, 0))  # Draw background image
+    
     for villager in villagers:
         villager.draw(screen)
     for task_location in task_locations:
