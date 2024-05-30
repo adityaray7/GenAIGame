@@ -1,6 +1,6 @@
 import pygame
 import time
-
+from utils.gpt_query import get_query
 class Villager:
     def __init__(self, agent_id, x, y, background_texts):
         self.agent_id = agent_id
@@ -13,6 +13,7 @@ class Villager:
         self.task_end_time = None
         self.task_running = False
         self.time_to_complete_task = None
+        self.last_talk_attempt_time = 0
         self.font = pygame.font.SysFont(None, 24)
 
     def assign_task(self, task, location, time_to_complete_task):

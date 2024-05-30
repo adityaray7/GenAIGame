@@ -1,5 +1,5 @@
-from task_locations import TaskLocation
-from gpt_query import get_query
+from utils.task_locations import TaskLocation
+from utils.gpt_query import get_query
 
 def initialize_task_locations():
     task_locations = [
@@ -7,7 +7,7 @@ def initialize_task_locations():
         TaskLocation(200, 200, "Build a house",10),
         TaskLocation(600, 600, "Collect wood",8),
         TaskLocation(80, 600, "Fetch water",10),
-        TaskLocation(1000, 600, "Guard the village",25),
+        TaskLocation(1000, 600, "Guard the village",15),
         TaskLocation(200, 500, "Cook food",10),
         TaskLocation(300, 100, "Hunt for animals",15),
         TaskLocation(600, 400, "Scout the area",10),
@@ -18,7 +18,7 @@ def initialize_task_locations():
 
 def assign_tasks_to_villagers_from_llm(villagers, task_locations):
     for villager in villagers:
-        query = f"What should be the next task for {villager.agent_id}? Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]}"
+        query = f"What should be the first task for {villager.agent_id}? Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]}"
 
         context = " ".join(villager.background_texts)
         messages = [
@@ -57,8 +57,8 @@ def assign_next_task(villager, task_locations,previous_task):
     try:
         task_name = response.strip().split(':')[1].strip()
         task_location = next((loc for loc in task_locations if loc.task == task_name), None)
-        task_time = task_location.task_period  # Time required for the task
         if task_location:
+            task_time = task_location.task_period  # Time required for the task
             villager.assign_task(task_name, task_location,task_time)
             print(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})\n")
         else:

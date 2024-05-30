@@ -1,6 +1,6 @@
-from vector_db import VectorDatabase
-from get_embeddings import get_embedding
-from gpt_query import get_query
+from utils.vector_db import VectorDatabase
+from utils.get_embeddings import get_embedding
+from utils.gpt_query import get_query
 
 class VillagerAgent:
     def __init__(self, agent_id, background_texts, dim=3072):
