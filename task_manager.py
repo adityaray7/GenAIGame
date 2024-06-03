@@ -60,7 +60,7 @@ def assign_next_task(villager, task_locations,previous_task):
         if task_location:
             task_time = task_location.task_period  # Time required for the task
             villager.assign_task(task_name, task_location,task_time)
-            print(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})\n")
+            print(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
         else:
             print(f"Task '{task_name}' not found in available task locations.")
     except IndexError:

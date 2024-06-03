@@ -1,3 +1,6 @@
 otsuka-venv
 game_state.json
 __pycache__
+.env
+conversations.json
+game_state.json

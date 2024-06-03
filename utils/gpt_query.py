@@ -1,8 +1,7 @@
 import os
 from openai import AzureOpenAI
 
-os.environ['AZURE_OPENAI_API_KEY'] = "3c749ed024f440269bd40f8472fa8f56"
-os.environ['AZURE_OPENAI_API_ENDPOINT'] = "https://openai-for-internship-southindia.openai.azure.com/"
+#api key and endpoint
 
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
