@@ -1,3 +1,8 @@
+'''
+Currently not in use
+'''
+
+
 import random
 from utils.gpt_query import get_query
 from villager import Villager
