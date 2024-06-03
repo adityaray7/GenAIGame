@@ -33,7 +33,7 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
             task_location = next((loc for loc in task_locations if loc.task == task_name), None)
             if task_location:
                 task_time = task_location.task_period  # Time required for the task
-                villager.assign_task(task_name, task_location,task_time)
+                villager.assign_task(task_name, task_location, task_time)
                 print(f"Assigned task '{task_name}' to  {villager.agent_id} at location ({task_location.x}, {task_location.y})")
             else:
                 print(f"Task '{task_name}' not found in available task locations.")
@@ -41,7 +41,7 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
             print(f"Unexpected response format: {response}")
             default_task_location = task_locations[0]
             default_task_time = default_task_location.task_period
-            villager.assign_task(default_task_location.task, default_task_location,default_task_time)
+            villager.assign_task(default_task_location.task, default_task_location, default_task_time)
 
         
 
@@ -70,6 +70,5 @@ def assign_next_task(villager, task_locations,previous_task):
         default_task_time = default_task_location.task_period
 
         villager.assign_task(default_task_location.task, default_task_location,default_task_time)
-
 
     return task_name, task_location

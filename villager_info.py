@@ -11,7 +11,7 @@ def print_villager_info(villagers_info):
         print(f"Current Task: {info['current_task']}")
         print(f"Task Start Time: {info['task_start_time']}")
         print(f"Task End Time: {info['task_end_time']}")
-        print(f"Task Running: {info['task_running']}")
+        print(f"Task Doing: {info['task_doing']}")
         print("-" * 20)
 
 if __name__ == "__main__":
