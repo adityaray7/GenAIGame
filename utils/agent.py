@@ -1,6 +1,7 @@
 from utils.vector_db import VectorDatabase
 from utils.get_embeddings import get_embedding
 from utils.gpt_query import get_query
+from langchain_core.messages import HumanMessage, SystemMessage
 
 class VillagerAgent:
     def __init__(self, agent_id, background_texts, dim=3072):
@@ -21,8 +22,8 @@ class VillagerAgent:
         relevant_info = self.vector_db.search(query_embedding)
         context = " ".join([info['text'] for info in relevant_info])
         messages = [
-            {"role": "system", "content": context},
-            {"role": "user", "content": query}
+            SystemMessage(content=context),
+            HumanMessage(content=query)
         ]
         response = get_query(messages)
         return response

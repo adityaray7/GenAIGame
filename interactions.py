@@ -4,6 +4,7 @@ Currently not in use
 
 
 import random
+from langchain_core.messages import HumanMessage, SystemMessage
 from utils.gpt_query import get_query
 from villager import Villager
 
@@ -16,10 +17,15 @@ def interact(villagers):
             for _ in range(rounds_to_talk):
                 # Generate context from memory
                 context = " ".join(villager.background_texts)
+
                 # Generate a query to the LLM
                 query = generate_query(villager)
+
                 # Get response from LLM
-                response = get_query([{"role": "system", "content": context}, {"role": "user", "content": query}])
+                response = get_query([
+                    SystemMessage(content=context), 
+                    HumanMessage(content=query)
+                ])
                 # Process response (if needed)
                 process_response(response)
 

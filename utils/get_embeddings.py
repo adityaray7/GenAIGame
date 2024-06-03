@@ -1,20 +1,17 @@
-import os
-from openai import AzureOpenAI
+from langchain_openai import AzureOpenAIEmbeddings
+from dotenv import load_dotenv
 
-#api key and endpoint
+load_dotenv()
 
+def get_embedding(text, embedding_model="text-embedding3"):
+  text = text.replace("\n", " ")
+  embeddings = AzureOpenAIEmbeddings(
+    azure_deployment=embedding_model
+  )
+  response = embeddings.embed_query(text)
+  print(f"Embedding model out: {response[0]}")
 
-client = AzureOpenAI(
-  api_key = os.getenv("AZURE_OPENAI_API_KEY"),  
-  api_version = "2024-02-01",
-  azure_endpoint =os.getenv("AZURE_OPENAI_API_ENDPOINT") 
-)
+  return response
 
-
-def get_embedding(text, model="text-embedding3"):
-   text = text.replace("\n", " ")
-   return client.embeddings.create(input = [text], model=model).data[0].embedding
-
-
-# result = get_embedding("Your")
-# print(result)
+if __name__ == "__main__":
+  print(get_embedding("What is the meaning of life?"))
