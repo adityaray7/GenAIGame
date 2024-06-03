@@ -1,19 +1,19 @@
-import os
-from openai import AzureOpenAI
+from langchain_openai import AzureChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
 from dotenv import load_dotenv
-#api key and endpoint
-load_dotenv(".env")
+load_dotenv()
 
-client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
-    api_version="2024-02-01",
-    azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT")
-)
-
-def get_query(messages,model = 'GPT35-turboA'):
-    response = client.chat.completions.create(
-        model=model, # model = "deployment_name".
-        messages=messages
+def get_query(messages, max_tokens=50, temperature=0.0, deployment_name="GPT35-turboA"):
+    model = AzureChatOpenAI(
+        deployment_name=deployment_name,
+        temperature=temperature,
+        max_tokens=max_tokens
     )
-    return response.choices[0].message.content
+    response = model.invoke(messages)
+    return response.content
    
+if __name__ == "__main__":
+    print(get_query([
+        HumanMessage(content="What is the meaning of life?"),
+        SystemMessage(content="The meaning of life is to live and learn. Output only this and nothing else. DO NOT OUTPUT ANYTHING ELSE.")
+    ]))

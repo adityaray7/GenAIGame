@@ -4,8 +4,17 @@ from villager import Villager
 from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task
 import json
 from utils.gpt_query import get_query
+from langchain_core.messages import HumanMessage, SystemMessage
+import os
+from dotenv import load_dotenv
 import time
 
+load_dotenv()
+# # Initialize LangSmith
+os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
+os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
+os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
+os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
 
 # Constants
 SCREEN_WIDTH = 1200
@@ -95,10 +104,8 @@ def handle_villager_interactions(villagers,conversations):
                         if current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
                             for i in range(1):
                                 context = " ".join(villager1.background_texts + villager2.background_texts)
-                                messages = [
-                                    {"role": "system", "content": context},
-                                    {"role": "user", "content": ""}
-                                ]
+                                
+                                messages = [SystemMessage(content=context), HumanMessage(content="")]
                                 response = get_query(messages)
                                 # Add conversation to the list
                                 conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": response})
