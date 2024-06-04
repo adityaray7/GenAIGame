@@ -97,15 +97,17 @@ task_locations = initialize_task_locations()
 assign_tasks_to_villagers_from_llm(villagers, task_locations)
 conversations = []  # List to store conversations
 
-def assign_task_thread(villager):
+def assign_task_thread(villager, current_task=None):
     if (villager.agent_id in villagers_threaded):
         return
     villagers_threaded.append(villager.agent_id)
-    print(f"{villager.agent_id} has completed the task '{villager.current_task}'!")
+    print(f"{villager.agent_id} has completed the task '{current_task}'!")
     print(f"{villagers_threaded} are the villagers currently getting assigned tasks")
     # Assign next task to the villager
     print(f"Assigning next task to {villager.agent_id}...")
-    task_name, task_location = assign_next_task(villager, task_locations,villager.current_task)
+
+    task_name, task_location = assign_next_task(villager, task_locations, current_task)
+
     task_time = task_location.task_period  # Time required for the task
     villager.assign_task(task_name, task_location, task_time)  # Assign new task
     print(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
@@ -122,8 +124,9 @@ while running:
 
     for villager in villagers:
         if villager.task_complete():
-            x = Thread(target=assign_task_thread, args=(villager,))
-            x.start()
+            current_task = villager.current_task
+            thread = Thread(target=assign_task_thread, args=(villager,current_task,))
+            thread.start()
             
         villager.update()
 
