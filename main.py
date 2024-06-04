@@ -21,24 +21,26 @@ os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
 CLEAR_CONVERSATIONS_INTERVAL = 10  # Number of iterations before clearing conversations
-
+DAY_DURATION = 30  # 60 seconds for a full day cycle
+NIGHT_DURATION = 30  # 60 seconds for a full night cycle
+TRANSITION_DURATION = 10  # 10 seconds for a transition period
 
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
-
-# Load background image
-background_image = pygame.image.load("images/map2.png")
-background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
+# Load background images
+background_day = pygame.image.load("images/map2.jpg")
+background_night = pygame.image.load("images/night.jpg")
+background_day = pygame.transform.scale(background_day, (SCREEN_WIDTH, SCREEN_HEIGHT))
+background_night = pygame.transform.scale(background_night, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Predefined backgrounds for villagers
 backgrounds = [
-    ["I am Villager 0.", "I enjoy exploring the woods and gathering herbs.", "I often cook meals for my fellow villagers."],
-    ["I am Villager 1.", "I have a knack for construction and enjoy building structures.", "I believe a sturdy village is key to our safety."],
-    ["I am Villager 2.", "I am always on high alert, watching over the village day and night.", "I take pride in keeping everyone safe from harm."]
+    ["I am Villager 0.", "I enjoy exploring the woods and gathering herbs.", "I often cook meals for my fellow villagers.","I have to find out who the werewolf is"],
+    ["I am Villager 1.", "I have a knack for construction and enjoy building structures.", "I believe a sturdy village is key to our safety.","I have to find out who the werewolf is"],
+    ["I am Villager 2.", "I am always on high alert, watching over the village day and night.", "I take pride in keeping everyone safe from harm.","I have to find out who the werewolf is"],
     # ["I am Villager 3.", "I am drawn to the river, where I find peace and serenity.", "I am the one who fetches water for the village."],
     # ["I am Villager 4.", "I am passionate about culinary arts and experimenting with flavors.", "I love to create delicious meals for my friends and family."],
     # ["I am Villager 5.", "I am a skilled hunter, trained to track and capture prey.", "I provide meat and hides to sustain our community."],
@@ -81,10 +83,17 @@ def save_conversations(conversations, filename="conversations.json"):
     with open(filename, 'w') as f:
         json.dump(conversations, f, indent=4)
 
-    # conversations.clear()  # Clear conversations after saving
-
-
-
+def blend_images(image1, image2, blend_factor):
+    """Blend two images together based on the blend_factor (0.0 to 1.0)"""
+    temp_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    temp_surface.blit(image1, (0, 0))
+    temp_surface.set_alpha(int(255 * (1 - blend_factor)))
+    screen.blit(temp_surface, (0, 0))
+    
+    temp_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    temp_surface.blit(image2, (0, 0))
+    temp_surface.set_alpha(int(255 * blend_factor))
+    screen.blit(temp_surface, (0, 0))
 
 
 # Initialize task locations
@@ -92,17 +101,37 @@ task_locations = initialize_task_locations()
 
 # Assign tasks to villagers from LLM
 assign_tasks_to_villagers_from_llm(villagers, task_locations)
-conversations = []  # List to store conversations
+conversations = []  
 
 
 # Main game loop
 running = True
+start_time = time.time()
+is_day = True
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # Update game state
+    # Update day/night cycle
+    current_time = time.time()
+    elapsed_time = current_time - start_time
+    blend_factor = 0
+
+    if is_day:
+        if elapsed_time >= DAY_DURATION:
+            is_day = False
+            start_time = current_time
+        elif elapsed_time >= DAY_DURATION - TRANSITION_DURATION:
+            blend_factor = (elapsed_time - (DAY_DURATION - TRANSITION_DURATION)) / TRANSITION_DURATION
+    else:
+        if elapsed_time >= NIGHT_DURATION:
+            is_day = True
+            start_time = current_time
+        elif elapsed_time >= NIGHT_DURATION - TRANSITION_DURATION:
+            blend_factor = (elapsed_time - (NIGHT_DURATION - TRANSITION_DURATION)) / TRANSITION_DURATION
+
 
     for villager in villagers:
         if villager.task_complete():
@@ -122,10 +151,12 @@ while running:
     # Save game state periodically
     save_game_state(villagers)
     save_conversations(conversations)
-    
 
     # Render game state
-    screen.blit(background_image, (0, 0))  # Draw background image
+    if is_day:
+        blend_images(background_day, background_night, blend_factor)
+    else:
+        blend_images(background_night, background_day, blend_factor)
     
     for villager in villagers:
         villager.draw(screen)
