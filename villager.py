@@ -27,7 +27,6 @@ class Villager:
     # Returns True if the current time exceeds the end time of the task and False otherwise
     def task_complete(self):
         if self.current_task is None:
-            print(f"{self.agent_id} has no task assigned!")
             return False  # No task assigned
         else:
             # Check if the current time exceeds the end time of the task

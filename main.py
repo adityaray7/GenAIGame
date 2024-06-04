@@ -9,6 +9,7 @@ import os
 from dotenv import load_dotenv
 import time
 from interactions import handle_villager_interactions
+from threading import Thread
 
 load_dotenv()
 # # Initialize LangSmith
@@ -16,6 +17,10 @@ os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
 os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
 os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
+
+
+# Multithreading 
+villagers_threaded = []
 
 # Constants
 SCREEN_WIDTH = 1200
@@ -84,9 +89,6 @@ def save_conversations(conversations, filename="conversations.json"):
     # conversations.clear()  # Clear conversations after saving
 
 
-
-
-
 # Initialize task locations
 task_locations = initialize_task_locations()
 
@@ -94,6 +96,19 @@ task_locations = initialize_task_locations()
 assign_tasks_to_villagers_from_llm(villagers, task_locations)
 conversations = []  # List to store conversations
 
+def assign_task_thread(villager):
+    if (villager.agent_id in villagers_threaded):
+        return
+    villagers_threaded.append(villager.agent_id)
+    print(f"{villager.agent_id} has completed the task '{villager.current_task}'!")
+    print(f"{villagers_threaded} are the villagers currently getting assigned tasks")
+    # Assign next task to the villager
+    print(f"Assigning next task to {villager.agent_id}...")
+    task_name, task_location = assign_next_task(villager, task_locations,villager.current_task)
+    task_time = task_location.task_period  # Time required for the task
+    villager.assign_task(task_name, task_location, task_time)  # Assign new task
+    print(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
+    villagers_threaded.remove(villager.agent_id)
 
 # Main game loop
 running = True
@@ -106,13 +121,8 @@ while running:
 
     for villager in villagers:
         if villager.task_complete():
-            print(f"{villager.agent_id} has completed the task '{villager.current_task}'!")
-            # Assign next task to the villager
-            print(f"Assigning next task to {villager.agent_id}...")
-            task_name, task_location = assign_next_task(villager, task_locations,villager.current_task)
-            task_time = task_location.task_period  # Time required for the task
-            villager.assign_task(task_name, task_location, task_time)  # Assign new task
-            print(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
+            x = Thread(target=assign_task_thread, args=(villager,))
+            x.start()
             
         villager.update()
 
