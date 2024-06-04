@@ -8,6 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 import os
 from dotenv import load_dotenv
 import time
+from interactions import handle_villager_interactions
 
 load_dotenv()
 # # Initialize LangSmith
@@ -82,36 +83,7 @@ def save_conversations(conversations, filename="conversations.json"):
 
     # conversations.clear()  # Clear conversations after saving
 
-    
 
-TALK_DISTANCE_THRESHOLD = 50  # Adjust as needed
-TALK_PROBABILITY = 0.05  # Adjust as needed
-TALK_COOLDOWN_TIME = 30  # Time in seconds for cooldown period
-
-
-conversations = []  # List to store conversations
-
-# Method to handle villager interactions
-def handle_villager_interactions(villagers,conversations):
-    current_time = time.time()
-    for villager1 in villagers:
-        for villager2 in villagers:
-            if villager1 != villager2:
-                distance = ((villager1.x - villager2.x) ** 2 + (villager1.y - villager2.y) ** 2) ** 0.5
-                if distance < TALK_DISTANCE_THRESHOLD:
-                    if random.random() < TALK_PROBABILITY:
-                        # Check if enough time has passed since the last talk attempt
-                        if current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
-                            for i in range(1):
-                                context = " ".join(villager1.background_texts + villager2.background_texts)
-                                
-                                messages = [SystemMessage(content=context), HumanMessage(content="")]
-                                response = get_query(messages)
-                                # Add conversation to the list
-                                conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": response})
-                            # Update last talk attempt time for both villagers
-                            villager1.last_talk_attempt_time = current_time
-                            villager2.last_talk_attempt_time = current_time
 
 
 
@@ -120,6 +92,8 @@ task_locations = initialize_task_locations()
 
 # Assign tasks to villagers from LLM
 assign_tasks_to_villagers_from_llm(villagers, task_locations)
+conversations = []  # List to store conversations
+
 
 # Main game loop
 running = True
@@ -148,6 +122,7 @@ while running:
     # Save game state periodically
     save_game_state(villagers)
     save_conversations(conversations)
+    
 
     # Render game state
     screen.blit(background_image, (0, 0))  # Draw background image
@@ -160,4 +135,3 @@ while running:
     clock.tick(60)
 
 pygame.quit()
-
