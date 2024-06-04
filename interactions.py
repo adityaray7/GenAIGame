@@ -24,11 +24,15 @@ def handle_villager_interactions(villagers,conversations):
     for villager1 in villagers:
         for villager2 in villagers:
             if villager1 != villager2:
+                if villager1.talking or villager2.talking:
+                    continue
                 distance = ((villager1.x - villager2.x) ** 2 + (villager1.y - villager2.y) ** 2) ** 0.5
                 if distance < TALK_DISTANCE_THRESHOLD:
                     if random.random() < TALK_PROBABILITY:
                         # Check if enough time has passed since the last talk attempt
                         if current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
+                            villager1.talking = True
+                            villager2.talking = True
                             for i in range(random.randint(2, 4)):
                                 context = " ".join(villager1.background_texts + villager2.background_texts)
                                 
@@ -39,5 +43,7 @@ def handle_villager_interactions(villagers,conversations):
                             # Update last talk attempt time for both villagers
                             villager1.last_talk_attempt_time = current_time
                             villager2.last_talk_attempt_time = current_time
+                            villager1.talking = False
+                            villager2.talking = False
 
 

@@ -14,6 +14,7 @@ class Villager:
         self.task_doing = False
         self.time_to_complete_task = None
         self.last_talk_attempt_time = 0
+        self.talking = False
         self.font = pygame.font.SysFont(None, 24)
 
     def assign_task(self, task, location, time_to_complete_task):
@@ -42,6 +43,9 @@ class Villager:
             self.task_end_time = self.task_start_time + self.time_to_complete_task
 
     def update(self):
+        if self.talking:
+            return
+
         if self.task_doing:
             # Check if the task is complete
             if self.task_complete():

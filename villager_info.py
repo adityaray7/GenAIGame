@@ -12,6 +12,7 @@ def print_villager_info(villagers_info):
         print(f"Task Start Time: {info['task_start_time']}")
         print(f"Task End Time: {info['task_end_time']}")
         print(f"Task Doing: {info['task_doing']}")
+        print(f"Talking: {info['talking']}")
         print("-" * 20)
 
 if __name__ == "__main__":

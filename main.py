@@ -73,7 +73,8 @@ def villager_info(villagers):
             "current_task": villager.current_task,
             "task_start_time": villager.task_start_time,
             "task_end_time": villager.task_end_time,
-            "task_doing": villager.task_doing
+            "task_doing": villager.task_doing,
+            "talking": villager.talking
         })
     return info
 
@@ -127,7 +128,8 @@ while running:
         villager.update()
 
         # Handle villager interactions
-    handle_villager_interactions(villagers,conversations)
+    
+    Thread(target=handle_villager_interactions, args=(villagers,conversations)).start()
 
     # Save game state periodically
     save_game_state(villagers)

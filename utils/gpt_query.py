@@ -3,7 +3,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from dotenv import load_dotenv
 load_dotenv()
 
-def get_query(messages, max_tokens=50, temperature=0.0, deployment_name="GPT35-turboA"):
+def get_query(messages, max_tokens=100, temperature=0.0, deployment_name="GPT35-turboA"):
     model = AzureChatOpenAI(
         deployment_name=deployment_name,
         temperature=temperature,
