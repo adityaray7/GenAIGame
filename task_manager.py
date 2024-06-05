@@ -1,6 +1,7 @@
 from utils.task_locations import TaskLocation
 from utils.gpt_query import get_query
 from langchain_core.messages import HumanMessage, SystemMessage
+from utils.logger import logger
 
 def initialize_task_locations():
     task_locations = [
@@ -34,11 +35,11 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
             if task_location:
                 task_time = task_location.task_period  # Time required for the task
                 villager.assign_task(task_name, task_location, task_time)
-                print(f"Assigned task '{task_name}' to  {villager.agent_id} at location ({task_location.x}, {task_location.y})")
+                logger.debug(f"Assigned task '{task_name}' to  {villager.agent_id} at location ({task_location.x}, {task_location.y})")
             else:
-                print(f"Task '{task_name}' not found in available task locations.")
+                logger.warning(f"Task '{task_name}' not found in available task locations.")
         except IndexError:
-            print(f"Unexpected response format: {response}")
+            logger.error(f"Unexpected response format: {response}")
             default_task_location = task_locations[0]
             default_task_time = default_task_location.task_period
             villager.assign_task(default_task_location.task, default_task_location, default_task_time)
@@ -61,11 +62,11 @@ def assign_next_task(villager, task_locations,previous_task):
         if task_location:
             task_time = task_location.task_period  # Time required for the task
             villager.assign_task(task_name, task_location,task_time)
-            print(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
+            logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
         else:
-            print(f"Task '{task_name}' not found in available task locations.")
+            logger.warning(f"Task '{task_name}' not found in available task locations.")
     except IndexError:
-        print(f"Unexpected response format: {response}\n")
+        logger.error(f"Unexpected response format: {response}\n")
         default_task_location = task_locations[0]
         default_task_time = default_task_location.task_period
 

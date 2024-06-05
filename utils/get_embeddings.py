@@ -9,7 +9,6 @@ def get_embedding(text, embedding_model="text-embedding3"):
     azure_deployment=embedding_model
   )
   response = embeddings.embed_query(text)
-  print(f"Embedding model out: {response[0]}")
 
   return response
 
