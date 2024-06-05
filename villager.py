@@ -1,6 +1,7 @@
 import pygame
 import time
 from utils.gpt_query import get_query
+from utils.logger import logger
 class Villager:
     def __init__(self, agent_id, x, y, background_texts):
         self.agent_id = agent_id
@@ -37,7 +38,7 @@ class Villager:
     def start_task(self):
         # Record the start and end time of the task
         if not self.task_doing:
-            print(f"{self.agent_id} has started to do the task '{self.current_task}'!")
+            logger.info(f"{self.agent_id} has started to do the task '{self.current_task}'!")
             self.task_doing = True
             self.task_start_time = time.time()
             self.task_end_time = self.task_start_time + self.time_to_complete_task
@@ -49,7 +50,7 @@ class Villager:
         if self.task_doing:
             # Check if the task is complete
             if self.task_complete():
-                print(f"\n{self.agent_id} has completed the task '{self.current_task}'!")
+                logger.info(f"\n{self.agent_id} has completed the task '{self.current_task}'!")
                 self.current_task = None
                 self.time_to_complete_task = None
                 self.task_doing = False
