@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import time
 from interactions import handle_villager_interactions
 from threading import Thread
+from client import send
 
 load_dotenv()
 # # Initialize LangSmith
@@ -65,6 +66,7 @@ for i in range(len(backgrounds)):
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
 
+
 def villager_info(villagers):
     info = []
     for villager in villagers:
@@ -105,6 +107,39 @@ def blend_images(image1, image2, blend_factor):
 # Initialize task locations
 task_locations = initialize_task_locations()
 
+# Function to send game state to the 
+def send_game_state():
+    global villagers
+    villagers_state = []
+    num_villagers = len(villagers)
+    for villager in villagers:
+        villagers_state.append({
+            "agent_id": villager.agent_id,
+            "x": villager.x,
+            "y": villager.y
+        })
+
+    global task_locations
+    tasks = task_locations
+    task_info = []
+    for task in tasks:
+        task_info.append({
+            "x": task.x,
+            "y": task.y,
+            "task": task.task
+        })
+    
+    game_state = {
+        "numVillagers": num_villagers,
+        "villagers": villagers_state,
+        "tasks": task_info
+    }
+
+    # convert game_state to json
+    game_state = json.dumps(game_state)
+    send(game_state)
+
+
 # Assign tasks to villagers from LLM
 assign_tasks_to_villagers_from_llm(villagers, task_locations)
 conversations = []  # List to store conversations
@@ -130,6 +165,7 @@ running = True
 start_time = time.time()
 is_day = True
 while running:
+    send_game_state()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
