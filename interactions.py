@@ -13,11 +13,6 @@ import json
 TALK_DISTANCE_THRESHOLD = 50  # Adjust as needed
 TALK_PROBABILITY = 0.05  # Adjust as needed
 TALK_COOLDOWN_TIME = 30  # Time in seconds for cooldown period
-
-
-
-
-
 # Method to handle villager interactions
 def handle_villager_interactions(villagers,conversations):
     current_time = time.time()
@@ -27,10 +22,7 @@ def handle_villager_interactions(villagers,conversations):
                 if villager1.talking or villager2.talking:
                     continue
                 distance = ((villager1.x - villager2.x) ** 2 + (villager1.y - villager2.y) ** 2) ** 0.5
-                if distance < TALK_DISTANCE_THRESHOLD:
-                    if random.random() < TALK_PROBABILITY:
-                        # Check if enough time has passed since the last talk attempt
-                        if current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
+                if distance < TALK_DISTANCE_THRESHOLD and random.random() < TALK_PROBABILITY and current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
                             villager1.talking = True
                             villager2.talking = True
                             for i in range(random.randint(2, 4)):
