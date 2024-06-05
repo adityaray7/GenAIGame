@@ -4,4 +4,4 @@ __pycache__
 .env
 conversations.json
 game_state.json
-genai-venv/
+/genai-venv
