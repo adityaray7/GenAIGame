@@ -112,7 +112,6 @@ def send_game_state():
     global villagers
     villagers_state = []
     num_villagers = len(villagers)
-    print(num_villagers)
     for villager in villagers:
         villagers_state.append({
             "agent_id": villager.agent_id,
@@ -140,9 +139,6 @@ def send_game_state():
     game_state = json.dumps(game_state)
     send(game_state)
 
-send_game_state()
-
-quit()
 
 # Assign tasks to villagers from LLM
 assign_tasks_to_villagers_from_llm(villagers, task_locations)
@@ -169,6 +165,7 @@ running = True
 start_time = time.time()
 is_day = True
 while running:
+    send_game_state()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
