@@ -143,7 +143,7 @@ class Agent:
         )
     
     def _generate_reaction(
-        self, observation: str, suffix: str, now: Optional[datetime] = None, last_k : Optional[int] = 50
+        self, observation: str, suffix: str, now: Optional[datetime] = None, last_k : Optional[int] = 4
     ) -> str:
         """React to a given observation or dialogue act."""
         prompt = PromptTemplate.from_template(
@@ -244,7 +244,7 @@ class Agent:
                     self.memory.now_key: now,
                 },
             )
-            return False, f"{self.name} said {farewell}"
+            return False, f"{self.name} : {farewell}"
         if "SAY:" in result:
             response_text = self._clean_response(result.split("SAY:")[-1])
             self.memory.save_context(
