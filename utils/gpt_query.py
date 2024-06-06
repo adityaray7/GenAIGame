@@ -1,6 +1,6 @@
 from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
-from track_tokens import track_tokens
+# from track_tokens import track_tokens
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -11,7 +11,7 @@ def get_query(messages, max_tokens=100, temperature=0.0, deployment_name="GPT35-
         max_tokens=max_tokens
     )
     response = model.invoke(messages)
-    track_tokens(response)
+    # track_tokens(response)
     return response.content
    
 if __name__ == "__main__":
