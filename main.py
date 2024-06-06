@@ -26,7 +26,7 @@ villagers_threaded = []
 
 # Constants
 SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 800
+SCREEN_HEIGHT = 720
 CLEAR_CONVERSATIONS_INTERVAL = 10  # Number of iterations before clearing conversations
 DAY_DURATION = 30  # 60 seconds for a full day cycle
 NIGHT_DURATION = 30  # 60 seconds for a full night cycle
@@ -46,7 +46,7 @@ clock = pygame.time.Clock()
 # Predefined backgrounds for villagers
 backgrounds = [
     ["I am Villager 0.", "I enjoy exploring the woods and gathering herbs.", "I often cook meals for my fellow villagers."],
-    ["I am Villager 1.", "I have a knack for construction and enjoy building structures.", "I believe a sturdy village is key to our safety."],
+    ["I am Villager 1.", "I have a knack for construction and enjoxy building structures.", "I believe a sturdy village is key to our safety."],
     ["I am Villager 2.", "I am always on high alert, watching over the village day and night.", "I take pride in keeping everyone safe from harm."]
     # ["I am Villager 3.", "I am drawn to the river, where I find peace and serenity.", "I am the one who fetches water for the village."],
     # ["I am Villager 4.", "I am passionate about culinary arts and experimenting with flavors.", "I love to create delicious meals for my friends and family."],
@@ -111,6 +111,7 @@ task_locations = initialize_task_locations()
 # Function to send game state to the 
 def send_game_state():
     global villagers
+    global is_day
     villagers_state = []
     num_villagers = len(villagers)
     for villager in villagers:
@@ -133,7 +134,8 @@ def send_game_state():
     game_state = {
         "numVillagers": num_villagers,
         "villagers": villagers_state,
-        "tasks": task_info
+        "tasks": task_info, 
+        "isDay": is_day,
     }
 
     # convert game_state to json
