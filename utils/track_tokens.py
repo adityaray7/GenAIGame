@@ -3,7 +3,7 @@ import os
 from openai import AzureOpenAI
 from dotenv import load_dotenv
 import datetime
-from logger import logger
+from utils.logger import logger
 from pymongo import MongoClient
 
 load_dotenv(".env")
