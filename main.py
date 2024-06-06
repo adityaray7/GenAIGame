@@ -1,6 +1,6 @@
 import pygame
 import random
-from villager import Villager
+from villager import Villager, Werewolf
 from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task
 import json
 from utils.gpt_query import get_query
@@ -12,13 +12,31 @@ from interactions import handle_villager_interactions
 from threading import Thread
 from client import send
 from utils.logger import logger
-
+import math
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+from langchain.retrievers import TimeWeightedVectorStoreRetriever
+from typing import Any, Dict, List, Optional
+from pymongo import MongoClient
+from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
+from utils.agentmemory import AgentMemory
+# Connect to your Atlas cluster
+ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
+client = MongoClient(ATLAS_CONNECTION_STRING)
+
+# Define collection and index name
+db_name = "langchain_db"
+collection_name = "test"
+atlas_collection = client[db_name][collection_name]
+vector_search_index = "vector_index"
+
+
 # # Initialize LangSmith
 os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
 os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
 os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
+ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 
 # Multithreading 
@@ -28,8 +46,8 @@ villagers_threaded = []
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 720
 CLEAR_CONVERSATIONS_INTERVAL = 10  # Number of iterations before clearing conversations
-DAY_DURATION = 30  # 60 seconds for a full day cycle
-NIGHT_DURATION = 30  # 60 seconds for a full night cycle
+DAY_DURATION = 60  # 60 seconds for a full day cycle
+NIGHT_DURATION = 60  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
 
 # Load background images
@@ -45,9 +63,10 @@ clock = pygame.time.Clock()
 
 # Predefined backgrounds for villagers
 backgrounds = [
-    ["I am Villager 0.", "I enjoy exploring the woods and gathering herbs.", "I often cook meals for my fellow villagers."],
-    ["I am Villager 1.", "I have a knack for construction and enjoxy building structures.", "I believe a sturdy village is key to our safety."],
-    ["I am Villager 2.", "I am always on high alert, watching over the village day and night.", "I take pride in keeping everyone safe from harm."]
+    
+    ["I am Sam.", "I enjoy exploring the woods and gathering herbs.", "I often cook meals for my fellow villagers."],
+    ["I am Jack.", "I have a knack for construction and enjoy building structures.", "I believe a sturdy village is key to our safety."],
+    ["I am Ronald.", "I am always on high alert, watching over the village day and night.", "I take pride in keeping everyone safe from harm."]
     # ["I am Villager 3.", "I am drawn to the river, where I find peace and serenity.", "I am the one who fetches water for the village."],
     # ["I am Villager 4.", "I am passionate about culinary arts and experimenting with flavors.", "I love to create delicious meals for my friends and family."],
     # ["I am Villager 5.", "I am a skilled hunter, trained to track and capture prey.", "I provide meat and hides to sustain our community."],
@@ -57,15 +76,76 @@ backgrounds = [
     # ["I am Villager 9.", "I am patient and compassionate, with a gift for teaching.", "I educate the children of our village, guiding them toward a brighter future."],
 ]
 
+names=["Sam","Jack","Ronald"]
+
+# werewolf_background = [
+#     ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
+#     ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
+# ]
+
+llm = AzureChatOpenAI(
+    azure_deployment="GPT35-turboA",
+    api_version="2024-02-01",
+    temperature=0
+)
+
+def relevance_score_fn(score: float) -> float:
+    """Return a similarity score on a scale [0, 1]."""
+    # This will differ depending on a few things:
+    # - the distance / similarity metric used by the VectorStore
+    # - the scale of your embeddings (OpenAI's are unit norm. Many others are not!)
+    # This function converts the euclidean norm of normalized embeddings
+    # (0 is most similar, sqrt(2) most dissimilar)
+    # to a similarity function (0 to 1)
+    
+
+    # this returns negetive relevance values so temporarily made abs()
+    # change this to implement cosine_similarity
+    return abs(1.0 - (score / math.sqrt(2)))
+
+def create_new_memory_retriever():
+    """Create a new vector store retriever unique to the agent."""
+    # Define your embedding model
+    embeddings_model = AzureOpenAIEmbeddings(
+        azure_deployment="text-embedding3",
+        api_version="2024-02-01"
+    )
+    # Initialize the vectorstore as empty
+    embedding_size = 3072
+
+    ###############################################
+    # index = faiss.IndexFlatL2(embedding_size)
+    vectorstore = MongoDBAtlasVectorSearch(atlas_collection, embeddings_model)
+    
+    # vectorstore = FAISS(
+    #     embedding_function=embeddings_model,
+    #     index=index,
+    #     docstore=InMemoryDocstore({}),
+    #     index_to_docstore_id={},
+    #     relevance_score_fn=relevance_score_fn,
+    # )
+    return TimeWeightedVectorStoreRetriever(
+        vectorstore=vectorstore, other_score_keys=["importance"], k=15, decay_rate=0.005
+    )
 # Initialize villagers
 villagers = []
 for i in range(len(backgrounds)):
     x = random.randint(50, SCREEN_WIDTH - 50)
     y = random.randint(50, SCREEN_HEIGHT - 50)
     background_texts = backgrounds[i]
-    villager = Villager(f"villager_{i}", x, y, background_texts)
+    ". ".join(a for a in background_texts)
+    villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
+    villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory)
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
+
+# for i in range(len(werewolf_background)):
+#     x = random.randint(50, SCREEN_WIDTH - 50)
+#     y = random.randint(50, SCREEN_HEIGHT - 50)
+#     background_texts = backgrounds[i]
+#     villager = Werewolf(f"werewolf_{i}", x, y, background_texts)
+#     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
+#     villagers.append(villager)
 
 
 def villager_info(villagers):
@@ -157,11 +237,19 @@ def assign_task_thread(villager, current_task=None):
     logger.debug(f"Assigning next task to {villager.agent_id}...")
 
     task_name, task_location = assign_next_task(villager, task_locations, current_task)
-
     task_time = task_location.task_period  # Time required for the task
-    villager.assign_task(task_name, task_location, task_time)  # Assign new task
+    if isinstance(villager, Werewolf):
+        villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
+    else:
+        villager.assign_task(task_name, task_location, task_time)
     logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
     villagers_threaded.remove(villager.agent_id)
+
+# def handle_night_meeting(werewolves):
+#     logger.info("Night meeting for werewolves has started!")
+#     for werewolf in werewolves:
+#         werewolf.night_meeting(werewolves)
+
 
 # Main game loop
 running = True
@@ -174,20 +262,22 @@ while running:
             running = False
 
     # Update day/night cycle
-    current_time = time.time()
-    elapsed_time = current_time - start_time
+    curr = time.time()
+    elapsed_time = curr - start_time
     blend_factor = 0
 
     if is_day:
         if elapsed_time >= DAY_DURATION:
             is_day = False
-            start_time = current_time
+            start_time = curr
         elif elapsed_time >= DAY_DURATION - TRANSITION_DURATION:
             blend_factor = (elapsed_time - (DAY_DURATION - TRANSITION_DURATION)) / TRANSITION_DURATION
     else:
+        # if elapsed_time == NIGHT_DURATION/2:
+            # handle_night_meeting([v for v in villagers if isinstance(v, Werewolf)])
         if elapsed_time >= NIGHT_DURATION:
             is_day = True
-            start_time = current_time
+            start_time = curr
         elif elapsed_time >= NIGHT_DURATION - TRANSITION_DURATION:
             blend_factor = (elapsed_time - (NIGHT_DURATION - TRANSITION_DURATION)) / TRANSITION_DURATION
 
