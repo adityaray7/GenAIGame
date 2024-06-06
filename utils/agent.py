@@ -127,8 +127,6 @@ class Agent:
     ) -> str:
         """Return a descriptive summary of the agent."""
         current_time = datetime.now() if now is None else now
-        print("-----------")
-        print(current_time)
         since_refresh = (current_time - self.last_refreshed).seconds
         if (
             not self.summary
