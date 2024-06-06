@@ -19,15 +19,10 @@ def initialize_task_locations():
     return task_locations
 
 def assign_tasks_to_villagers_from_llm(villagers, task_locations):
+    
     for villager in villagers:
-        query = f"What should be the first task for {villager.agent_id}? Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]}"
-
-        context = " ".join(villager.background_texts)
-        messages = [
-            SystemMessage(content=context),
-            HumanMessage(content=query)
-        ]
-        response = get_query(messages)
+        _,response = villager.agent.generate_reaction(observation="only assign one task from the following:"+str([loc.task for loc in task_locations])+" other than None",call_to_action_template="What should be the first task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>")
+        print(response)
 
         try:
             task_name = response.strip().split(':')[1].strip()
@@ -42,19 +37,14 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
             logger.error(f"Unexpected response format: {response}")
             default_task_location = task_locations[0]
             default_task_time = default_task_location.task_period
-            villager.assign_task(default_task_location.task, default_task_location, default_task_time)
-
-        
+            villager.assign_task(default_task_location.task, default_task_location, default_task_time)      
 
 
 def assign_next_task(villager, task_locations,previous_task):
-    query = f"What should be the next task for {villager.agent_id}?  Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}"
-    context = " ".join(villager.background_texts)
-    messages = [
-        SystemMessage(content=context),
-        HumanMessage(content=query)
-    ]
-    response = get_query(messages)
+    query = f"What should be the next task for {villager.agent_id}?  Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}.Do not assign other than from the given list"
+    
+    _,response = villager.agent.generate_reaction(observation="only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}",call_to_action_template="What should be the next task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>. Do not assign other than from the given list")
+    print(response)
 
     try:
         task_name = response.strip().split(':')[1].strip()

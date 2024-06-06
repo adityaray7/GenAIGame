@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import time
 import requests
+import torch
 
 
 #open ai embeddings
@@ -26,7 +27,8 @@ def get_e5_embedding(text):
   text = text.replace("\n", " ")
   start=time.time()
   model = SentenceTransformer('intfloat/e5-small')
-  embeddings = model.encode(text)
+  with torch.no_grad():
+    embeddings = model.encode(text)
   print(f"Time taken to get embeddings: {time.time()-start}")
   return embeddings
 
@@ -36,6 +38,8 @@ if __name__ == "__main__":
 
   emb1 = np.array(get_embedding("What is the meaning of life?")).reshape(-1,1)
   emb2 = get_e5_embedding("What is the meaning of life?").reshape(-1,1)
+
+  print(emb1.shape, emb2.shape)
 
   similarity = cosine_similarity(emb1, emb2)[0][0]
   print(similarity)
