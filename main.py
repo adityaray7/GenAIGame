@@ -198,7 +198,7 @@ task_locations = initialize_task_locations()
 # Function to send game state to the 
 def send_game_state():
     global villagers
-    global is_day
+    global is_day,blend_factor
     villagers_state = []
     num_villagers = len(villagers)
     for villager in villagers:
@@ -223,6 +223,7 @@ def send_game_state():
         "villagers": villagers_state,
         "tasks": task_info, 
         "isDay": is_day,
+        "blendFactor": blend_factor,
     }
 
     # convert game_state to json
@@ -262,6 +263,7 @@ def handle_morning_meeting(villagers, center_x, center_y):
 running = True
 start_time = time.time()
 is_day = True
+blend_factor = 0
 while running:
     send_game_state()
     for event in pygame.event.get():
