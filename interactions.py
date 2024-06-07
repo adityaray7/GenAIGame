@@ -28,14 +28,14 @@ def handle_villager_interactions(villagers,conversations):
                             villager1.talking = True
                             villager2.talking = True
 
-                            initial_obs = f"You see {villager2.agent_id} nearby. Talk about your task and ask the {villager2.agent_id} about its tasks?"
+                            initial_obs = f"You see {villager2.agent_id} nearby. Talk about your task and ask the {villager2.agent_id} about its tasks"
                             StartConvo,result = villager1.agent.generate_reaction(observation=initial_obs)
 
                             if StartConvo:
                                 for _ in range(2):
                                     for villager in [villager2,villager1]:
                                         other_villager= villager1 if villager == villager2 else villager2
-                                        stayInConversation,response = villager.agent.generate_dialogue_response(observation=result)
+                                        stayInConversation,response = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}.Give a reply to it ")
                                         conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": response})
 
                                         if not stayInConversation:
