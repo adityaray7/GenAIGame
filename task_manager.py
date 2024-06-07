@@ -1,6 +1,8 @@
 from utils.task_locations import TaskLocation
 from utils.gpt_query import get_query
 from langchain_core.messages import HumanMessage, SystemMessage
+from utils.logger import logger
+import random
 
 def initialize_task_locations():
     task_locations = [
@@ -18,15 +20,10 @@ def initialize_task_locations():
     return task_locations
 
 def assign_tasks_to_villagers_from_llm(villagers, task_locations):
+    
     for villager in villagers:
-        query = f"What should be the first task for {villager.agent_id}? Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]}"
-
-        context = " ".join(villager.background_texts)
-        messages = [
-            SystemMessage(content=context),
-            HumanMessage(content=query)
-        ]
-        response = get_query(messages)
+        _,response = villager.agent.generate_reaction(observation="only assign one task from the following:"+str([loc.task for loc in task_locations])+" other than None",call_to_action_template="What should be the first task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>")
+        print(response)
 
         try:
             task_name = response.strip().split(':')[1].strip()
@@ -34,38 +31,38 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
             if task_location:
                 task_time = task_location.task_period  # Time required for the task
                 villager.assign_task(task_name, task_location, task_time)
-                print(f"Assigned task '{task_name}' to  {villager.agent_id} at location ({task_location.x}, {task_location.y})")
+                logger.debug(f"Assigned task '{task_name}' to  {villager.agent_id} at location ({task_location.x}, {task_location.y})")
             else:
-                print(f"Task '{task_name}' not found in available task locations.")
+                logger.warning(f"Task '{task_name}' not found in available task locations.")
         except IndexError:
-            print(f"Unexpected response format: {response}")
+            logger.error(f"Unexpected response format: {response}")
             default_task_location = task_locations[0]
             default_task_time = default_task_location.task_period
-            villager.assign_task(default_task_location.task, default_task_location, default_task_time)
-
-        
+            villager.assign_task(default_task_location.task, default_task_location, default_task_time)      
 
 
 def assign_next_task(villager, task_locations,previous_task):
-    query = f"What should be the next task for {villager.agent_id}?  Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}"
-    context = " ".join(villager.background_texts)
-    messages = [
-        SystemMessage(content=context),
-        HumanMessage(content=query)
-    ]
-    response = get_query(messages)
+    query = f"What should be the next task for {villager.agent_id}?  Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}.Do not assign other than from the given list"
+    
+    _,response = villager.agent.generate_reaction(observation="only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}",call_to_action_template="What should be the next task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>. Do not assign other than from the given list")
+    print(response)
 
     try:
         task_name = response.strip().split(':')[1].strip()
-        task_location = next((loc for loc in task_locations if loc.task == task_name), None)
-        if task_location:
+        task_location = random.choice([task for task in task_locations if task != previous_task])
+        if task_location in task_locations:
             task_time = task_location.task_period  # Time required for the task
             villager.assign_task(task_name, task_location,task_time)
-            print(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
+            logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
         else:
-            print(f"Task '{task_name}' not found in available task locations.")
+            default_task_location = next((loc for loc in task_locations), previous_task)
+            default_task_name = default_task_location.task
+            default_task_time = default_task_location.task_period
+            villager.assign_task(default_task_name, default_task_location,default_task_time)
+            logger.warning(f"Task '{task_name}' not found in available task locations.")
+
     except IndexError:
-        print(f"Unexpected response format: {response}\n")
+        logger.error(f"Unexpected response format: {response}\n")
         default_task_location = task_locations[0]
         default_task_time = default_task_location.task_period
 

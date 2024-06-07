@@ -32,15 +32,15 @@ import re
 from langchain_core.prompts import PromptTemplate
 from typing import Any, Dict, List, Optional, Tuple
 from langchain_core.language_models import BaseLanguageModel
-from agentmemory import AgentMemory
+from utils.agentmemory import AgentMemory
 from datetime import datetime
 
 class Agent:
     id_counter = 0
 
     def __init__(self, name : str, llm : BaseLanguageModel, 
-                 description : str, status : str, memory : AgentMemory, 
-                 age : Optional[int] = None):
+                 description : str,  memory : AgentMemory, 
+                 age : Optional[int] = None,status=""):
         self.name : str = name
         self.llm : BaseLanguageModel = llm
         self.description : str = description
@@ -188,9 +188,7 @@ class Agent:
     
     # look into save_context later
     def generate_reaction(
-        self, observation: str, now: Optional[datetime] = None
-    ) -> Tuple[bool, str]:
-        """React to a given observation."""
+        self, observation: str, now: Optional[datetime] = None,
         call_to_action_template = (
             "Should {agent_name} react to the observation, and if so,"
             + " what would be an appropriate reaction? Respond in one line."
@@ -198,10 +196,14 @@ class Agent:
             + "\notherwise, write:\nREACT: {agent_name}'s reaction (if anything)."
             + "\nEither do nothing, react, or say something but not both.\n\n"
         )
+    ) -> Tuple[bool, str]:
+        """React to a given observation."""
+     
         full_result = self._generate_reaction(
             observation, call_to_action_template, now=now
         )
         result = full_result.strip().split("\n")[0]
+        
 
         self.memory.save_context(
             {},
@@ -214,7 +216,7 @@ class Agent:
 
         if "REACT:" in result:
             reaction = self._clean_response(result.split("REACT:")[-1])
-            return False, f"{self.name} {reaction}"
+            return False, f"{self.name} : {reaction}"
         if "SAY:" in result:
             said_value = self._clean_response(result.split("SAY:")[-1])
             return True, f"{self.name} : {said_value}"
@@ -233,6 +235,7 @@ class Agent:
         full_result = self._generate_reaction(
             observation, call_to_action_template, now=now
         )
+        
         result = full_result.strip().split("\n")[0]
         if "GOODBYE:" in result:
             farewell = self._clean_response(result.split("GOODBYE:")[-1])

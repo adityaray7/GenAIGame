@@ -1,13 +1,13 @@
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from langchain.retrievers import TimeWeightedVectorStoreRetriever
-from pinecone import Pinecone, ServerlessSpec
+# from pinecone import Pinecone, ServerlessSpec
 from typing import Any, Dict, List, Optional
 from pymongo import MongoClient
 from langchain_mongodb import MongoDBAtlasVectorSearch
-from langchain_community.vectorstores import FAISS
-from langchain_community.docstore.in_memory import InMemoryDocstore
-from langchain_pinecone import PineconeVectorStore
-import faiss
+# from langchain_community.vectorstores import FAISS
+# from langchain_community.docstore.in_memory import InMemoryDocstore
+# from langchain_pinecone import PineconeVectorStore
+# import faiss
 import math
 # from villager_description import villager_descriptions
 from dotenv import load_dotenv
@@ -15,9 +15,9 @@ import os
 from agentmemory import AgentMemory
 from agent import Agent
 
-load_dotenv("../.env")
-
+load_dotenv()
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
+print(ATLAS_CONNECTION_STRING)
 
 # Connect to your Atlas cluster
 client = MongoClient(ATLAS_CONNECTION_STRING)
@@ -126,7 +126,7 @@ def interview_agent(agent: Agent, message: str) -> str:
     new_message = f"{USER_NAME} says {message}. If you don't know the answer, say that you don't know."
     return agent.generate_dialogue_response(new_message)[1]
 
-# def run_conversation(agents: List[Agent], initial_observation: str) -> None:
+def run_conversation(agents: List[Agent], initial_observation: str) -> None:
     """Runs a conversation between agents."""
     print(initial_observation)
     _, observation = agents[1].generate_reaction(initial_observation)
@@ -163,9 +163,9 @@ print(interview_agent(george, "What do you do?"))
 print(interview_agent(george, "What is thomas' occupation?"))
 
 agents = [george, thomas]
-# run_conversation(
-#     agents,
-#     "George: Hi, Thomas. What have you been upto lately? What is your occupation?",
-# )
+run_conversation(
+    agents,
+    "George: Hi, Thomas. What have you been upto lately? What is your occupation?",
+)
 
-# print(interview_agent(george, "What is thomas' occupation?"))
+print(interview_agent(george, "What is thomas' occupation?"))

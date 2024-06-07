@@ -11,14 +11,10 @@ import time
 import json
 
 TALK_DISTANCE_THRESHOLD = 50  # Adjust as needed
-TALK_PROBABILITY = 0.05  # Adjust as needed
 TALK_COOLDOWN_TIME = 30  # Time in seconds for cooldown period
-
-
-
-
-
 # Method to handle villager interactions
+
+
 def handle_villager_interactions(villagers,conversations):
     current_time = time.time()
     for villager1 in villagers:
@@ -27,19 +23,27 @@ def handle_villager_interactions(villagers,conversations):
                 if villager1.talking or villager2.talking:
                     continue
                 distance = ((villager1.x - villager2.x) ** 2 + (villager1.y - villager2.y) ** 2) ** 0.5
-                if distance < TALK_DISTANCE_THRESHOLD:
-                    if random.random() < TALK_PROBABILITY:
-                        # Check if enough time has passed since the last talk attempt
-                        if current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
+                if distance < TALK_DISTANCE_THRESHOLD and current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
                             villager1.talking = True
                             villager2.talking = True
-                            for i in range(random.randint(2, 4)):
-                                context = " ".join(villager1.background_texts + villager2.background_texts)
-                                
-                                messages = [SystemMessage(content=context), HumanMessage(content="")]
-                                response = get_query(messages)
-                                # Add conversation to the list
-                                conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": response})
+
+                            initial_obs = f"You see {villager2.agent_id} nearby. Talk about your task and ask the {villager2.agent_id} about its tasks?"
+                            StartConvo,result = villager1.agent.generate_reaction(observation=initial_obs)
+
+                            if StartConvo:
+                                for _ in range(4):
+                                    for villager in [villager2,villager1]:
+                                        other_villager= villager1 if villager == villager2 else villager2
+                                        stayInConversation,result = villager.agent.generate_dialogue_response(observation=result+f"{other_villager.agent_id} says {result}.Give a reply to it ")
+                                        conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
+
+                                        if not stayInConversation:
+                                            StartConvo = False
+                                            break
+
+                                    if not StartConvo:
+                                        break
+
                             # Update last talk attempt time for both villagers
                             villager1.last_talk_attempt_time = current_time
                             villager2.last_talk_attempt_time = current_time
