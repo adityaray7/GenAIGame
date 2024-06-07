@@ -37,7 +37,6 @@ from datetime import datetime
 
 class Agent:
     id_counter = 0
-
     def __init__(self, name : str, llm : BaseLanguageModel, 
                  description : str,  memory : AgentMemory, 
                  age : Optional[int] = None,status=""):

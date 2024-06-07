@@ -42,9 +42,8 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
 
 
 def assign_next_task(villager, task_locations,previous_task):
-    query = f"What should be the next task for {villager.agent_id}?  Expecting the response to be in the format Task: <task_name>,only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}.Do not assign other than from the given list"
     
-    _,response = villager.agent.generate_reaction(observation="only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}",call_to_action_template="What should be the next task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>. Do not assign other than from the given list")
+    _,response = villager.agent.generate_reaction(observation="only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}. ONLY ASSIGN TASK FROM THE LIST",call_to_action_template="What should be the next task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>. ONLY ASSIGN TASK FROM THE GIVEN LIST: {[loc.task for loc in task_locations]} . DO NOT ASSIGN TASK OTHER THAN THE LIST")
     print(response)
 
     try:
