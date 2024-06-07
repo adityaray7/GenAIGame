@@ -17,7 +17,7 @@ class Villager:
         self.current_task = None
         self.task_location = None
         self.task_start_time = None
-        self.task_end_time = 111717403133    # random big number
+        self.task_end_time = 111717403133    
         self.task_doing = False
         self.time_to_complete_task = None
         self.last_talk_attempt_time = 0
@@ -69,6 +69,12 @@ class Villager:
                     self.y += dy / dist
                 else:
                     self.start_task()
+
+
+    def move_to_center(self, center_x, center_y):
+        """Move the villager to the center of the map."""
+        self.x = center_x
+        self.y = center_y
 
 
     def draw(self, screen):
