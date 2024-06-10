@@ -37,7 +37,6 @@ from datetime import datetime
 
 class Agent:
     id_counter = 0
-
     def __init__(self, name : str, llm : BaseLanguageModel, 
                  description : str,  memory : AgentMemory, 
                  age : Optional[int] = None,status=""):
@@ -127,8 +126,6 @@ class Agent:
     ) -> str:
         """Return a descriptive summary of the agent."""
         current_time = datetime.now() if now is None else now
-        print("-----------")
-        print(current_time)
         since_refresh = (current_time - self.last_refreshed).seconds
         if (
             not self.summary

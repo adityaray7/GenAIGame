@@ -32,10 +32,10 @@ vector_search_index = "vector_index"
 
 
 # # Initialize LangSmith
-os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
-os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
-os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
-os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
+# os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
+# os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
+# os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
+# os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 
@@ -44,7 +44,7 @@ villagers_threaded = []
 
 # Constants
 SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 800
+SCREEN_HEIGHT = 720
 CLEAR_CONVERSATIONS_INTERVAL = 10  # Number of iterations before clearing conversations
 DAY_DURATION = 60  # 60 seconds for a full day cycle
 NIGHT_DURATION = 60  # 60 seconds for a full night cycle
@@ -197,6 +197,7 @@ task_locations = initialize_task_locations()
 # Function to send game state to the 
 def send_game_state():
     global villagers
+    global is_day,blend_factor
     villagers_state = []
     num_villagers = len(villagers)
     for villager in villagers:
@@ -219,7 +220,9 @@ def send_game_state():
     game_state = {
         "numVillagers": num_villagers,
         "villagers": villagers_state,
-        "tasks": task_info
+        "tasks": task_info, 
+        "isDay": is_day,
+        "blendFactor": blend_factor,
     }
 
     # convert game_state to json
@@ -249,16 +252,17 @@ def assign_task_thread(villager, current_task=None):
     logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
     villagers_threaded.remove(villager.agent_id)
 
-# def handle_night_meeting(werewolves):
-#     logger.info("Night meeting for werewolves has started!")
-#     for werewolf in werewolves:
-#         werewolf.night_meeting(werewolves)
+def handle_morning_meeting(villagers, center_x, center_y):
+    logger.info("Morning meeting has started! All villagers are moving to the center of the map.")
+    for villager in villagers:
+        villager.move_to_center(center_x, center_y)
 
 
 # Main game loop
 running = True
 start_time = time.time()
 is_day = True
+blend_factor = 0
 while running:
     send_game_state()
     for event in pygame.event.get():
@@ -272,6 +276,7 @@ while running:
 
     if is_day:
         if elapsed_time >= DAY_DURATION:
+            # handle_morning_meeting(villagers, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # Move villagers to the center
             is_day = False
             start_time = curr
         elif elapsed_time >= DAY_DURATION - TRANSITION_DURATION:
