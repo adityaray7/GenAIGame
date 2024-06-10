@@ -63,17 +63,16 @@ clock = pygame.time.Clock()
 
 # Predefined backgrounds for villagers
 backgrounds = [
-    
-    ["I am Sam. I enjoy exploring the woods and gathering herbs. The forest is my sanctuary, where I feel most alive and connected to nature."
-"I often cook meals for my fellow villagers. Using the herbs and plants I gather, I create nutritious and flavorful dishes that keep everyone in good health and spirits."
+    ["I am Sam. I enjoy exploring the woods and gathering herbs. The forest is my sanctuary, where I feel most alive and connected to nature.",
+"I often cook meals for my fellow villagers. Using the herbs and plants I gather, I create nutritious and flavorful dishes that keep everyone in good health and spirits.",
 "My knowledge of the forest's flora allows me to prepare remedies for common ailments, ensuring our village remains healthy and strong."],
-    ["I am Jack. I have a knack for construction and enjoy building structures. From homes to storage sheds, my craftsmanship ensures our village is well-built and resilient."
-"I believe a sturdy village is key to our safety. By using strong materials and innovative designs, I create buildings that can withstand harsh weather and potential threats."
-"I also lead repair and maintenance efforts, making sure that every structure stands the test of time and continues to serve our community."],
-    ["I am Ronald. I am always on high alert, watching over the village day and night. My keen eyes and sharp senses make me an excellent guardian."
-"I take pride in keeping everyone safe from harm. Whether it's warding off wild animals or keeping an eye out for intruders, my vigilance ensures our village's security."
-"I train younger villagers in self-defense and alertness, passing on my knowledge so that they too can contribute to the safety of our home."
-]
+    ["I am Jack. I have a knack for construction and enjoy building structures. From homes to storage sheds, my craftsmanship ensures our village is well-built and resilient.",
+"I believe a sturdy village is key to our safety. By using strong materials and innovative designs, I create buildings that can withstand harsh weather and potential threats.",
+"I also lead repair and maintenance efforts, making sure that every structure stands the test of time and continues to serve our community."
+],
+    ["I am Ronald. I am always on high alert, watching over the village day and night. My keen eyes and sharp senses make me an excellent guardian.",
+"I take pride in keeping everyone safe from harm. Whether it's warding off wild animals or keeping an eye out for intruders, my vigilance ensures our village's security.",
+"I train younger villagers in self-defense and alertness, passing on my knowledge so that they too can contribute to the safety of our home."]
     # ["I am Villager 3.", "I am drawn to the river, where I find peace and serenity.", "I am the one who fetches water for the village."],
     # ["I am Villager 4.", "I am passionate about culinary arts and experimenting with flavors.", "I love to create delicious meals for my friends and family."],
     # ["I am Villager 5.", "I am a skilled hunter, trained to track and capture prey.", "I provide meat and hides to sustain our community."],
