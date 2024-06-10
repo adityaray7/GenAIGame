@@ -3,7 +3,6 @@ import random
 from villager import Villager, Werewolf
 from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task
 import json
-from utils.gpt_query import get_query
 from langchain_core.messages import HumanMessage, SystemMessage
 import os
 from dotenv import load_dotenv
@@ -30,12 +29,6 @@ collection_name = "test"
 atlas_collection = client[db_name][collection_name]
 vector_search_index = "vector_index"
 
-
-# # Initialize LangSmith
-# os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
-# os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
-# os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
-# os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 
@@ -104,7 +97,6 @@ def relevance_score_fn(score: float) -> float:
     # (0 is most similar, sqrt(2) most dissimilar)
     # to a similarity function (0 to 1)
     
-
     # this returns negetive relevance values so temporarily made abs()
     # change this to implement cosine_similarity
     return abs(1.0 - (score / math.sqrt(2)))
@@ -249,7 +241,7 @@ def assign_task_thread(villager, current_task=None):
         villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
     else:
         villager.assign_task(task_name, task_location, task_time)
-    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
+    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
     villagers_threaded.remove(villager.agent_id)
 
 def handle_morning_meeting(villagers, center_x, center_y):
