@@ -1,11 +1,5 @@
-'''
-Currently not in use
-'''
-
-
 import random
 from langchain_core.messages import HumanMessage, SystemMessage
-from utils.gpt_query import get_query
 from villager import Villager
 import time
 import json
@@ -51,5 +45,4 @@ def handle_villager_interactions(villagers,conversations):
                             villager2.last_talk_attempt_time = current_time
                             villager1.talking = False
                             villager2.talking = False
-
 
