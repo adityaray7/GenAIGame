@@ -46,8 +46,8 @@ villagers_threaded = []
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 720
 CLEAR_CONVERSATIONS_INTERVAL = 10  # Number of iterations before clearing conversations
-DAY_DURATION = 60  # 60 seconds for a full day cycle
-NIGHT_DURATION = 60  # 60 seconds for a full night cycle
+DAY_DURATION = 30  # 60 seconds for a full day cycle
+NIGHT_DURATION = 30  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
 
 # Load background images

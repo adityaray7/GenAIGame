@@ -22,7 +22,7 @@ def initialize_task_locations():
 def assign_tasks_to_villagers_from_llm(villagers, task_locations):
     
     for villager in villagers:
-        _,response = villager.agent.generate_reaction(observation="only assign one task from the following:"+str([loc.task for loc in task_locations])+" other than None",call_to_action_template="What should be the first task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>")
+        _,response = villager.agent.generate_reaction(observation="only assign one task from the following:"+str([loc.task for loc in task_locations])+" other than None",call_to_action_template="What should be the first task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>. ONLY ASSIGN TASK FROM THE LIST")
         print(response)
 
         try:
