@@ -1,36 +1,34 @@
+from utils.logger import logger
 import pygame
 import random
-from villager import Villager, Werewolf
+
 from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task
 import json
-from langchain_core.messages import HumanMessage, SystemMessage
 import os
 from dotenv import load_dotenv
 import time
 from interactions import handle_villager_interactions
 from threading import Thread
+from utils.to_be_threaded_function import threaded_function
 from client import send
-from utils.logger import logger
 import math
-from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from langchain.retrievers import TimeWeightedVectorStoreRetriever
-from typing import Any, Dict, List, Optional
-from pymongo import MongoClient
 from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
-from utils.agentmemory import AgentMemory
-# Connect to your Atlas cluster
-ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
-client = MongoClient(ATLAS_CONNECTION_STRING)
+from utils.mongoClient import get_atlas_collection
 
+client_holder = {}
 # Define collection and index name
 db_name = "langchain_db"
 collection_name = "test"
-atlas_collection = client[db_name][collection_name]
-vector_search_index = "vector_index"
 
-ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
+# Connect to your Atlas cluster
+mongo_connection_thread = Thread(target=threaded_function, args=(client_holder, get_atlas_collection, (db_name, collection_name)))
+mongo_connection_thread.start()
 
+from villager import Villager, Werewolf
+from utils.agentmemory import AgentMemory
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
 # Multithreading 
 villagers_threaded = []
@@ -55,7 +53,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 # Predefined backgrounds for villagers
-backgrounds = [
+villager_backgrounds = [
     ["I am Sam. I enjoy exploring the woods and gathering herbs. The forest is my sanctuary, where I feel most alive and connected to nature.",
 "I often cook meals for my fellow villagers. Using the herbs and plants I gather, I create nutritious and flavorful dishes that keep everyone in good health and spirits.",
 "My knowledge of the forest's flora allows me to prepare remedies for common ailments, ensuring our village remains healthy and strong."],
@@ -77,16 +75,21 @@ backgrounds = [
 
 names=["Sam","Jack","Ronald"]
 
-# werewolf_background = [
-#     ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
-#     ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
-# ]
+werewolf_background = [
+    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
+    ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
+]
 
 llm = AzureChatOpenAI(
     azure_deployment="GPT35-turboA",
     api_version="2024-02-01",
     temperature=0
 )
+
+
+# Mongo connection thread
+mongo_connection_thread.join()
+atlas_collection = client_holder["result"]
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
@@ -125,12 +128,13 @@ def create_new_memory_retriever():
     return TimeWeightedVectorStoreRetriever(
         vectorstore=vectorstore, other_score_keys=["importance"], k=15, decay_rate=0.005
     )
+
 # Initialize villagers
 villagers = []
-for i in range(len(backgrounds)):
+for i in range(len(villager_backgrounds)):
     x = random.randint(50, SCREEN_WIDTH - 50)
     y = random.randint(50, SCREEN_HEIGHT - 50)
-    background_texts = backgrounds[i]
+    background_texts = villager_backgrounds[i]
     ". ".join(a for a in background_texts)
     villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
     villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory)
@@ -221,7 +225,6 @@ def send_game_state():
     game_state = json.dumps(game_state)
     send(game_state)
 
-
 # Assign tasks to villagers from LLM
 assign_tasks_to_villagers_from_llm(villagers, task_locations)
 conversations = []  # List to store conversations
@@ -248,7 +251,6 @@ def handle_morning_meeting(villagers, center_x, center_y):
     logger.info("Morning meeting has started! All villagers are moving to the center of the map.")
     for villager in villagers:
         villager.move_to_center(center_x, center_y)
-
 
 # Main game loop
 running = True

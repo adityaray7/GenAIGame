@@ -52,7 +52,6 @@ class Agent:
             self.chain(prompt).invoke({"entity":entity_name, "observation":observation})
         )
     
-
     @token_tracker
     def summarize_related_memories(self, observation: str) -> str:
         """Summarize memories that are most relevant to an observation."""
@@ -74,8 +73,8 @@ class Agent:
     def _clean_response(self, text: str) -> str:
         return re.sub(f"^{self.name} ", "", text.strip()).strip()
     
-    @token_tracker
     #working
+    @token_tracker
     def _compute_agent_summary(self) -> str:
         """"""
         prompt = PromptTemplate.from_template(
