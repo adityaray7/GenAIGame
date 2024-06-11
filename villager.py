@@ -1,6 +1,5 @@
 import pygame
 import time
-from utils.gpt_query import get_query
 from utils.logger import logger
 import random
 from utils.agent import Agent
@@ -56,7 +55,7 @@ class Villager:
         if self.task_doing:
             # Check if the task is complete
             if self.task_complete():
-                logger.info(f"\n{self.agent_id} has completed the task '{self.current_task}'!")
+                logger.info(f"{self.agent_id} has completed the task '{self.current_task}'!")
                 self.current_task = None
                 self.time_to_complete_task = None
                 self.task_doing = False
@@ -102,7 +101,7 @@ class Werewolf(Villager):
 
         if self.task_doing:
             if self.task_complete():
-                logger.info(f"\n{self.agent_id} (Werewolf) sabotaged the task '{self.current_task}'!")
+                logger.info(f"{self.agent_id} (Werewolf) sabotaged the task '{self.current_task}'!")
                 self.current_task = None
                 self.time_to_complete_task = None
                 self.task_doing = False

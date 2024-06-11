@@ -1,5 +1,4 @@
 from utils.task_locations import TaskLocation
-from utils.gpt_query import get_query
 from langchain_core.messages import HumanMessage, SystemMessage
 from utils.logger import logger
 import random
@@ -22,7 +21,7 @@ def initialize_task_locations():
 def assign_tasks_to_villagers_from_llm(villagers, task_locations):
     
     for villager in villagers:
-        _,response = villager.agent.generate_reaction(observation="only assign one task from the following:"+str([loc.task for loc in task_locations])+" other than None",call_to_action_template="What should be the first task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>")
+        _,response = villager.agent.generate_reaction(observation="only assign one task from the following:"+str([loc.task for loc in task_locations])+" other than None",call_to_action_template="What should be the first task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>. ONLY ASSIGN TASK FROM THE LIST")
         print(response)
 
         try:
@@ -43,7 +42,8 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
 
 def assign_next_task(villager, task_locations,previous_task):
     
-    _,response = villager.agent.generate_reaction(observation="only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}. ONLY ASSIGN TASK FROM THE LIST",call_to_action_template="What should be the next task for "+villager.agent_id+f"? Expecting the response to be in the format Task: <task_name>. ONLY ASSIGN TASK FROM THE GIVEN LIST: {[loc.task for loc in task_locations]} . DO NOT ASSIGN TASK OTHER THAN THE LIST")
+    _,response = villager.agent.generate_reaction(observation=f"only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}",call_to_action_template="What should be the next task for "+villager.agent_id+f"? Expecting the response to be in the format Task: <task_name>. Do not assign other than from the given list. only assign one task from the following:{[loc.task for loc in task_locations]} ")
+
     print(response)
 
     try:
@@ -54,11 +54,11 @@ def assign_next_task(villager, task_locations,previous_task):
             villager.assign_task(task_name, task_location,task_time)
             logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
         else:
-            default_task_location = next((loc for loc in task_locations), previous_task)
-            default_task_name = default_task_location.task
+            default_task_location = task_locations[0]
             default_task_time = default_task_location.task_period
-            villager.assign_task(default_task_name, default_task_location,default_task_time)
+            villager.assign_task(default_task_location.task, default_task_location,default_task_time)
             logger.warning(f"Task '{task_name}' not found in available task locations.")
+            logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
 
     except IndexError:
         logger.error(f"Unexpected response format: {response}\n")
