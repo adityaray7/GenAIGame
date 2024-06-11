@@ -8,6 +8,8 @@ from langchain.schema import BaseMemory, Document
 from langchain.utils import mock_now
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
+from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 
 class AgentMemory(BaseMemory):
 
@@ -57,11 +59,12 @@ class AgentMemory(BaseMemory):
         #     logger.info("Character is reflecting")
         new_insights = []
         topics = self._get_topics_of_reflection()
-        for topic in topics:
-            insights = self._get_insights_on_topic(topic, now=now)
-            for insight in insights:
-                self.add_memory(insight, now=now)
-            new_insights.extend(insights)
+        with ThreadPoolExecutor as executor:
+            insights_threads = [executor.submit(self._get_insights_on_topic, topic, now=now) for topic in topics]
+            for insights in concurrent.futures.as_completed(insights_threads):
+                for insight in insights:
+                    self.add_memory(insight, now=now)
+                new_insights.extend(insights)
         return new_insights
 
     def _score_memory_importance(self, memory_content: str) -> float:

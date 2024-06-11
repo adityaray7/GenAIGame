@@ -5,6 +5,7 @@ from langchain_core.language_models import BaseLanguageModel
 from utils.agentmemory import AgentMemory
 from utils.track_tokens import token_tracker
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 class Agent:
     id_counter = 0
@@ -132,9 +133,17 @@ class Agent:
             + "\n\n"
             + suffix
         )
-        agent_summary_description = self.get_summary(now=now)
-        self.memory.add_memory(memory_content=agent_summary_description)
-        relevant_memories_str = self.summarize_related_memories(observation)
+
+        with ThreadPoolExecutor() as executor:
+            agent_summary_thread = executor.submit(self.get_summary, now=now)
+            relevant_memories_thread = executor.submit(self.summarize_related_memories, observation)
+
+            agent_summary_description = agent_summary_thread.result()
+            relevant_memories_str = relevant_memories_thread.result()
+
+        # agent_summary_description = self.get_summary(now=now)
+        # self.memory.add_memory(memory_content=agent_summary_description)
+        # relevant_memories_str = self.summarize_related_memories(observation)
 
         most_recent_memories = self.memory.memory_retriever.memory_stream[-last_k:]
         most_recent_memories_str = "\n".join(
