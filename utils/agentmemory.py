@@ -1,7 +1,7 @@
-import logging
 import re
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from utils.track_tokens import token_tracker
 from langchain.retrievers import TimeWeightedVectorStoreRetriever
 from langchain.schema import BaseMemory, Document
 from langchain.utils import mock_now
@@ -35,6 +35,14 @@ class AgentMemory(BaseMemory):
     def chain(self, prompt : PromptTemplate):
         return prompt | self.llm
     
+    def token_tracked_chain(self, prompt, variables):
+        @token_tracker
+        def invoke(prompt, variables):
+            response = self.chain(prompt).invoke(variables)
+            return response
+        
+        return invoke(prompt, variables)
+    
     def _parse_list(self, text: str) -> List[str]:
         """Parse a newline-separated string into a list of strings."""
         lines = re.split(r"\n", text.strip())
@@ -66,7 +74,8 @@ class AgentMemory(BaseMemory):
             + "\nMemory: {memory_content}"
             + "\nRating: "
         )
-        score = self.chain(prompt).invoke({"memory_content":memory_content}).content.strip()
+        variables = {"memory_content":memory_content}
+        score = self.token_tracked_chain(prompt, variables)
         match = re.search(r"^\D*(\d+)", score)
         # if self.verbose:
         #     logger.info(f"Importance score: {score}")
@@ -114,7 +123,8 @@ class AgentMemory(BaseMemory):
         observation_str = "\n".join(
             [self._format_memory_detail(o) for o in observations]
         )
-        result = self.chain(prompt=prompt).invoke({"observations" : observation_str})
+        variables = {"observations" : observation_str}
+        result = self.token_tracked_chain(prompt, variables)
         return self._parse_list(result.content)
     
     # working with warning
@@ -153,10 +163,12 @@ class AgentMemory(BaseMemory):
                 for i, memory in enumerate(related_memories)
             ]
         )
-        result = self.chain(prompt).invoke({
+        variables = {
             "topic":topic, 
             "related_statements":related_statements
-        })
+        }
+
+        result = self.token_tracked_chain(prompt, variables)
         # TODO: Parse the connections between memories and insights
         return self._parse_list(result.content)
     

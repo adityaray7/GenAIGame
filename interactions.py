@@ -1,8 +1,5 @@
 import random
-from langchain_core.messages import HumanMessage, SystemMessage
-from utils.gpt_query import get_query
 import time
-import json
 from utils.logger import logger
 
 TALK_DISTANCE_THRESHOLD = 20  # Adjust as needed
@@ -60,5 +57,3 @@ def handle_villager_interactions(villagers,conversations):
                             villager1.talking = False
                             villager2.talking = False
 
-
- 

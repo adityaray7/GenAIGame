@@ -1,43 +1,34 @@
+from utils.logger import logger
 import pygame
 import random
-from villager import Villager, Werewolf
+
 from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task
 import json
-from utils.gpt_query import get_query
-from langchain_core.messages import HumanMessage, SystemMessage
 import os
 from dotenv import load_dotenv
 import time
 from interactions import handle_villager_interactions,handle_meeting
 from threading import Thread
+from utils.to_be_threaded_function import threaded_function
 from client import send
-from utils.logger import logger
 import math
-from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from langchain.retrievers import TimeWeightedVectorStoreRetriever
-from typing import Any, Dict, List, Optional
-from pymongo import MongoClient
 from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
-from utils.agentmemory import AgentMemory
-# Connect to your Atlas cluster
-ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
-client = MongoClient(ATLAS_CONNECTION_STRING)
+from utils.mongoClient import get_atlas_collection
 
+client_holder = {}
 # Define collection and index name
 db_name = "langchain_db"
 collection_name = "test"
-atlas_collection = client[db_name][collection_name]
-vector_search_index = "vector_index"
 
+# Connect to your Atlas cluster
+mongo_connection_thread = Thread(target=threaded_function, args=(client_holder, get_atlas_collection, (db_name, collection_name)))
+mongo_connection_thread.start()
 
-# # Initialize LangSmith
-# os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
-# os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
-# os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
-# os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
-ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
-
+from villager import Villager, Werewolf
+from utils.agentmemory import AgentMemory
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
 # Multithreading 
 villagers_threaded = []
@@ -84,16 +75,21 @@ backgrounds = [
 
 names=["Sam","Jack","Ronald"]
 
-# werewolf_background = [
-#     ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
-#     ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
-# ]
+werewolf_background = [
+    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
+    ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
+]
 
 llm = AzureChatOpenAI(
     azure_deployment="GPT35-turboA",
     api_version="2024-02-01",
     temperature=0
 )
+
+
+# Mongo connection thread
+mongo_connection_thread.join()
+atlas_collection = client_holder["result"]
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
@@ -104,7 +100,6 @@ def relevance_score_fn(score: float) -> float:
     # (0 is most similar, sqrt(2) most dissimilar)
     # to a similarity function (0 to 1)
     
-
     # this returns negetive relevance values so temporarily made abs()
     # change this to implement cosine_similarity
     return abs(1.0 - (score / math.sqrt(2)))
@@ -133,6 +128,7 @@ def create_new_memory_retriever():
     return TimeWeightedVectorStoreRetriever(
         vectorstore=vectorstore, other_score_keys=["importance"], k=15, decay_rate=0.005
     )
+
 # Initialize villagers
 villagers = []
 num_villagers = len(backgrounds)
@@ -234,7 +230,6 @@ def send_game_state():
     # convert game_state to json
     game_state = json.dumps(game_state)
     send(game_state)
-
 
 # Assign tasks to villagers from LLM
 assign_tasks_to_villagers_from_llm(villagers, task_locations)

@@ -1,6 +1,4 @@
 from utils.task_locations import TaskLocation
-from utils.gpt_query import get_query
-from langchain_core.messages import HumanMessage, SystemMessage
 from utils.logger import logger
 import random
 
@@ -60,9 +58,6 @@ def assign_next_task(villager, task_locations,previous_task):
             villager.assign_task(default_task_location.task, default_task_location,default_task_time)
             logger.warning(f"Task '{task_name}' not found in available task locations.")
             logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
-
-
-
 
     except IndexError:
         logger.error(f"Unexpected response format: {response}\n")

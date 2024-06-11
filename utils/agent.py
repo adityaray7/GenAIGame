@@ -3,6 +3,7 @@ from langchain_core.prompts import PromptTemplate
 from typing import Any, Dict, List, Optional, Tuple
 from langchain_core.language_models import BaseLanguageModel
 from utils.agentmemory import AgentMemory
+from utils.track_tokens import token_tracker
 from datetime import datetime
 
 class Agent:
@@ -32,22 +33,26 @@ class Agent:
     def chain(self, prompt : PromptTemplate):
         return prompt | self.llm
     
+
+    @token_tracker
     def _get_entity_from_observation(self, observation: str) -> str:
         prompt = PromptTemplate.from_template(
             "What is the observed entity in the following observation? {observation}"
             + "\nEntity="
         )
-        return self.chain(prompt).invoke({"observation":observation}).content.strip()
+        return self.chain(prompt).invoke({"observation":observation})
 
+    @token_tracker
     def _get_entity_action(self, observation: str, entity_name: str) -> str:
         prompt = PromptTemplate.from_template(
             "What is the {entity} doing in the following observation? {observation}"
             + "\nThe {entity} is"
         )
         return (
-            self.chain(prompt).invoke({"entity":entity_name, "observation":observation}).content.strip()
+            self.chain(prompt).invoke({"entity":entity_name, "observation":observation})
         )
     
+    @token_tracker
     def summarize_related_memories(self, observation: str) -> str:
         """Summarize memories that are most relevant to an observation."""
         prompt = PromptTemplate.from_template(
@@ -63,12 +68,13 @@ class Agent:
         relevant_memories = self.memory.fetch_memories(observation=observation)
         q1 = f"What is the relationship between {self.name} and {entity_name}"
         q2 = f"{entity_name} is {entity_action}"
-        return self.chain(prompt=prompt).invoke({"q1":q1, "queries":[q1, q2], "relevant_memories" : relevant_memories}).content.strip()
+        return self.chain(prompt=prompt).invoke({"q1":q1, "queries":[q1, q2], "relevant_memories" : relevant_memories})
     
     def _clean_response(self, text: str) -> str:
         return re.sub(f"^{self.name} ", "", text.strip()).strip()
     
     #working
+    @token_tracker
     def _compute_agent_summary(self) -> str:
         """"""
         prompt = PromptTemplate.from_template(
@@ -87,8 +93,6 @@ class Agent:
                 "queries":[f"{self.name}'s core characteristics"],
                 "relevant_memories":relevant_memories
             })
-            .content
-            .strip()
         )
     
     def get_summary(
@@ -111,6 +115,7 @@ class Agent:
             + f"\n{self.summary}"
         )
     
+    @token_tracker
     def _generate_reaction(
         self, observation: str, suffix: str, now: Optional[datetime] = None, last_k : Optional[int] = 4
     ) -> str:
@@ -153,7 +158,7 @@ class Agent:
         #     prompt.format(most_recent_memories="", **kwargs)
         # )
         # kwargs[self.memory.most_recent_memories_token_key] = consumed_tokens
-        return self.chain(prompt=prompt).invoke(kwargs).content.strip()
+        return self.chain(prompt=prompt).invoke(kwargs)
     
     # look into save_context later
     def generate_reaction(
@@ -172,7 +177,6 @@ class Agent:
             observation, call_to_action_template, now=now
         )
         result = full_result.strip().split("\n")[0]
-        
 
         self.memory.save_context(
             {},
@@ -244,31 +248,3 @@ class Agent:
 
     def reset(self):
         self.id_counter = 0
-
-
-# class DialogueSimulator:
-#     def __init__(self, agents, selection_function):
-#         self.agents = agents
-#         self._step = 0
-#         self.select_next_speaker = selection_function
-    
-#     def reset(self):
-#         for agent in self.agents:
-#             agent.reset()
-    
-#     def inject(self, name, message):
-#         for agent in self.agents:
-#             agent.receive(name, message)
-    
-#     def step(self):
-#         speaker_idx = self.select_next_speaker(self._step, self.agents)
-#         speaker = self.agents[speaker_idx]
-
-#         message = speaker.send()
-
-#         for receiver in self.agents:
-#             receiver.receive(speaker.name, message)
-
-#         self._step += 1
-
-#         return speaker.name, messag
