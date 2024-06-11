@@ -16,15 +16,14 @@ from langchain.retrievers import TimeWeightedVectorStoreRetriever
 from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
 from utils.mongoClient import get_atlas_collection
+ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 client_holder = {}
+convo_holder = {}
 # Define collection and index name
 db_name = "langchain_db"
 collection_name = "test"
-
-convo= "conversations"
-atlas_collection = client[db_name][collection_name]
-convo_collection = client[db_name][convo]
+convo_collection_name = "conversations"
 
 vector_search_index = "vector_index"
 
@@ -32,6 +31,11 @@ vector_search_index = "vector_index"
 # Connect to your Atlas cluster
 mongo_connection_thread = Thread(target=threaded_function, args=(client_holder, get_atlas_collection, (db_name, collection_name)))
 mongo_connection_thread.start()
+
+# Connect to your Atlas cluster
+convo_connection_thread = Thread(target=threaded_function, args=(convo_holder, get_atlas_collection, (db_name, convo_collection_name)))
+convo_connection_thread.start()
+
 
 from villager import Villager, Werewolf
 from utils.agentmemory import AgentMemory
@@ -97,6 +101,7 @@ llm = AzureChatOpenAI(
 # Mongo connection thread
 mongo_connection_thread.join()
 atlas_collection = client_holder["result"]
+convo_collection = convo_holder["result"]
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
