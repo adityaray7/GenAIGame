@@ -8,7 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 import os
 from dotenv import load_dotenv
 import time
-from interactions import handle_villager_interactions
+from interactions import handle_villager_interactions,handle_meeting
 from threading import Thread
 from client import send
 from utils.logger import logger
@@ -45,10 +45,10 @@ villagers_threaded = []
 # Constants
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 720
-CLEAR_CONVERSATIONS_INTERVAL = 10  # Number of iterations before clearing conversations
-DAY_DURATION = 30  # 60 seconds for a full day cycle
-NIGHT_DURATION = 30  # 60 seconds for a full night cycle
+DAY_DURATION = 120  # 60 seconds for a full day cycle
+NIGHT_DURATION = 120  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
+MORNING_MEETING_DURATION = 10
 
 # Load background images
 background_day = pygame.image.load("images/map2.jpg")
@@ -65,14 +65,14 @@ clock = pygame.time.Clock()
 backgrounds = [
     ["I am Sam. I enjoy exploring the woods and gathering herbs. The forest is my sanctuary, where I feel most alive and connected to nature.",
 "I often cook meals for my fellow villagers. Using the herbs and plants I gather, I create nutritious and flavorful dishes that keep everyone in good health and spirits.",
-"My knowledge of the forest's flora allows me to prepare remedies for common ailments, ensuring our village remains healthy and strong."],
+"My knowledge of the forest's flora allows me to prepare remedies for common ailments, ensuring our village remains healthy and strong.","Keep an I eye on other villagers while taking and in the meeting raise your suspicion on the werewolf"],
     ["I am Jack. I have a knack for construction and enjoy building structures. From homes to storage sheds, my craftsmanship ensures our village is well-built and resilient.",
 "I believe a sturdy village is key to our safety. By using strong materials and innovative designs, I create buildings that can withstand harsh weather and potential threats.",
-"I also lead repair and maintenance efforts, making sure that every structure stands the test of time and continues to serve our community."
+"I also lead repair and maintenance efforts, making sure that every structure stands the test of time and continues to serve our community.","Keep an I eye on other villagers while taking and in the meeting raise your suspicion on the werewolf"
 ],
     ["I am Ronald. I am always on high alert, watching over the village day and night. My keen eyes and sharp senses make me an excellent guardian.",
 "I take pride in keeping everyone safe from harm. Whether it's warding off wild animals or keeping an eye out for intruders, my vigilance ensures our village's security.",
-"I train younger villagers in self-defense and alertness, passing on my knowledge so that they too can contribute to the safety of our home."]
+"I train younger villagers in self-defense and alertness, passing on my knowledge so that they too can contribute to the safety of our home.","Keep an I eye on other villagers while taking and in the meeting raise your suspicion on the werewolf"]
     # ["I am Villager 3.", "I am drawn to the river, where I find peace and serenity.", "I am the one who fetches water for the village."],
     # ["I am Villager 4.", "I am passionate about culinary arts and experimenting with flavors.", "I love to create delicious meals for my friends and family."],
     # ["I am Villager 5.", "I am a skilled hunter, trained to track and capture prey.", "I provide meat and hides to sustain our community."],
@@ -135,13 +135,19 @@ def create_new_memory_retriever():
     )
 # Initialize villagers
 villagers = []
-for i in range(len(backgrounds)):
-    x = random.randint(50, SCREEN_WIDTH - 50)
-    y = random.randint(50, SCREEN_HEIGHT - 50)
+num_villagers = len(backgrounds)
+center_x = 800
+center_y = 360
+radius = 60
+
+for i in range(num_villagers):
+    angle = i * (2 * math.pi / num_villagers)
+    x = int(center_x + radius * math.cos(angle))
+    y = int(center_y + radius * math.sin(angle))
     background_texts = backgrounds[i]
     ". ".join(a for a in background_texts)
     villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
-    villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory)
+    villager = Villager(names[i], random.randint(0,SCREEN_WIDTH), random.randint(0,SCREEN_HEIGHT), background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y))
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
 
@@ -240,22 +246,43 @@ def assign_task_thread(villager, current_task=None):
     villagers_threaded.append(villager.agent_id)
     logger.info(f"{villager.agent_id} has completed the task '{current_task}'!")
     logger.info(f"{villagers_threaded} are the villagers currently getting assigned tasks")
-    # Assign next task to the villager
     logger.debug(f"Assigning next task to {villager.agent_id}...")
 
     task_name, task_location = assign_next_task(villager, task_locations, current_task)
     task_time = task_location.task_period  # Time required for the task
-    if isinstance(villager, Werewolf):
-        villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
-    else:
-        villager.assign_task(task_name, task_location, task_time)
+    villager.assign_task(task_name, task_location, task_time)
     logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
     villagers_threaded.remove(villager.agent_id)
 
-def handle_morning_meeting(villagers, center_x, center_y):
-    logger.info("Morning meeting has started! All villagers are moving to the center of the map.")
+
+def morning_meeting(villagers,conversations,elapsed_time):
+    global is_morning_meeting
+    is_morning_meeting = True
+    global reached
+    reached = True
+    temp = elapsed_time
     for villager in villagers:
-        villager.move_to_center(center_x, center_y)
+        villager.interrupt_task()
+        dx, dy = villager.meeting_location[0] - villager.x, villager.meeting_location[1] - villager.y
+        dist = (dx**2 + dy**2)**0.5
+        if dist > 1:
+            villager.x += dx / dist
+            villager.y += dy / dist
+            reached = False
+                
+    if reached:
+        logger.info("All villagers have gathered for the morning meeting.")
+        handle_meeting(villagers, conversations)
+        elapsed_time = temp
+        return elapsed_time + MORNING_MEETING_DURATION
+    
+    return elapsed_time
+    
+
+def end_morning_meeting(villagers):
+    global is_morning_meeting
+    is_morning_meeting = False
+    assign_tasks_to_villagers_from_llm(villagers, task_locations)
 
 
 # Main game loop
@@ -263,7 +290,10 @@ running = True
 start_time = time.time()
 is_day = True
 blend_factor = 0
+is_morning_meeting = False
+
 while running:
+    
     send_game_state()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -274,16 +304,31 @@ while running:
     elapsed_time = curr - start_time
     blend_factor = 0
 
+
     if is_day:
+
         if elapsed_time >= DAY_DURATION:
-            # handle_morning_meeting(villagers, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # Move villagers to the center
             is_day = False
             start_time = curr
         elif elapsed_time >= DAY_DURATION - TRANSITION_DURATION:
             blend_factor = (elapsed_time - (DAY_DURATION - TRANSITION_DURATION)) / TRANSITION_DURATION
+
+        if elapsed_time < MORNING_MEETING_DURATION:
+            
+            if not is_morning_meeting:
+                logger.info("Starting morning meeting...")
+
+            elapsed_time = morning_meeting(villagers,conversations,elapsed_time)
+
+
+        elif elapsed_time > MORNING_MEETING_DURATION and is_morning_meeting:
+            logger.info("Ending morning meeting...")
+            temp = elapsed_time
+            end_morning_meeting(villagers)
+            elapsed_time = temp    
+
+    
     else:
-        # if elapsed_time == NIGHT_DURATION/2:
-            # handle_night_meeting([v for v in villagers if isinstance(v, Werewolf)])
         if elapsed_time >= NIGHT_DURATION:
             is_day = True
             start_time = curr

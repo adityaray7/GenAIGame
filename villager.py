@@ -6,12 +6,12 @@ import random
 from utils.agent import Agent
 from langchain_core.language_models import BaseLanguageModel
 from utils.agentmemory import AgentMemory
-
 class Villager:
-    def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation=""):
+    def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
         self.agent_id = name
         self.x = x
         self.y = y
+        self.meeting_location = meeting_location
         self.background_texts = background_texts
         self.agent=Agent(name=name,status=occupation,memory=memory,llm=llm,description=background_texts)
         self.current_task = None
@@ -70,11 +70,10 @@ class Villager:
                 else:
                     self.start_task()
 
-
-    def move_to_center(self, center_x, center_y):
-        """Move the villager to the center of the map."""
-        self.x = center_x
-        self.y = center_y
+    def interrupt_task(self):
+        self.current_task = None
+        self.task_doing = False
+        self.last_talk_attempt_time = time.time()
 
 
     def draw(self, screen):
