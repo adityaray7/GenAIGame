@@ -69,12 +69,10 @@ class Villager:
                 else:
                     self.start_task()
 
-
     def move_to_center(self, center_x, center_y):
         """Move the villager to the center of the map."""
         self.x = center_x
         self.y = center_y
-
 
     def draw(self, screen):
         color = (0, 0, 0) if self.task_doing else (255, 0, 0)

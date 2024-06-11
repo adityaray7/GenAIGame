@@ -1,8 +1,5 @@
 import random
-from langchain_core.messages import HumanMessage, SystemMessage
-from villager import Villager
 import time
-import json
 
 TALK_DISTANCE_THRESHOLD = 50  # Adjust as needed
 TALK_PROBABILITY = 0.05  # Adjust as needed
