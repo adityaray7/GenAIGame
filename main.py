@@ -26,7 +26,10 @@ client = MongoClient(ATLAS_CONNECTION_STRING)
 # Define collection and index name
 db_name = "langchain_db"
 collection_name = "test"
+convo= "conversations"
 atlas_collection = client[db_name][collection_name]
+convo_collection = client[db_name][convo]
+
 vector_search_index = "vector_index"
 
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
@@ -164,6 +167,13 @@ def villager_info(villagers):
 def save_game_state(villagers, filename="game_state.json"):
     with open(filename, 'w') as f:
         json.dump(villager_info(villagers), f, indent=4)
+# Function to save conversations to MongoDB
+def save_conversations_to_mongodb(conversations):
+    if conversations:
+        convo_collection.insert_many(conversations)
+        logger.info(f"Saved {len(conversations)} conversations to MongoDB.")
+    else:
+        logger.info("No new conversations to save.")
 
 # Function to save conversations to a JSON file
 def save_conversations(conversations, filename="conversations.json"):
@@ -209,12 +219,19 @@ def send_game_state():
             "task": task.task
         })
     
+    conversations = []  
+    with open ("conversations.json","r") as f:
+        conversations = json.load(f)
+        
+    
     game_state = {
         "numVillagers": num_villagers,
         "villagers": villagers_state,
         "tasks": task_info, 
         "isDay": is_day,
         "blendFactor": blend_factor,
+        "conversations": conversations,
+        
     }
 
     # convert game_state to json
@@ -297,6 +314,10 @@ while running:
     # Save game state periodically
     save_game_state(villagers)
     save_conversations(conversations)
+    if conversations:
+        print("conversations",conversations)
+        save_conversations_to_mongodb(conversations)
+    conversations.clear()  # Clear the list after saving
     
     # Render game state
     if is_day:
