@@ -242,13 +242,17 @@ def send_game_state():
     with open ("conversations.json","r") as f:
         conversations = json.load(f)
         
-    
+
+    isConvo=False
+    if conversations:
+        isConvo=True    
     game_state = {
         "numVillagers": num_villagers,
         "villagers": villagers_state,
         "tasks": task_info, 
         "isDay": is_day,
         "blendFactor": blend_factor,
+        "isConvo":isConvo,
         "conversations": conversations,
         
     }
