@@ -8,6 +8,8 @@ from utils.agentmemory import AgentMemory
 from dotenv import load_dotenv
 import os
 load_dotenv()
+
+ELIMINATION_DISTANCE = 10
 class Villager:
     def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
         self.agent_id = name
@@ -25,8 +27,11 @@ class Villager:
         self.last_talk_attempt_time = 0
         self.talking = False
         self.font = pygame.font.SysFont(None, 24)
+        self.alive = True
 
     def assign_task(self, task, location, time_to_complete_task):
+        if self.alive == False:
+            return
         self.current_task = task
         self.task_location = (location.x, location.y)
         self.time_to_complete_task = time_to_complete_task / float(os.getenv("SPEED"))
@@ -36,6 +41,8 @@ class Villager:
 
     # Returns True if the current time exceeds the end time of the task and False otherwise
     def task_complete(self):
+        if self.alive == False:
+            return
         if self.current_task is None:
             return False  # No task assigned
         else:
@@ -44,6 +51,8 @@ class Villager:
 
     # Records the start and end time of the task and sets the task_doing flag to True
     def start_task(self):
+        if self.alive == False:
+            return
         # Record the start and end time of the task
         if not self.task_doing:
             logger.info(f"{self.agent_id} has started to do the task '{self.current_task}'!")
@@ -52,6 +61,9 @@ class Villager:
             self.task_end_time = self.task_start_time + self.time_to_complete_task
 
     def update(self):
+        if self.alive == False:
+            return
+        
         if self.talking:
             return
 
@@ -89,7 +101,9 @@ class Villager:
         vil_image = pygame.transform.scale(vil_image, (75, 75))
         screen.blit(vil_image, (self.x, self.y))
             
-
+    def get_eliminated(self):
+        logger.info(f"{self.agent_id} has been eliminated!")
+        self.alive = False
 
 class Werewolf(Villager):
     def __init__(self, agent_id, x, y, background_texts):
@@ -116,17 +130,14 @@ class Werewolf(Villager):
                 else:
                     self.start_task()
 
-    def night_meeting(self, werewolves, villagers):
-        logger.info("Werewolves are having a night meeting!")
-        target = self.choose_elimination_target(villagers)
-        logger.info(f"Werewolves have decided to eliminate: {target.agent_id}")
-        target.alive = False  # Eliminate the target
+    def eliminate(self, villager):
+        if self.alive == False:
+            return
+        logger.info(f"{self.agent_id} has eliminated {villager.agent_id}!")
+        dist = ((self.x - villager.x)**2 + (self.y - villager.y)**2)**0.5
 
-    def choose_elimination_target(self, villagers):
-        potential_targets = [villager for villager in villagers if not isinstance(villager, Werewolf) and villager.alive]
-        if potential_targets:
-            return random.choice(potential_targets)
-        return None
+        if dist < ELIMINATION_DISTANCE:
+            villager.get_eliminated()
     
 
 class Player(Villager):  # Inherits from the Villager class
@@ -135,6 +146,8 @@ class Player(Villager):  # Inherits from the Villager class
         self.speed = 1
 
     def handle_input(self):
+        if self.alive == False:
+            return
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0
         if keys[pygame.K_LEFT]:
@@ -150,6 +163,8 @@ class Player(Villager):  # Inherits from the Villager class
 
 
     def update(self):
+        if self.alive == False:
+            return
         self.handle_input()  # Handle player input
         # Call the parent class update method to handle tasks
         super().update()
