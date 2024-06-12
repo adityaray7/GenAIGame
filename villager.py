@@ -127,3 +127,42 @@ class Werewolf(Villager):
         if potential_targets:
             return random.choice(potential_targets)
         return None
+    
+
+class Player(Villager):  # Inherits from the Villager class
+    def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0)):
+        super().__init__(name, x, y, background_texts, llm, memory, occupation, meeting_location)
+        self.speed = 1
+
+    def handle_input(self):
+        keys = pygame.key.get_pressed()
+        dx, dy = 0, 0
+        if keys[pygame.K_LEFT]:
+            dx -= self.speed
+        if keys[pygame.K_RIGHT]:
+            dx += self.speed
+        if keys[pygame.K_UP]:
+            dy -= self.speed
+        if keys[pygame.K_DOWN]:
+            dy += self.speed
+        self.x += dx
+        self.y += dy
+
+
+    def update(self):
+        self.handle_input()  # Handle player input
+        # Call the parent class update method to handle tasks
+        super().update()
+
+    def draw(self, screen):
+        color = (0, 255, 0)  # Green color for the player
+        pygame.draw.circle(screen, color, (int(self.x), int(self.y)), 5)
+        agent_id_text = self.font.render(self.agent_id, True, (0, 0, 0))
+        screen.blit(agent_id_text, (self.x + 10, self.y))
+        if self.current_task:
+            task_text = self.font.render(self.current_task, True, (0, 0, 0))
+            screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the player
+        vil_image = pygame.image.load('images/vil.png')  # Assuming there's an image for the player
+        vil_image = pygame.transform.scale(vil_image, (75, 75))
+        screen.blit(vil_image, (self.x, self.y))  # Render the player image on the screen
+
