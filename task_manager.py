@@ -36,8 +36,6 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
         try:
             task_name = response.strip().split(':')[1].strip()
             task_location = [loc for loc in task_locations if loc.task == task_name][0]
-            print("*"*50)
-            print(task_name)
             if task_location:
                 task_time = task_location.task_period  # Time required for the task
                 villager.assign_task(task_name, task_location, task_time)
