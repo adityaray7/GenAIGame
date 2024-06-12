@@ -37,7 +37,7 @@ convo_connection_thread = Thread(target=threaded_function, args=(convo_holder, g
 convo_connection_thread.start()
 
 
-from villager import Villager, Werewolf
+from villager import Villager, Werewolf, Player
 from utils.agentmemory import AgentMemory
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
@@ -180,6 +180,9 @@ print([villager.agent_id for villager in villagers])
 #     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
 #     villagers.append(villager)
 
+player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
+player = Player("Player", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+
 
 def villager_info(villagers):
     info = []
@@ -255,13 +258,18 @@ def send_game_state():
     with open ("conversations.json","r") as f:
         conversations = json.load(f)
         
-    
+
+    # isConvo=False
+    # if conversations:
+    #     isConvo=True  
+    #   
     game_state = {
         "numVillagers": num_villagers,
         "villagers": villagers_state,
         "tasks": task_info, 
         "isDay": is_day,
         "blendFactor": blend_factor,
+        # "isConvo":isConvo,
         "conversations": conversations,
         
     }
@@ -285,8 +293,11 @@ def assign_task_thread(villager, current_task=None):
 
     task_name, task_location = assign_next_task(villager, task_locations, current_task)
     task_time = task_location.task_period  # Time required for the task
-    villager.assign_task(task_name, task_location, task_time)
-    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
+    if isinstance(villager, Werewolf):
+        villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
+    else:
+        villager.assign_task(task_name, task_location, task_time)
+    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
     villagers_threaded.remove(villager.agent_id)
 
 
@@ -334,6 +345,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    player.update()
+
     # Update day/night cycle
     curr = time.time()
     elapsed_time = curr - start_time
@@ -380,7 +393,7 @@ while running:
 
         # Handle villager interactions
     
-    Thread(target=handle_villager_interactions, args=(villagers,conversations)).start()
+    Thread(target=handle_villager_interactions, args=(player,villagers,conversations)).start()
 
     # Save game state periodically
     save_game_state(villagers)
@@ -396,7 +409,7 @@ while running:
     else:
         blend_images(background_night, background_day, blend_factor)
     
-    for villager in villagers:
+    for villager in [player]+villagers:
         villager.draw(screen)
     for task_location in task_locations:
         task_location.draw(screen)

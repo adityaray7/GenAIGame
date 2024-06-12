@@ -20,8 +20,41 @@ def handle_meeting(villagers, conversations):
         _,response = villager.agent.generate_reaction(observation=initial_obs,call_to_action_template=call_to_action_template)
         conversations.append({"villager1": villager.agent_id, "villager2": "meeting", "conversation": response})
 
-         
-def handle_villager_interactions(villagers,conversations):
+
+def handle_player_interaction(player, villagers, conversations):
+    current_time = time.time()
+    for villager in villagers:
+        if player != villager:
+            if player.talking or villager.talking:
+                continue
+            distance = ((player.x - villager.x) ** 2 + (player.y - villager.y) ** 2) ** 0.5
+            if distance < TALK_DISTANCE_THRESHOLD and random.random() < TALK_PROBABILITY and current_time - player.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
+                player.talking = True
+                villager.talking = True
+
+                for _ in range(2):
+                    # Player initiates the conversation
+                    player_input = input(f"Player: ")
+
+                    # Villager responds using LLM
+                    _, response = villager.agent.generate_reaction(observation=player_input)
+                    print(f"{response}")
+
+                    # Save conversation to the list
+                    conversations.append({"villager1": "Player", "villager2": villager.agent_id, "conversation": player_input})
+                    conversations.append({"villager1": villager.agent_id, "villager2": "Player", "conversation": response})
+
+                # Update last talk attempt time for both player and villager
+                player.last_talk_attempt_time = current_time
+                villager.last_talk_attempt_time = current_time
+                player.talking = False
+                villager.talking = False
+
+
+def handle_villager_interactions(player,villagers,conversations):
+
+    handle_player_interaction(player, villagers, conversations)
+
     current_time = time.time()
     for villager1 in villagers:
         for villager2 in villagers:

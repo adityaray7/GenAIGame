@@ -60,6 +60,7 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
     return tasks
 
 
+
 def assign_next_task(villager, task_locations,previous_task):
     
     _,response = villager.agent.generate_reaction(observation=f"only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}",call_to_action_template="What should be the next task for "+villager.agent_id+f"? Expecting the response to be in the format Task: <task_name>. Do not assign other than from the given list. only assign one task from the following:{[loc.task for loc in task_locations]} ")
