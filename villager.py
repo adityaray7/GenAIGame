@@ -5,6 +5,9 @@ import random
 from utils.agent import Agent
 from langchain_core.language_models import BaseLanguageModel
 from utils.agentmemory import AgentMemory
+from dotenv import load_dotenv
+import os
+load_dotenv()
 class Villager:
     def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
         self.agent_id = name
@@ -26,7 +29,7 @@ class Villager:
     def assign_task(self, task, location, time_to_complete_task):
         self.current_task = task
         self.task_location = (location.x, location.y)
-        self.time_to_complete_task = time_to_complete_task
+        self.time_to_complete_task = time_to_complete_task / float(os.getenv("SPEED"))
         self.task_doing = False
         self.task_start_time = None
         self.task_end_time = 111717403133
@@ -109,8 +112,8 @@ class Werewolf(Villager):
                 dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
                 dist = (dx**2 + dy**2)**0.5
                 if dist > 1:
-                    self.x += dx / dist
-                    self.y += dy / dist
+                    self.x += dx / dist * float(os.getenv("SPEED"))
+                    self.y += dy / dist * float(os.getenv("SPEED"))
                 else:
                     self.start_task()
 
@@ -126,3 +129,42 @@ class Werewolf(Villager):
         if potential_targets:
             return random.choice(potential_targets)
         return None
+    
+
+class Player(Villager):  # Inherits from the Villager class
+    def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0)):
+        super().__init__(name, x, y, background_texts, llm, memory, occupation, meeting_location)
+        self.speed = 1
+
+    def handle_input(self):
+        keys = pygame.key.get_pressed()
+        dx, dy = 0, 0
+        if keys[pygame.K_LEFT]:
+            dx -= self.speed
+        if keys[pygame.K_RIGHT]:
+            dx += self.speed
+        if keys[pygame.K_UP]:
+            dy -= self.speed
+        if keys[pygame.K_DOWN]:
+            dy += self.speed
+        self.x += dx
+        self.y += dy
+
+
+    def update(self):
+        self.handle_input()  # Handle player input
+        # Call the parent class update method to handle tasks
+        super().update()
+
+    def draw(self, screen):
+        color = (0, 255, 0)  # Green color for the player
+        pygame.draw.circle(screen, color, (int(self.x), int(self.y)), 5)
+        agent_id_text = self.font.render(self.agent_id, True, (0, 0, 0))
+        screen.blit(agent_id_text, (self.x + 10, self.y))
+        if self.current_task:
+            task_text = self.font.render(self.current_task, True, (0, 0, 0))
+            screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the player
+        vil_image = pygame.image.load('images/vil.png')  # Assuming there's an image for the player
+        vil_image = pygame.transform.scale(vil_image, (75, 75))
+        screen.blit(vil_image, (self.x, self.y))  # Render the player image on the screen
+
