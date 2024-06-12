@@ -21,6 +21,7 @@ ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 client_holder = {}
 convo_holder = {}
 # Define collection and index name
+names=["Sam","Jack","Ronald"]
 db_name = "langchain_db"
 collection_name = "test"
 convo_collection_name = "conversations"
@@ -84,7 +85,9 @@ backgrounds = [
     # ["I am Villager 9.", "I am patient and compassionate, with a gift for teaching.", "I educate the children of our village, guiding them toward a brighter future."],
 ]
 
-names=["Sam","Jack","Ronald"]
+
+
+
 
 werewolf_background = [
     ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
@@ -100,8 +103,11 @@ llm = AzureChatOpenAI(
 
 # Mongo connection thread
 mongo_connection_thread.join()
+print(convo_holder)
 atlas_collection = client_holder["result"]
 convo_collection = convo_holder["result"]
+
+
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
@@ -193,6 +199,12 @@ def save_conversations_to_mongodb(conversations):
         logger.info(f"Saved {len(conversations)} conversations to MongoDB.")
     else:
         logger.info("No new conversations to save.")
+        
+        
+    
+        
+        
+    
 
 # Function to save conversations to a JSON file
 def save_conversations(conversations, filename="conversations.json"):

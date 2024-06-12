@@ -24,7 +24,7 @@ client = MongoClient(ATLAS_CONNECTION_STRING)
 
 # Define collection and index name
 db_name = "langchain_db"
-collection_name = "test"
+collection_name = "memoryTest"
 atlas_collection = client[db_name][collection_name]
 vector_search_index = "vector_index"
 
@@ -42,10 +42,6 @@ villager_descriptions = [
     # ["I am Villager 9.", "I am patient and compassionate, with a gift for teaching.", "I educate the children of our village, guiding them toward a brighter future."],
 ]
 
-os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
-os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
-os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
-os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
 
 llm = AzureChatOpenAI(
     azure_deployment="GPT35-turboA",
@@ -126,27 +122,27 @@ def interview_agent(agent: Agent, message: str) -> str:
     new_message = f"{USER_NAME} says {message}. If you don't know the answer, say that you don't know."
     return agent.generate_dialogue_response(new_message)[1]
 
-def run_conversation(agents: List[Agent], initial_observation: str) -> None:
-    """Runs a conversation between agents."""
-    print(initial_observation)
-    _, observation = agents[1].generate_reaction(initial_observation)
-    print(observation)
-    turns = 0
-    counter = 0
-    while True and counter < 10:
-        break_dialogue = False
-        for agent in agents:
-            stay_in_dialogue, observation = agent.generate_dialogue_response(
-                observation
-            )
-            print(observation)
-            # observation = f"{agent.name} said {reaction}"
-            if not stay_in_dialogue:
-                break_dialogue = True
-        if break_dialogue:
-            break
-        turns += 1
-        counter += 1
+# def run_conversation(agents: List[Agent], initial_observation: str) -> None:
+#     """Runs a conversation between agents."""
+#     print(initial_observation)
+#     _, observation = agents[1].generate_reaction(initial_observation)
+#     print(observation)
+#     turns = 0
+#     counter = 0
+#     while True and counter < 10:
+#         break_dialogue = False
+#         for agent in agents:
+#             stay_in_dialogue, observation = agent.generate_dialogue_response(
+#                 observation
+#             )
+#             print(observation)
+#             # observation = f"{agent.name} said {reaction}"
+#             if not stay_in_dialogue:
+#                 break_dialogue = True
+#         if break_dialogue:
+#             break
+#         turns += 1
+#         counter += 1
 
 print(interview_agent(george, "What do you do?"))
 
