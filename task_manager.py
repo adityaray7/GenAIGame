@@ -1,6 +1,7 @@
 from utils.task_locations import TaskLocation
 from utils.logger import logger
 import random
+import concurrent.futures
 
 def initialize_task_locations():
     task_locations = [
@@ -26,29 +27,38 @@ def assign_first_task(villagers, task_locations,task_names):
         villager.assign_task(task_name, task_location, task_time)
         logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
         
+def get_villager_task(villager, task_locations):
+    _,response = villager.agent.generate_reaction(observation="only assign one task from the following:["+str([loc.task for loc in task_locations])+"] other than None",call_to_action_template="What should be the first task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>. ONLY ASSIGN TASK FROM THE LIST")
+    print(response)
+
+    try:
+        task_name = response.strip().split(':')[1].strip()
+        task_location = [loc for loc in task_locations if loc.task == task_name][0]
+        print("*"*50)
+        print(task_name)
+        if task_location:
+            task_time = task_location.task_period  # Time required for the task
+            villager.assign_task(task_name, task_location, task_time)
+            logger.debug(f"Assigned task '{task_name}' to  {villager.agent_id} at location ({task_location.x}, {task_location.y})")
+        else:
+            logger.warning(f"Task '{task_name}' not found in available task locations.")
+    except IndexError:
+        logger.error(f"Unexpected response format: {response}")
+        default_task_location = random.choice(task_locations)
+        default_task_time = default_task_location.task_period
+        villager.assign_task(default_task_location.task, default_task_location, default_task_time)      
+
 
 def assign_tasks_to_villagers_from_llm(villagers, task_locations):
-    
-    for villager in villagers:
-        _,response = villager.agent.generate_reaction(observation="only assign one task from the following:["+str([loc.task for loc in task_locations])+"] other than None",call_to_action_template="What should be the first task for "+villager.agent_id+"? Expecting the response to be in the format Task: <task_name>. ONLY ASSIGN TASK FROM THE LIST")
-        print(response)
+    tasks = []
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        tasks_thread = [executor.submit(get_villager_task, villager, task_locations) for villager in villagers]
 
-        try:
-            task_name = response.strip().split(':')[1].strip()
-            task_location = [loc for loc in task_locations if loc.task == task_name][0]
-            print("*"*50)
-            print(task_name)
-            if task_location:
-                task_time = task_location.task_period  # Time required for the task
-                villager.assign_task(task_name, task_location, task_time)
-                logger.debug(f"Assigned task '{task_name}' to  {villager.agent_id} at location ({task_location.x}, {task_location.y})")
-            else:
-                logger.warning(f"Task '{task_name}' not found in available task locations.")
-        except IndexError:
-            logger.error(f"Unexpected response format: {response}")
-            default_task_location = random.choice(task_locations)
-            default_task_time = default_task_location.task_period
-            villager.assign_task(default_task_location.task, default_task_location, default_task_time)      
+        for task in concurrent.futures.as_completed(tasks_thread):
+            tasks.append(task.result())
+
+    return tasks
+
 
 
 def assign_next_task(villager, task_locations,previous_task):
