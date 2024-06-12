@@ -5,6 +5,9 @@ import random
 from utils.agent import Agent
 from langchain_core.language_models import BaseLanguageModel
 from utils.agentmemory import AgentMemory
+from dotenv import load_dotenv
+import os
+load_dotenv()
 class Villager:
     def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
         self.agent_id = name
@@ -26,7 +29,7 @@ class Villager:
     def assign_task(self, task, location, time_to_complete_task):
         self.current_task = task
         self.task_location = (location.x, location.y)
-        self.time_to_complete_task = time_to_complete_task
+        self.time_to_complete_task = time_to_complete_task / float(os.getenv("SPEED"))
         self.task_doing = False
         self.task_start_time = None
         self.task_end_time = 111717403133
@@ -108,8 +111,8 @@ class Werewolf(Villager):
                 dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
                 dist = (dx**2 + dy**2)**0.5
                 if dist > 1:
-                    self.x += dx / dist
-                    self.y += dy / dist
+                    self.x += dx / dist * float(os.getenv("SPEED"))
+                    self.y += dy / dist * float(os.getenv("SPEED"))
                 else:
                     self.start_task()
 
