@@ -17,6 +17,16 @@ def initialize_task_locations():
     ]
     return task_locations
 
+def assign_first_task(villagers, task_locations,task_names):
+    for i in range(len(villagers)):
+        villager = villagers[i]
+        task_name = task_names[i]
+        task_location = [loc for loc in task_locations if loc.task == task_name][0]
+        task_time = task_location.task_period  # Time required for the task
+        villager.assign_task(task_name, task_location, task_time)
+        logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
+        
+
 def assign_tasks_to_villagers_from_llm(villagers, task_locations):
     
     for villager in villagers:

@@ -2,7 +2,7 @@ from utils.logger import logger
 import pygame
 import random
 
-from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task
+from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task,assign_first_task
 import json
 import os
 from dotenv import load_dotenv
@@ -258,7 +258,8 @@ def send_game_state():
     send(game_state)
 
 # Assign tasks to villagers from LLM
-assign_tasks_to_villagers_from_llm(villagers, task_locations)
+# assign_tasks_to_villagers_from_llm(villagers, task_locations)
+assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village'])
 conversations = []  # List to store conversations
 
 def assign_task_thread(villager, current_task=None):
@@ -303,7 +304,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
-    assign_tasks_to_villagers_from_llm(villagers, task_locations)
+    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village'])
 
 
 # Main game loop
