@@ -57,22 +57,6 @@ def assign_tasks_to_villagers_from_llm(villagers, task_locations):
         for task in concurrent.futures.as_completed(tasks_thread):
             tasks.append(task.result())
 
-
-        try:
-            task_name = response.strip().split(':')[1].strip()
-            task_location = [loc for loc in task_locations if loc.task == task_name][0]
-            if task_location:
-                task_time = task_location.task_period  # Time required for the task
-                villager.assign_task(task_name, task_location, task_time)
-                logger.debug(f"Assigned task '{task_name}' to  {villager.agent_id} at location ({task_location.x}, {task_location.y})")
-            else:
-                logger.warning(f"Task '{task_name}' not found in available task locations.")
-        except IndexError:
-            logger.error(f"Unexpected response format: {response}")
-            default_task_location = random.choice(task_locations)
-            default_task_time = default_task_location.task_period
-            villager.assign_task(default_task_location.task, default_task_location, default_task_time)      
-
     return tasks
 
 
