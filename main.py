@@ -86,10 +86,11 @@ backgrounds = [
 
 names=["Sam","Jack","Ronald"]
 
-werewolf_background = [
-    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
-    ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
+werewolf_backgrounds = [
+    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone.", "I perform tasks related to farming and gathering food."],
+    # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
+werewolf_names=["Louis"]
 
 llm = AzureChatOpenAI(
     azure_deployment="GPT35-turboA",
@@ -159,6 +160,18 @@ for i in range(num_villagers):
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
 
+for i in range(len(werewolf_backgrounds)):
+    angle = i * (2 * math.pi / num_villagers)
+    x = int(center_x + radius * math.cos(angle))
+    y = int(center_y + radius * math.sin(angle))
+    background_texts = werewolf_backgrounds[i]
+    ". ".join(a for a in background_texts)
+    werewolf_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
+    werewolf = Werewolf(werewolf_names[i], random.randint(0,SCREEN_WIDTH), random.randint(0,SCREEN_HEIGHT), background_texts=background_texts,llm=llm,memory=werewolf_memory,meeting_location=(x,y))
+    werewolf.last_talk_attempt_time = 0  # Initialize last talk attempt time
+    villagers.append(werewolf)
+
+print([villager.agent_id for villager in villagers])
 # for i in range(len(werewolf_background)):
 #     x = random.randint(50, SCREEN_WIDTH - 50)
 #     y = random.randint(50, SCREEN_HEIGHT - 50)
@@ -259,7 +272,7 @@ def send_game_state():
 
 # Assign tasks to villagers from LLM
 # assign_tasks_to_villagers_from_llm(villagers, task_locations)
-assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village'])
+assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village', 'Fetch water'])
 conversations = []  # List to store conversations
 
 def assign_task_thread(villager, current_task=None):
@@ -304,7 +317,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
-    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village'])
+    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village', 'Fetch water'])
 
 
 # Main game loop

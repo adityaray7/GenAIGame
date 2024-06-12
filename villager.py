@@ -89,8 +89,9 @@ class Villager:
 
 
 class Werewolf(Villager):
-    def __init__(self, agent_id, x, y, background_texts):
-        super().__init__(agent_id, x, y, background_texts)
+    def __init__(self, agent_id, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
+        super().__init__(agent_id, x, y, background_texts, llm, memory, occupation, meeting_location)
+        print(self.agent_id)
         self.is_werewolf = True
 
     def update(self):
@@ -113,6 +114,7 @@ class Werewolf(Villager):
                 else:
                     self.start_task()
 
+    # Make this like a morning meeting function.
     def night_meeting(self, werewolves, villagers):
         logger.info("Werewolves are having a night meeting!")
         target = self.choose_elimination_target(villagers)
