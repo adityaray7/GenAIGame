@@ -123,10 +123,11 @@ backgrounds = [
 
 \
 
-werewolf_background = [
-    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
-    ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
+werewolf_backgrounds = [
+    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone."],
+    # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
+werewolf_names=["Louis"]
 
 
 class Path:
@@ -225,6 +226,18 @@ for i in range(num_villagers):
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
 
+for i in range(len(werewolf_backgrounds)):
+    angle = i * (2 * math.pi / len(werewolf_backgrounds))
+    x = int(center_x + radius * math.cos(angle))
+    y = int(center_y + radius * math.sin(angle))
+    background_texts = werewolf_backgrounds[i]
+    ". ".join(a for a in background_texts)
+    werewolf_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
+    werewolf = Werewolf(werewolf_names[i], x, y, background_texts=background_texts,llm=llm,memory=werewolf_memory,meeting_location=(x,y))
+    werewolf.last_talk_attempt_time = 0  # Initialize last talk attempt time
+    villagers.append(werewolf)
+
+print([villager.agent_id for villager in villagers])
 # for i in range(len(werewolf_background)):
 #     x = random.randint(50, SCREEN_WIDTH - 50)
 #     y = random.randint(50, SCREEN_HEIGHT - 50)
@@ -337,7 +350,7 @@ def send_game_state():
 
 # Assign tasks to villagers from LLM
 # assign_tasks_to_villagers_from_llm(villagers, task_locations)
-assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village'])
+assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village', 'Fetch water'])
 conversations = []  # List to store conversations
 
 def assign_task_thread(villager, current_task=None):
@@ -350,8 +363,11 @@ def assign_task_thread(villager, current_task=None):
 
     task_name, task_location = assign_next_task(villager, task_locations, current_task)
     task_time = task_location.task_period  # Time required for the task
-    villager.assign_task(task_name, task_location, task_time)
-    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
+    if isinstance(villager, Werewolf):
+        villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
+    else:
+        villager.assign_task(task_name, task_location, task_time)
+    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
     villagers_threaded.remove(villager.agent_id)
 
 
@@ -363,6 +379,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
     temp = elapsed_time
     meeting_complete = False
     villager_remove = False
+    print(villagers)
     for villager in villagers:
         villager.interrupt_task()
         dx, dy = villager.meeting_location[0] - villager.x, villager.meeting_location[1] - villager.y
@@ -371,7 +388,8 @@ def morning_meeting(villagers,conversations,elapsed_time):
             villager.x += dx / dist
             villager.y += dy / dist
             reached = False
-                
+    print(reached)
+    print(elapsed_time)           
     if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
         meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
@@ -384,7 +402,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
-    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village'])
+    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village', 'Fetch water'])
 
 mixer.music.play(-1)
 
@@ -462,6 +480,7 @@ while running:
             print(Fore.RED+ convo['villager1'] + " to " +  convo['villager2'] + " : " + convo['conversation'].split(":")[-1])
         save_conversations_to_mongodb(conversations)
     conversations.clear()  # Clear the list after saving
+    dead_villagers = Villager.killed_villagers
     
     # Render game state
     if is_day:
@@ -473,6 +492,9 @@ while running:
         p.draw(screen)
 
     for villager in [player]+villagers:
+        villager.draw(screen)
+
+    for villager in dead_villagers:
         villager.draw(screen)
 
     for task_location in task_locations:

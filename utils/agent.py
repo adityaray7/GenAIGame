@@ -144,7 +144,8 @@ class Agent:
     # look into save_context later
     def generate_reaction(
         self, observation: str, now: Optional[datetime] = None,
-        call_to_action_template = (agentPromptJson['generate_reaction'])
+        call_to_action_template = (agentPromptJson['generate_reaction']),
+        villager = "None"
     ) -> Tuple[bool, str]:
         """React to a given observation."""
      
@@ -161,7 +162,12 @@ class Agent:
                 self.memory.now_key: now,
             },
         )
-
+        if "KILL:" in result:
+            print("*"*50)
+            print("KILL")
+            print("*"*50)
+            reaction = self._clean_response(result.split("KILL:")[-1])
+            return False, f"{self.name} : {villager} has been killed"
         if "REACT:" in result:
             reaction = self._clean_response(result.split("REACT:")[-1])
             return False, f"{self.name} : {reaction}"
@@ -172,15 +178,30 @@ class Agent:
             return False, result
         
     def generate_dialogue_response(
-        self, observation: str, now: Optional[datetime] = None
+        self, observation: str, now: Optional[datetime] = None,
+        call_to_action_template = (agentPromptJson['generate_dialogue_response']),
+        villager="None"
     ) -> Tuple[bool, str]:
         """React to a given observation."""
-        call_to_action_template = (agentPromptJson['generate_dialogue_response'])
         full_result = self._generate_reaction(
             observation, call_to_action_template, now=now
         )
         
         result = full_result.strip().split("\n")[0]
+        if "KILL:" in result:
+            print("*"*50)
+            print("KILL")
+            print("*"*50)
+            kill = self._clean_response(result.split("KILL:")[-1])
+            self.memory.save_context(
+                {},
+                {
+                    self.memory.add_memory_key: f"{self.name} observed "
+                    f"{observation} and killed {villager}",
+                    self.memory.now_key: now,
+                }
+            )
+            return False, f"{self.name} : {villager} has been killed"
         if "GOODBYE:" in result:
             farewell = self._clean_response(result.split("GOODBYE:")[-1])
             self.memory.save_context(
