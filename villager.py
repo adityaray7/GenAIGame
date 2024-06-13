@@ -132,7 +132,7 @@ class Werewolf(Villager):
 class Player(Villager):  # Inherits from the Villager class
     def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0)):
         super().__init__(name, x, y, background_texts, llm, memory, occupation, meeting_location)
-        self.speed = 1
+        self.speed = 1.5
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
