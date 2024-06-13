@@ -16,6 +16,7 @@ from langchain.retrievers import TimeWeightedVectorStoreRetriever
 from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
 from utils.mongoClient import get_atlas_collection
+from colorama import Fore
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 names=["Sam","Jack","Ronald"]
@@ -481,7 +482,9 @@ while running:
     save_game_state(villagers)
     save_conversations(conversations)
     if conversations:
-        print("conversations",conversations)
+        print(Fore.RED + "\nconversations")
+        for convo in conversations:
+            print(Fore.RED+ convo['villager1'] + " to " +  convo['villager2'] + " : " + convo['conversation'].split(":")[-1])
         save_conversations_to_mongodb(conversations)
     conversations.clear()  # Clear the list after saving
     
