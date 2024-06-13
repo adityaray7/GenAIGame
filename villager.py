@@ -5,8 +5,11 @@ import random
 from utils.agent import Agent
 from langchain_core.language_models import BaseLanguageModel
 from utils.agentmemory import AgentMemory
+from dotenv import load_dotenv
+import os
+load_dotenv()
 class Villager:
-    def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
+    def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0),paths=[]):
         self.agent_id = name
         self.x = x
         self.y = y
@@ -21,12 +24,13 @@ class Villager:
         self.time_to_complete_task = None
         self.last_talk_attempt_time = 0
         self.talking = False
+        self.paths = paths
         self.font = pygame.font.SysFont(None, 24)
 
     def assign_task(self, task, location, time_to_complete_task):
         self.current_task = task
         self.task_location = (location.x, location.y)
-        self.time_to_complete_task = time_to_complete_task
+        self.time_to_complete_task = time_to_complete_task / float(os.getenv("SPEED"))
         self.task_doing = False
         self.task_start_time = None
         self.task_end_time = 111717403133
@@ -61,13 +65,55 @@ class Villager:
                 self.task_doing = False
         else:
             if self.current_task is not None:
-                dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
-                dist = (dx**2 + dy**2)**0.5
-                if dist > 1:
-                    self.x += dx / dist
-                    self.y += dy / dist
-                else:
+                # dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
+                # dist = (dx**2 + dy**2)**0.5
+                # if dist > 1:
+                #     self.x += dx / dist
+                #     self.y += dy / dist
+                # else:
+                #     self.start_task()
+            
+            # Possible directions to move: up, down, left, right, and diagonals
+                directions = [
+                (0, -1), (0, 1), (-1, 0), (1, 0),
+                (-1, -1), (-1, 1), (1, -1), (1, 1)
+                ]
+                current_distance = self.distance_to_target(self.x, self.y)
+                moved = False
+
+                for direction in directions:
+                    next_x = self.x + direction[0]
+                    next_y = self.y + direction[1]
+                    # print(self.agent_id)
+                    # print(self.is_on_path(next_x, next_y, self.paths) , self.distance_to_target(next_x, next_y) , current_distance)
+
+                    if self.distance_to_target(next_x, next_y) < current_distance:
+                        self.x = next_x
+                        self.y = next_y
+                        moved = True
+                        break
+
+                if not moved:
+                    # Move to the left if no valid move was found
+                    next_x = self.x+ 1
+                    next_y = self.y
+                    if self.is_on_path(next_x, next_y, self.paths):
+                        self.x = next_x
+                        self.y = next_y
+
+                if current_distance <= 1:
                     self.start_task()
+
+    def is_on_path(self, x, y, paths):
+            for path in paths:
+                if path.rect.collidepoint(x, y):
+                    return True
+            return False
+    
+    def distance_to_target(self, x, y):
+        dx = self.task_location[0] - x
+        dy = self.task_location[1] - y
+        return (dx ** 2 + dy ** 2) ** 0.5
 
     def interrupt_task(self):
         self.current_task = None
@@ -78,13 +124,13 @@ class Villager:
         color = (0, 0, 0) if self.task_doing else (255, 0, 0)
         pygame.draw.circle(screen, color, (int(self.x), int(self.y)), 5)
         agent_id_text = self.font.render(self.agent_id, True, (0, 0, 0))
-        screen.blit(agent_id_text, (self.x + 10, self.y))
+        screen.blit(agent_id_text, (self.x -25, self.y-40))
         if self.current_task:
             task_text = self.font.render(self.current_task, True, (0, 0, 0))
             screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the villager
-        vil_image = pygame.image.load('images/vil.png')
-        vil_image = pygame.transform.scale(vil_image, (75, 75))
-        screen.blit(vil_image, (self.x, self.y))
+        vil_image = pygame.image.load(f'images/{self.agent_id.lower()}.png')
+        vil_image = pygame.transform.scale(vil_image, (50, 50))
+        screen.blit(vil_image, (self.x-25, self.y-25))
             
 
 
@@ -109,8 +155,8 @@ class Werewolf(Villager):
                 dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
                 dist = (dx**2 + dy**2)**0.5
                 if dist > 1:
-                    self.x += dx / dist
-                    self.y += dy / dist
+                    self.x += dx / dist * float(os.getenv("SPEED"))
+                    self.y += dy / dist * float(os.getenv("SPEED"))
                 else:
                     self.start_task()
 
@@ -126,3 +172,42 @@ class Werewolf(Villager):
         if potential_targets:
             return random.choice(potential_targets)
         return None
+    
+
+class Player(Villager):  # Inherits from the Villager class
+
+    def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0),paths=[]):
+        super().__init__(name, x, y, background_texts, llm, memory, occupation, meeting_location,paths=paths)
+        self.speed = 1
+
+    def handle_input(self):
+        keys = pygame.key.get_pressed()
+        dx, dy = 0, 0
+        if keys[pygame.K_LEFT]:
+            dx -= self.speed
+        if keys[pygame.K_RIGHT]:
+            dx += self.speed
+        if keys[pygame.K_UP]:
+            dy -= self.speed
+        if keys[pygame.K_DOWN]:
+            dy += self.speed
+        self.x += dx
+        self.y += dy
+
+
+    def update(self):
+        self.handle_input()
+        super().update()        
+
+    def draw(self, screen):
+        color = (0, 255, 0)  # Green color for the player
+        pygame.draw.circle(screen, color, (int(self.x), int(self.y)), 5)
+        agent_id_text = self.font.render(self.agent_id, True, (0, 0, 0))
+        screen.blit(agent_id_text, (self.x + 10, self.y))
+        if self.current_task:
+            task_text = self.font.render(self.current_task, True, (0, 0, 0))
+            screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the player
+        vil_image = pygame.image.load('images/vil.png')  # Assuming there's an image for the player
+        vil_image = pygame.transform.scale(vil_image, (75, 75))
+        screen.blit(vil_image, (self.x, self.y))  # Render the player image on the screen
+

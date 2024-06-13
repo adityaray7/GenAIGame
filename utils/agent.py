@@ -6,6 +6,7 @@ from utils.agentmemory import AgentMemory
 from utils.track_tokens import token_tracker
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
+from utils.prompts import agentPromptJson
 
 class Agent:
     id_counter = 0
@@ -37,18 +38,12 @@ class Agent:
 
     @token_tracker
     def _get_entity_from_observation(self, observation: str) -> str:
-        prompt = PromptTemplate.from_template(
-            "What is the observed entity in the following observation? {observation}"
-            + "\nEntity="
-        )
+        prompt = PromptTemplate.from_template(agentPromptJson['_get_entity_from_observation'])
         return self.chain(prompt).invoke({"observation":observation})
 
     @token_tracker
     def _get_entity_action(self, observation: str, entity_name: str) -> str:
-        prompt = PromptTemplate.from_template(
-            "What is the {entity} doing in the following observation? {observation}"
-            + "\nThe {entity} is"
-        )
+        prompt = PromptTemplate.from_template(agentPromptJson['_get_entity_action'])
         return (
             self.chain(prompt).invoke({"entity":entity_name, "observation":observation})
         )
@@ -56,14 +51,7 @@ class Agent:
     @token_tracker
     def summarize_related_memories(self, observation: str) -> str:
         """Summarize memories that are most relevant to an observation."""
-        prompt = PromptTemplate.from_template(
-            """
-            {q1}?
-            Context from memory:
-            {relevant_memories}
-            Relevant context: 
-            """
-        )
+        prompt = PromptTemplate.from_template(agentPromptJson['summarize_related_memories'])
         entity_name = self._get_entity_from_observation(observation)
         entity_action = self._get_entity_action(observation, entity_name)
         relevant_memories = self.memory.fetch_memories(observation=observation)
@@ -78,13 +66,7 @@ class Agent:
     @token_tracker
     def _compute_agent_summary(self) -> str:
         """"""
-        prompt = PromptTemplate.from_template(
-            "How would you summarize {name}'s core characteristics given the"
-            + " following statements:\n"
-            + "{relevant_memories}"
-            + "Do not embellish."
-            + "\n\nSummary: "
-        )
+        prompt = PromptTemplate.from_template(agentPromptJson['_compute_agent_summary'])
         # The agent seeks to think about their core characteristics.
         relevant_memories = self.memory.fetch_memories(observation=self.name)
         return (
@@ -121,17 +103,7 @@ class Agent:
         self, observation: str, suffix: str, now: Optional[datetime] = None, last_k : Optional[int] = 4
     ) -> str:
         """React to a given observation or dialogue act."""
-        prompt = PromptTemplate.from_template(
-            "{agent_summary_description}"
-            + "\nIt is {current_time}."
-            + "\n{agent_name}'s occupation: {agent_status}"
-            + "\nSummary of relevant context from {agent_name}'s memory:"
-            + "\n{relevant_memories}"
-            + "\nMost recent observations: {most_recent_memories}"
-            + "\nObservation: {observation}"
-            + "\n\n"
-            + suffix
-        )
+        prompt = PromptTemplate.from_template(agentPromptJson['_generate_reaction'] + suffix)
 
         with ThreadPoolExecutor() as executor:
             agent_summary_thread = executor.submit(self.get_summary, now=now)
@@ -172,13 +144,7 @@ class Agent:
     # look into save_context later
     def generate_reaction(
         self, observation: str, now: Optional[datetime] = None,
-        call_to_action_template = (
-            "Should {agent_name} react to the observation, and if so,"
-            + " what would be an appropriate reaction? Respond in one line."
-            + ' If the action is to engage in dialogue, write:\nSAY: "what to say"'
-            + "\notherwise, write:\nREACT: {agent_name}'s reaction (if anything)."
-            + "\nEither do nothing, react, or say something but not both.\n\n"
-        )
+        call_to_action_template = (agentPromptJson['generate_reaction'])
     ) -> Tuple[bool, str]:
         """React to a given observation."""
      
@@ -209,11 +175,7 @@ class Agent:
         self, observation: str, now: Optional[datetime] = None
     ) -> Tuple[bool, str]:
         """React to a given observation."""
-        call_to_action_template = (
-            "What would {agent_name} say? To end the conversation, write:"
-            ' GOODBYE: "what to say". Otherwise to continue the conversation,'
-            ' write: SAY: "what to say next"\n\n'
-        )
+        call_to_action_template = (agentPromptJson['generate_dialogue_response'])
         full_result = self._generate_reaction(
             observation, call_to_action_template, now=now
         )
@@ -231,7 +193,7 @@ class Agent:
             )
             return False, f"{self.name} : {farewell}"
         if "SAY:" in result:
-            response_text = self._clean_response(result.split("SAY:")[-1])
+            response_text = self._clean_response(result.split(":")[-1])
             self.memory.save_context(
                 {},
                 {
@@ -248,6 +210,7 @@ class Agent:
         self, force_refresh: bool = False, now: Optional[datetime] = None
     ) -> str:
         """Return a full header of the agent's status, summary, and current time."""
+
         now = datetime.now() if now is None else now
         summary = self.get_summary(force_refresh=force_refresh, now=now)
         current_time_str = now.strftime("%B %d, %Y, %I:%M %p")
