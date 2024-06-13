@@ -87,7 +87,7 @@ backgrounds = [
 names=["Sam","Jack","Ronald"]
 
 werewolf_backgrounds = [
-    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone.", "I perform tasks related to farming and gathering food."],
+    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone."],
     # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
 werewolf_names=["Louis"]

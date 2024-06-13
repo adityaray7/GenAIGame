@@ -11,6 +11,7 @@ load_dotenv()
 
 ELIMINATION_DISTANCE = 10
 class Villager:
+    killed_villagers = []
     def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
         self.agent_id = name
         self.x = x
@@ -99,6 +100,8 @@ class Villager:
             screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the villager
         vil_image = pygame.image.load('images/vil.png')
         vil_image = pygame.transform.scale(vil_image, (75, 75))
+        if not self.alive:
+            vil_image = pygame.transform.rotate(vil_image, 180)
         screen.blit(vil_image, (self.x, self.y))
             
     def get_eliminated(self):
