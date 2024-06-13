@@ -388,6 +388,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
     global reached
     reached = True
     temp = elapsed_time
+    meeting_complete = False
     for villager in villagers:
         villager.interrupt_task()
         dx, dy = villager.meeting_location[0] - villager.x, villager.meeting_location[1] - villager.y
@@ -399,11 +400,11 @@ def morning_meeting(villagers,conversations,elapsed_time):
                 
     if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
-        handle_meeting(villagers, conversations)
+        meeting_complete,villager_remove =handle_meeting(villagers, conversations)
         elapsed_time = temp
-        return elapsed_time + MORNING_MEETING_DURATION
+        return meeting_complete,elapsed_time + MORNING_MEETING_DURATION
     
-    return elapsed_time
+    return meeting_complete,elapsed_time
     
 
 def end_morning_meeting(villagers):
@@ -414,7 +415,7 @@ def end_morning_meeting(villagers):
 
 # Main game loop
 running = True
-start_time = time.time()-20
+start_time = time.time()
 is_day = True
 blend_factor = 0
 is_morning_meeting = False
@@ -447,10 +448,10 @@ while running:
             if not is_morning_meeting:
                 logger.info("Starting morning meeting...")
 
-            elapsed_time = morning_meeting(villagers,conversations,elapsed_time)
+            meeting_complete,elapsed_time = morning_meeting(villagers,conversations,elapsed_time)
 
 
-        elif elapsed_time > MORNING_MEETING_DURATION and is_morning_meeting:
+        elif elapsed_time > MORNING_MEETING_DURATION and meeting_complete and is_morning_meeting:
             logger.info("Ending morning meeting...")
             temp = elapsed_time
             end_morning_meeting(villagers)

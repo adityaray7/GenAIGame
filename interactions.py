@@ -14,11 +14,18 @@ def handle_meeting(villagers, conversations):
           _,response = villager.agent.generate_reaction(observation=initial_obs)
           conversations.append({"villager1": villager.agent_id, "villager2": "meeting" , "conversation": response})
 
+    voting_results = []
     for villager in villagers:
-        initial_obs =f"Based on your memory tell the name of the agent whom you think is the werewolf"
+        initial_obs =f"Based on your interactions ONLY SAY THE NAME OF THE VILLAGER WHO YOU THINK IS THE WEREWOLF from the list {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}"
         call_to_action_template = f"Who do you think is the werewolf other than {villager.agent_id} from the following: {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}? ONLY SAY THE NAME AND NOTHING ELSE"
         _,response = villager.agent.generate_reaction(observation=initial_obs,call_to_action_template=call_to_action_template)
         conversations.append({"villager1": villager.agent_id, "villager2": "meeting", "conversation": response})
+        voting_results.append(response)
+    print("*"*50)
+    print(voting_results)
+    print("*"*50)
+
+    return True,max(voting_results, key = voting_results.count)
 
 
 def handle_player_interaction(player, villagers, conversations):
