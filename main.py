@@ -6,6 +6,7 @@ from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_loc
 import json
 import os
 from dotenv import load_dotenv
+from pygame import mixer
 import time
 from interactions import handle_villager_interactions,handle_meeting
 from threading import Thread
@@ -17,6 +18,9 @@ from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
 from utils.mongoClient import get_atlas_collection, get_atlas_collections
 from colorama import Fore
+mixer.init()
+mixer.music.load('music/music.mp3')
+
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 names=["Sam","Jack","Ronald"]
@@ -130,7 +134,6 @@ class Path:
     def __init__(self, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
         self.color = (100, 100, 100)  # Gray color for the obstacle
-
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
 
@@ -160,8 +163,6 @@ path[11] = Path(3*SCREEN_WIDTH//4+25, 0, 30, 900)  # Example size of 50x50
 #outer veritical path
 path[12] = Path(30, 0, 30, 900)  # Example size of 50x50
 path[13] = Path(SCREEN_WIDTH-60, 0, 30, 900)  # Example size of 50x50
-
-
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
@@ -403,6 +404,7 @@ def end_morning_meeting(villagers):
     is_morning_meeting = False
     assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village', 'Fetch water'])
 
+mixer.music.play(-1)
 
 # Main game loop
 running = True
@@ -410,6 +412,7 @@ start_time = time.time()
 is_day = True
 blend_factor = 0
 is_morning_meeting = False
+
 
 while running:
     
