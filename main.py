@@ -149,7 +149,7 @@ backgrounds = [
 \
 
 werewolf_backgrounds = [
-    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone.", "I perform tasks related to farming and gathering food."],
+    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone."],
     # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
 werewolf_names=["Louis"]
@@ -391,8 +391,11 @@ def assign_task_thread(villager, current_task=None):
 
     task_name, task_location = assign_next_task(villager, task_locations, current_task)
     task_time = task_location.task_period  # Time required for the task
-    villager.assign_task(task_name, task_location, task_time)
-    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
+    if isinstance(villager, Werewolf):
+        villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
+    else:
+        villager.assign_task(task_name, task_location, task_time)
+    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
     villagers_threaded.remove(villager.agent_id)
 
 
