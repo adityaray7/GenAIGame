@@ -246,17 +246,17 @@ def send_game_state():
         conversations = json.load(f)
         
 
-    # isConvo=False
-    # if conversations:
-    #     isConvo=True  
-    #   
+    isConvo=False
+    if conversations:
+        isConvo=True  
+      
     game_state = {
         "numVillagers": num_villagers,
         "villagers": villagers_state,
         "tasks": task_info, 
         "isDay": is_day,
         "blendFactor": blend_factor,
-        # "isConvo":isConvo,
+        "isConvo":isConvo,
         "conversations": conversations,
         
     }
