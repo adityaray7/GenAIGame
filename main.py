@@ -431,6 +431,7 @@ meeting_complete = False
 message = None
 message_start_time = None
 message_duration = 5  # Duration to show the message in seconds
+dead_villagers = []
 
 while running:
     
@@ -508,7 +509,7 @@ while running:
             print(Fore.RED+ convo['villager1'] + " to " +  convo['villager2'] + " : " + convo['conversation'].split(":")[-1])
         save_conversations_to_mongodb(conversations)
     conversations.clear()  # Clear the list after saving
-    dead_villagers = Villager.killed_villagers
+    dead_villagers.extend(Villager.killed_villagers)
 
     # Render game state
     if is_day:
