@@ -18,8 +18,17 @@ load_dotenv()
 from utils.mongoClient import get_atlas_collection
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
+names=["Sam","Jack","Ronald"]
+convo_collection_names=["Sam_convo","Jack_convo","Ronald_convo"]
+
 client_holder = {}
 convo_holder = {}
+villager1_holder = {}
+villager1_convo_holder = {}
+villager2_holder = {}
+vilager2_convo_holder = {}
+villager3_holder = {}
+villager3_convo_holder = {}
 # Define collection and index name
 db_name = "langchain_db"
 collection_name = "test"
@@ -36,10 +45,62 @@ mongo_connection_thread.start()
 convo_connection_thread = Thread(target=threaded_function, args=(convo_holder, get_atlas_collection, (db_name, convo_collection_name)))
 convo_connection_thread.start()
 
+# Create collections for each villager
+villager1_connection_thread = Thread(target=threaded_function, args=(villager1_holder, get_atlas_collection, (db_name, names[0])))
+villager1_connection_thread.start()
+
+villager1_convo_connection_thread = Thread(target=threaded_function, args=(villager1_convo_holder, get_atlas_collection, (db_name, convo_collection_names[0])))
+villager1_convo_connection_thread.start()
+
+villager2_connection_thread = Thread(target=threaded_function, args=(villager2_holder, get_atlas_collection, (db_name, names[1])))
+villager2_connection_thread.start()
+
+villager2_convo_connection_thread = Thread(target=threaded_function, args=(vilager2_convo_holder, get_atlas_collection, (db_name, convo_collection_names[1])))
+villager2_convo_connection_thread.start()
+
+villager3_connection_thread = Thread(target=threaded_function, args=(villager3_holder, get_atlas_collection, (db_name, names[2])))
+villager3_connection_thread.start()
+
+villager3_convo_connection_thread = Thread(target=threaded_function, args=(villager3_convo_holder, get_atlas_collection, (db_name, convo_collection_names[2])))
+villager3_convo_connection_thread.start()
+
+
+
 
 from villager import Villager, Werewolf, Player
 from utils.agentmemory import AgentMemory
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+
+llm = AzureChatOpenAI(
+    azure_deployment="GPT35-turboA",
+    api_version="2024-02-01",
+    temperature=0
+)
+
+
+# Mongo connection thread
+mongo_connection_thread.join()
+convo_connection_thread.join()
+villager1_connection_thread.join()
+villager1_convo_connection_thread.join()
+villager2_connection_thread.join()
+villager2_convo_connection_thread.join()
+villager3_connection_thread.join()
+villager3_convo_connection_thread.join()
+
+atlas_collection = client_holder["result"]
+convo_collection = convo_holder["result"]
+villager_collections = {
+    names[0]: villager1_holder["result"],
+    names[1]: villager2_holder["result"],
+    names[2]: villager3_holder["result"]
+}
+villager_conv_collections = {
+    names[0]: villager1_convo_holder["result"],
+    names[1]: vilager2_convo_holder["result"],
+    names[2]: villager3_convo_holder["result"]
+}
+
 
 # Multithreading 
 villagers_threaded = []
@@ -84,18 +145,14 @@ backgrounds = [
     # ["I am Villager 9.", "I am patient and compassionate, with a gift for teaching.", "I educate the children of our village, guiding them toward a brighter future."],
 ]
 
-names=["Sam","Jack","Ronald"]
+\
 
 werewolf_background = [
     ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
     ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
 
-llm = AzureChatOpenAI(
-    azure_deployment="GPT35-turboA",
-    api_version="2024-02-01",
-    temperature=0
-)
+
 class Path:
     def __init__(self, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
@@ -133,11 +190,6 @@ path[13] = Path(SCREEN_WIDTH-60, 0, 60, 900)  # Example size of 50x50
 
 
 
-# Mongo connection thread
-mongo_connection_thread.join()
-atlas_collection = client_holder["result"]
-convo_collection = convo_holder["result"]
-
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
     # This will differ depending on a few things:
@@ -151,9 +203,10 @@ def relevance_score_fn(score: float) -> float:
     # change this to implement cosine_similarity
     return abs(1.0 - (score / math.sqrt(2)))
 
-def create_new_memory_retriever():
+def create_new_memory_retriever(agent_name="Player"):
     """Create a new vector store retriever unique to the agent."""
     # Define your embedding model
+    print("creating memory retriever for",agent_name)
     embeddings_model = AzureOpenAIEmbeddings(
         azure_deployment="text-embedding3",
         api_version="2024-02-01"
@@ -163,7 +216,11 @@ def create_new_memory_retriever():
 
     ###############################################
     # index = faiss.IndexFlatL2(embedding_size)
-    vectorstore = MongoDBAtlasVectorSearch(atlas_collection, embeddings_model)
+    if(agent_name=="Player"):
+        agent_collection = atlas_collection
+    else:    
+        agent_collection = villager_collections[agent_name]
+    vectorstore = MongoDBAtlasVectorSearch(agent_collection, embeddings_model)
     
     # vectorstore = FAISS(
     #     embedding_function=embeddings_model,
@@ -189,7 +246,8 @@ for i in range(num_villagers):
     y = int(center_y + radius * math.sin(angle))
     background_texts = backgrounds[i]
     ". ".join(a for a in background_texts)
-    villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
+
+    villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever(names[i))
     villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y),paths=path)
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
@@ -228,7 +286,11 @@ def save_game_state(villagers, filename="game_state.json"):
 def save_conversations_to_mongodb(conversations):
     if conversations:
         convo_collection.insert_many(conversations)
+        if conversations[0]["villager1"] in villager_collections:
+            villager_conv_collections[conversations[0]["villager1"]].insert_many(conversations)
+        
         logger.info(f"Saved {len(conversations)} conversations to MongoDB.")
+        
     else:
         logger.info("No new conversations to save.")
 
@@ -281,17 +343,17 @@ def send_game_state():
         conversations = json.load(f)
         
 
-    # isConvo=False
-    # if conversations:
-    #     isConvo=True  
-    #   
+    isConvo=False
+    if conversations:
+        isConvo=True  
+      
     game_state = {
         "numVillagers": num_villagers,
         "villagers": villagers_state,
         "tasks": task_info, 
         "isDay": is_day,
         "blendFactor": blend_factor,
-        # "isConvo":isConvo,
+        "isConvo":isConvo,
         "conversations": conversations,
         
     }
