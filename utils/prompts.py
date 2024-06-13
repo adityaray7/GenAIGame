@@ -31,11 +31,9 @@ agentPromptJson = {
             + "\n\n",
     
     "generate_reaction": 
-            "Should {agent_name} react to the observation, and if so,"
-            + " what would be an appropriate reaction? Respond in one line."
-            + ' If the action is to engage in dialogue, write:\nSAY: "what to say"'
-            + "\notherwise, write:\nREACT: {agent_name}'s reaction (if anything)."
-            + "\nEither do nothing, react, or say something but not both.\n\n",
+            "What should {agent_name} say to the observation"
+            + " what would be an appropriate reply? Respond in one line."
+            + 'Write:\n{agent_name}: "what to say"',
     
     "generate_dialogue_response": 
         "What would {agent_name} say? To end the conversation, write:"

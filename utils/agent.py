@@ -193,7 +193,7 @@ class Agent:
             )
             return False, f"{self.name} : {farewell}"
         if "SAY:" in result:
-            response_text = self._clean_response(result.split("SAY:")[-1])
+            response_text = self._clean_response(result.split(":")[-1])
             self.memory.save_context(
                 {},
                 {
