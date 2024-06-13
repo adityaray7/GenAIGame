@@ -34,11 +34,11 @@ def handle_player_interaction(player, villagers, conversations):
 
                 for _ in range(2):
                     # Player initiates the conversation
-                    player_input = input(f"Player: Hey {villager.agent_id}, how are you? ")
+                    player_input = input(f"Player: ")
 
                     # Villager responds using LLM
                     _, response = villager.agent.generate_reaction(observation=player_input)
-                    print(f"{villager.agent_id}: {response}")
+                    print(f"{response}")
 
                     # Save conversation to the list
                     conversations.append({"villager1": "Player", "villager2": villager.agent_id, "conversation": player_input})

@@ -168,7 +168,7 @@ for i in range(num_villagers):
 #     villagers.append(villager)
 
 player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
-player = Player("Player", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, ["I am the player."], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+player = Player("Player", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 
 
 def villager_info(villagers):
