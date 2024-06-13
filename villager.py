@@ -141,11 +141,11 @@ class Villager:
         if self.current_task:
             task_text = self.font.render(self.current_task, True, (0, 0, 0))
             screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the villager
-        vil_image = pygame.image.load('images/vil.png')
-        vil_image = pygame.transform.scale(vil_image, (75, 75))
+        vil_image = pygame.image.load(f'images/{self.agent_id.lower()}.png')
+        vil_image = pygame.transform.scale(vil_image, (60, 60))
         if not self.alive:
             vil_image = pygame.transform.rotate(vil_image, 180)
-        screen.blit(vil_image, (self.x, self.y))
+        screen.blit(vil_image, (self.x-25, self.y-25))
             
     def get_eliminated(self):
         logger.info(f"{self.agent_id} has been eliminated!")
@@ -169,12 +169,43 @@ class Werewolf(Villager):
                 self.task_doing = False
         else:
             if self.current_task is not None:
-                dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
-                dist = (dx**2 + dy**2)**0.5
-                if dist > 1:
-                    self.x += dx / dist * float(os.getenv("SPEED"))
-                    self.y += dy / dist * float(os.getenv("SPEED"))
-                else:
+                # dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
+                # dist = (dx**2 + dy**2)**0.5
+                # if dist > 1:
+                #     self.x += dx / dist
+                #     self.y += dy / dist
+                # else:
+                #     self.start_task()
+            
+            # Possible directions to move: up, down, left, right, and diagonals
+                directions = [
+                (0, -1), (0, 1), (-1, 0), (1, 0),
+                (-1, -1), (-1, 1), (1, -1), (1, 1)
+                ]
+                current_distance = self.distance_to_target(self.x, self.y)
+                moved = False
+
+                for direction in directions:
+                    next_x = self.x + direction[0]
+                    next_y = self.y + direction[1]
+                    # print(self.agent_id)
+                    # print(self.is_on_path(next_x, next_y, self.paths) , self.distance_to_target(next_x, next_y) , current_distance)
+
+                    if self.distance_to_target(next_x, next_y) < current_distance:
+                        self.x = next_x
+                        self.y = next_y
+                        moved = True
+                        break
+
+                if not moved:
+                    # Move to the left if no valid move was found
+                    next_x = self.x+ 1
+                    next_y = self.y
+                    if self.is_on_path(next_x, next_y, self.paths):
+                        self.x = next_x
+                        self.y = next_y
+
+                if current_distance <= 1:
                     self.start_task()
 
     def eliminate(self, villager):

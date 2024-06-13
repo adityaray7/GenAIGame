@@ -8,7 +8,7 @@ TALK_PROBABILITY = 0.05  # Adjust as needed
 TALK_COOLDOWN_TIME = 60  # Time in seconds for cooldown period
 # Method to handle villager interactions
 
-def handle_meeting(villagers, conversations):
+def handle_meeting(villagers, conversations,villager_remove):
     logger.info("Meeting started")
     for villager in villagers:
           initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}"
@@ -22,11 +22,9 @@ def handle_meeting(villagers, conversations):
         _,response = villager.agent.generate_reaction(observation=initial_obs,call_to_action_template=call_to_action_template)
         conversations.append({"villager1": villager.agent_id, "villager2": "meeting", "conversation": response})
         voting_results.append(response)
-    print("*"*50)
-    print(voting_results)
-    print("*"*50)
-
-    return True,max(voting_results, key = voting_results.count)
+    
+    villager_remove = max(voting_results, key = voting_results.count)
+    return True,villager_remove
 
 
 def handle_player_interaction(player, villagers, conversations):
@@ -90,7 +88,7 @@ def handle_villager_interactions(player,villagers,conversations):
                                     )
                                 StartConvo,result = villager1.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template, villager=villager2.agent_id)
                                 if "killed" in result:
-                                    # villagers.remove(villager2)
+                                    villagers.remove(villager2)
                                     Villager.killed_villagers.append(villager2)
                                     villager2.alive = False
                                 conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": result})
@@ -115,7 +113,7 @@ def handle_villager_interactions(player,villagers,conversations):
                                                 )
                                             stayInConversation,result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}.Give a reply to it ", call_to_action_template=call_to_action_template, villager=other_villager.agent_id)
                                             if "killed" in result:
-                                                # villagers.remove(other_villager)
+                                                villagers.remove(other_villager)
                                                 Villager.killed_villagers.append(other_villager)
                                                 other_villager.alive = False
                                             conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
