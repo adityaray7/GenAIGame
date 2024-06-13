@@ -247,7 +247,7 @@ for i in range(num_villagers):
     background_texts = backgrounds[i]
     ". ".join(a for a in background_texts)
 
-    villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever(names[i))
+    villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever(names[i]))
     villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y),paths=path)
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
