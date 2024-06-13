@@ -128,7 +128,7 @@ class Villager:
         if self.current_task:
             task_text = self.font.render(self.current_task, True, (0, 0, 0))
             screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the villager
-        vil_image = pygame.image.load('images/vil.png')
+        vil_image = pygame.image.load(f'images/{self.agent_id.lower()}.png')
         vil_image = pygame.transform.scale(vil_image, (75, 75))
         screen.blit(vil_image, (self.x, self.y))
             
@@ -173,6 +173,7 @@ class Werewolf(Villager):
     
 
 class Player(Villager):  # Inherits from the Villager class
+
     def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0),paths=[]):
         super().__init__(name, x, y, background_texts, llm, memory, occupation, meeting_location,paths=paths)
         self.speed = 1
