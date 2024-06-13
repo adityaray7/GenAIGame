@@ -5,15 +5,15 @@ import concurrent.futures
 
 def initialize_task_locations():
     task_locations = [
-        TaskLocation(1000, 300, "Gather food",5),
-        TaskLocation(200, 200, "Build a house",10),
-        TaskLocation(600, 600, "Collect wood",8),
-        TaskLocation(80, 600, "Fetch water",10),
-        TaskLocation(1000, 600, "Guard the village",15),
-        TaskLocation(200, 500, "Cook food",10),
-        TaskLocation(300, 100, "Hunt for animals",15),
+        TaskLocation(1100, 650, "Gather food",5),
+        TaskLocation(1100, 200, "Build a house",10),
+        TaskLocation(1400, 100, "Collect wood",8),
+        TaskLocation(80, 700, "Fetch water",10),
+        TaskLocation(900, 450, "Guard the village",15),
+        TaskLocation(400, 650, "Cook food",10),
+        TaskLocation(100, 100, "Hunt for animals",15),
         TaskLocation(600, 400, "Scout the area",10),
-        TaskLocation(350, 350, "Heal the injured",12),
+        TaskLocation(400, 400, "Heal the injured",12),
         TaskLocation(700, 200, "Teach children",10)
     ]
     return task_locations
