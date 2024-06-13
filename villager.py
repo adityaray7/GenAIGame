@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 class Villager:
-    def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
+    def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0),paths=[]):
         self.agent_id = name
         self.x = x
         self.y = y
@@ -24,6 +24,7 @@ class Villager:
         self.time_to_complete_task = None
         self.last_talk_attempt_time = 0
         self.talking = False
+        self.paths = paths
         self.font = pygame.font.SysFont(None, 24)
 
     def assign_task(self, task, location, time_to_complete_task):
@@ -64,13 +65,55 @@ class Villager:
                 self.task_doing = False
         else:
             if self.current_task is not None:
-                dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
-                dist = (dx**2 + dy**2)**0.5
-                if dist > 1:
-                    self.x += dx / dist
-                    self.y += dy / dist
-                else:
+                # dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
+                # dist = (dx**2 + dy**2)**0.5
+                # if dist > 1:
+                #     self.x += dx / dist
+                #     self.y += dy / dist
+                # else:
+                #     self.start_task()
+            
+            # Possible directions to move: up, down, left, right, and diagonals
+                directions = [
+                (0, -1), (0, 1), (-1, 0), (1, 0),
+                (-1, -1), (-1, 1), (1, -1), (1, 1)
+                ]
+                current_distance = self.distance_to_target(self.x, self.y)
+                moved = False
+
+                for direction in directions:
+                    next_x = self.x + direction[0]
+                    next_y = self.y + direction[1]
+                    # print(self.agent_id)
+                    # print(self.is_on_path(next_x, next_y, self.paths) , self.distance_to_target(next_x, next_y) , current_distance)
+
+                    if self.distance_to_target(next_x, next_y) < current_distance:
+                        self.x = next_x
+                        self.y = next_y
+                        moved = True
+                        break
+
+                if not moved:
+                    # Move to the left if no valid move was found
+                    next_x = self.x+ 1
+                    next_y = self.y
+                    if self.is_on_path(next_x, next_y, self.paths):
+                        self.x = next_x
+                        self.y = next_y
+
+                if current_distance <= 1:
                     self.start_task()
+
+    def is_on_path(self, x, y, paths):
+            for path in paths:
+                if path.rect.collidepoint(x, y):
+                    return True
+            return False
+    
+    def distance_to_target(self, x, y):
+        dx = self.task_location[0] - x
+        dy = self.task_location[1] - y
+        return (dx ** 2 + dy ** 2) ** 0.5
 
     def interrupt_task(self):
         self.current_task = None
@@ -85,7 +128,7 @@ class Villager:
         if self.current_task:
             task_text = self.font.render(self.current_task, True, (0, 0, 0))
             screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the villager
-        vil_image = pygame.image.load('images/vil.png')
+        vil_image = pygame.image.load(f'images/{self.agent_id.lower()}.png')
         vil_image = pygame.transform.scale(vil_image, (75, 75))
         screen.blit(vil_image, (self.x, self.y))
             
@@ -130,8 +173,9 @@ class Werewolf(Villager):
     
 
 class Player(Villager):  # Inherits from the Villager class
-    def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0)):
-        super().__init__(name, x, y, background_texts, llm, memory, occupation, meeting_location)
+
+    def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0),paths=[]):
+        super().__init__(name, x, y, background_texts, llm, memory, occupation, meeting_location,paths=paths)
         self.speed = 1
 
     def handle_input(self):
@@ -150,9 +194,8 @@ class Player(Villager):  # Inherits from the Villager class
 
 
     def update(self):
-        self.handle_input()  # Handle player input
-        # Call the parent class update method to handle tasks
-        super().update()
+        self.handle_input()
+        super().update()        
 
     def draw(self, screen):
         color = (0, 255, 0)  # Green color for the player

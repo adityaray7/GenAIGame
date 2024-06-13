@@ -106,16 +106,16 @@ villager_conv_collections = {
 villagers_threaded = []
 
 # Constants
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 720
+SCREEN_WIDTH = 1500
+SCREEN_HEIGHT = 900
 DAY_DURATION = 120  # 60 seconds for a full day cycle
 NIGHT_DURATION = 120  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
 MORNING_MEETING_DURATION = 10
 
 # Load background images
-background_day = pygame.image.load("images/map2.jpg")
-background_night = pygame.image.load("images/night.jpg")
+background_day = pygame.image.load("images/map3.png")
+background_night = pygame.image.load("images/night3.png")
 background_day = pygame.transform.scale(background_day, (SCREEN_WIDTH, SCREEN_HEIGHT))
 background_night = pygame.transform.scale(background_night, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -151,6 +151,44 @@ werewolf_background = [
     ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
     ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
+
+
+class Path:
+    def __init__(self, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = (100, 100, 100)  # Gray color for the obstacle
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+
+path=[None for i in range(14)]
+
+#pathways leading to the meeting point
+path[0] = Path(SCREEN_WIDTH //2+60, SCREEN_HEIGHT//2-30, 800, 60)  # Example size of 50x50
+path[1] = Path(0, SCREEN_HEIGHT//2-30, 700, 60)  # Example size of 50x50
+path[2] = Path(SCREEN_WIDTH //2-30, 0, 60, 400)  # Example size of 50x50
+path[3] = Path(SCREEN_WIDTH //2-30, SCREEN_HEIGHT//2+40, 60, 400)  # Example size of 50x50
+
+#meeting point
+path[4] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-100, 200, 60)  # Example size of 50x50
+path[5] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2+40, 200, 60)  # Example size of 50x50
+path[6] = Path(SCREEN_WIDTH //2+40, SCREEN_HEIGHT//2-60, 60, 150)  # Example size of 50x50
+path[7] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-60, 60, 150)  # Example size of 50x50
+
+
+#outer horizontal path
+path[8] = Path(0, SCREEN_HEIGHT//4-30, 1500, 60)  # Example size of 50x50
+path[9] = Path(0, 3*SCREEN_HEIGHT//4-30, 1500, 60)  # Example size of 50x50
+
+#inner vetical paths
+path[10] = Path(SCREEN_WIDTH//4-100, 0, 60, 900)  # Example size of 50x50
+path[11] = Path(3*SCREEN_WIDTH//4+100, 0, 60, 900)  # Example size of 50x50
+
+#outer veritical path
+path[12] = Path(0, 0, 60, 900)  # Example size of 50x50
+path[13] = Path(SCREEN_WIDTH-60, 0, 60, 900)  # Example size of 50x50
+
+
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
@@ -198,9 +236,9 @@ def create_new_memory_retriever(agent_name="Player"):
 # Initialize villagers
 villagers = []
 num_villagers = len(backgrounds)
-center_x = 800
-center_y = 360
-radius = 60
+center_x = SCREEN_WIDTH//2
+center_y = SCREEN_HEIGHT//2+40
+radius = 100
 
 for i in range(num_villagers):
     angle = i * (2 * math.pi / num_villagers)
@@ -208,8 +246,9 @@ for i in range(num_villagers):
     y = int(center_y + radius * math.sin(angle))
     background_texts = backgrounds[i]
     ". ".join(a for a in background_texts)
-    villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever(names[i]))
-    villager = Villager(names[i], random.randint(0,SCREEN_WIDTH), random.randint(0,SCREEN_HEIGHT), background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y))
+
+    villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever(names[i))
+    villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y),paths=path)
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
 
@@ -222,7 +261,7 @@ for i in range(num_villagers):
 #     villagers.append(villager)
 
 player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
-player = Player("Player", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+player = Player("Player", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=path)
 
 
 def villager_info(villagers):
@@ -358,7 +397,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
             villager.y += dy / dist
             reached = False
                 
-    if reached:
+    if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
         handle_meeting(villagers, conversations)
         elapsed_time = temp
@@ -375,7 +414,7 @@ def end_morning_meeting(villagers):
 
 # Main game loop
 running = True
-start_time = time.time()
+start_time = time.time()-20
 is_day = True
 blend_factor = 0
 is_morning_meeting = False
@@ -453,8 +492,13 @@ while running:
     
     for villager in [player]+villagers:
         villager.draw(screen)
+
     for task_location in task_locations:
         task_location.draw(screen)
+
+    # for p in path:
+    #     p.draw(screen)
+
     pygame.display.flip()
     clock.tick(60)
 
