@@ -84,10 +84,10 @@ villagers_threaded = []
 # Constants
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 900
-DAY_DURATION = 120  # 60 seconds for a full day cycle
-NIGHT_DURATION = 120  # 60 seconds for a full night cycle
+DAY_DURATION = 60  # 60 seconds for a full day cycle
+NIGHT_DURATION = 60  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
-MORNING_MEETING_DURATION = 10
+MORNING_MEETING_DURATION = 20
 
 # Load background images
 background_day = pygame.image.load("images/map3.png")
@@ -350,7 +350,7 @@ def send_game_state():
 
 # Assign tasks to villagers from LLM
 # assign_tasks_to_villagers_from_llm(villagers, task_locations)
-assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village', 'Fetch water'])
+assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village', 'Cook food'])
 conversations = []  # List to store conversations
 
 def assign_task_thread(villager, current_task=None):
@@ -379,17 +379,14 @@ def morning_meeting(villagers,conversations,elapsed_time):
     temp = elapsed_time
     meeting_complete = False
     villager_remove = False
-    print(villagers)
     for villager in villagers:
         villager.interrupt_task()
         dx, dy = villager.meeting_location[0] - villager.x, villager.meeting_location[1] - villager.y
         dist = (dx**2 + dy**2)**0.5
-        if dist > 1:
+        if dist > 2:
             villager.x += dx / dist
             villager.y += dy / dist
-            reached = False
-    print(reached)
-    print(elapsed_time)           
+            reached = False         
     if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
         meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
@@ -402,7 +399,25 @@ def morning_meeting(villagers,conversations,elapsed_time):
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
-    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village', 'Fetch water'])
+    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village', 'Cook food'])
+
+
+# Function to display text on the screen with a white background
+def display_text(screen, text, duration, font_size=50):
+    font = pygame.font.Font(None, font_size)
+    rendered_text = font.render(text, True, (255, 0, 0))  # Red color text
+    text_rect = rendered_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    background_rect = pygame.Rect(0, 0, text_rect.width + 20, text_rect.height + 20)
+    background_rect.center = text_rect.center
+
+    start_time = time.time()
+    while time.time() - start_time < duration:
+        screen.fill((255, 255, 255), background_rect)  # White background
+        screen.blit(rendered_text, text_rect)
+        pygame.display.flip()
+        clock.tick(60)
+
+
 
 mixer.music.play(-1)
 
@@ -412,7 +427,10 @@ start_time = time.time()
 is_day = True
 blend_factor = 0
 is_morning_meeting = False
-
+meeting_complete = False
+message = None
+message_start_time = None
+message_duration = 5  # Duration to show the message in seconds
 
 while running:
     
@@ -424,7 +442,7 @@ while running:
     player.update()
 
     # Update day/night cycle
-    curr = time.time()
+    curr = time.time()+20
     elapsed_time = curr - start_time
     blend_factor = 0
 
@@ -442,7 +460,17 @@ while running:
             if not is_morning_meeting:
                 logger.info("Starting morning meeting...")
 
+            display_text(screen,"Meeting Going On......", 1)
+
             meeting_complete,_,remove_villager = morning_meeting(villagers,conversations,elapsed_time)
+
+            if remove_villager:
+                for villager in villagers:
+                    if villager.agent_id == remove_villager:
+                        villagers.remove(villager)
+                        message = f"{villager.agent_id} was kicked out"
+                        message_start_time = time.time()
+                        break
 
 
         elif elapsed_time > MORNING_MEETING_DURATION and meeting_complete and is_morning_meeting:
@@ -481,7 +509,7 @@ while running:
         save_conversations_to_mongodb(conversations)
     conversations.clear()  # Clear the list after saving
     dead_villagers = Villager.killed_villagers
-    
+
     # Render game state
     if is_day:
         blend_images(background_day, background_night, blend_factor)
@@ -499,6 +527,20 @@ while running:
 
     for task_location in task_locations:
         task_location.draw(screen)
+
+     # Display message if there is one
+    if message and time.time() - message_start_time < message_duration:
+        display_text(screen, message, message_duration)
+
+    else:
+        # Check for win conditions
+        if all(isinstance(villager, Werewolf) for villager in villagers):
+            message = "Werewolves won the game!"
+            message_start_time = time.time()
+
+        elif all(not isinstance(villager, Werewolf) for villager in villagers):
+            message = "Townsfolk won the game!"
+            message_start_time = time.time()
 
     
     pygame.display.flip()
