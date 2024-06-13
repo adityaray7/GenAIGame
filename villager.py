@@ -129,7 +129,7 @@ class Villager:
             task_text = self.font.render(self.current_task, True, (0, 0, 0))
             screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the villager
         vil_image = pygame.image.load(f'images/{self.agent_id.lower()}.png')
-        vil_image = pygame.transform.scale(vil_image, (50, 50))
+        vil_image = pygame.transform.scale(vil_image, (60, 60))
         screen.blit(vil_image, (self.x-25, self.y-25))
             
 

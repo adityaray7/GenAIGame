@@ -165,10 +165,10 @@ class Path:
 path=[None for i in range(14)]
 
 #pathways leading to the meeting point
-path[0] = Path(SCREEN_WIDTH //2+60, SCREEN_HEIGHT//2-30, 800, 60)  # Example size of 50x50
-path[1] = Path(0, SCREEN_HEIGHT//2-30, 700, 60)  # Example size of 50x50
-path[2] = Path(SCREEN_WIDTH //2-30, 0, 60, 400)  # Example size of 50x50
-path[3] = Path(SCREEN_WIDTH //2-30, SCREEN_HEIGHT//2+40, 60, 400)  # Example size of 50x50
+path[0] = Path(SCREEN_WIDTH //2+60, SCREEN_HEIGHT//2-30, 800, 30)  # Example size of 50x50
+path[1] = Path(0, SCREEN_HEIGHT//2-30, 700, 30)  # Example size of 50x50
+path[2] = Path(SCREEN_WIDTH //2-30, 0, 30, 400)  # Example size of 50x50
+path[3] = Path(SCREEN_WIDTH //2-30, SCREEN_HEIGHT//2+40, 30, 400)  # Example size of 50x50
 
 #meeting point
 path[4] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-100, 200, 60)  # Example size of 50x50
@@ -178,16 +178,16 @@ path[7] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-60, 60, 150)  # Example si
 
 
 #outer horizontal path
-path[8] = Path(0, SCREEN_HEIGHT//4-30, 1500, 60)  # Example size of 50x50
-path[9] = Path(0, 3*SCREEN_HEIGHT//4-30, 1500, 60)  # Example size of 50x50
+path[8] = Path(0, SCREEN_HEIGHT//4-25, 1500, 30)  # Example size of 50x50
+path[9] = Path(0, 3*SCREEN_HEIGHT//4, 1500, 30)  # Example size of 50x50
 
 #inner vetical paths
-path[10] = Path(SCREEN_WIDTH//4-100, 0, 60, 900)  # Example size of 50x50
-path[11] = Path(3*SCREEN_WIDTH//4+100, 0, 60, 900)  # Example size of 50x50
+path[10] = Path(SCREEN_WIDTH//4-75, 0, 30, 900)  # Example size of 50x50
+path[11] = Path(3*SCREEN_WIDTH//4+25, 0, 30, 900)  # Example size of 50x50
 
 #outer veritical path
-path[12] = Path(0, 0, 60, 900)  # Example size of 50x50
-path[13] = Path(SCREEN_WIDTH-60, 0, 60, 900)  # Example size of 50x50
+path[12] = Path(30, 0, 30, 900)  # Example size of 50x50
+path[13] = Path(SCREEN_WIDTH-60, 0, 30, 900)  # Example size of 50x50
 
 
 
@@ -238,8 +238,8 @@ def create_new_memory_retriever(agent_name="Player"):
 villagers = []
 num_villagers = len(backgrounds)
 center_x = SCREEN_WIDTH//2
-center_y = SCREEN_HEIGHT//2+40
-radius = 100
+center_y = SCREEN_HEIGHT//2
+radius = 65
 
 for i in range(num_villagers):
     angle = i * (2 * math.pi / num_villagers)
@@ -390,6 +390,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
     reached = True
     temp = elapsed_time
     meeting_complete = False
+    villager_remove = False
     for villager in villagers:
         villager.interrupt_task()
         dx, dy = villager.meeting_location[0] - villager.x, villager.meeting_location[1] - villager.y
@@ -401,11 +402,11 @@ def morning_meeting(villagers,conversations,elapsed_time):
                 
     if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
-        meeting_complete,villager_remove =handle_meeting(villagers, conversations)
+        meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
         elapsed_time = temp
-        return meeting_complete,elapsed_time + MORNING_MEETING_DURATION
+        return meeting_complete,elapsed_time + MORNING_MEETING_DURATION,villager_remove
     
-    return meeting_complete,elapsed_time
+    return meeting_complete,elapsed_time,villager_remove
     
 
 def end_morning_meeting(villagers):
@@ -449,7 +450,7 @@ while running:
             if not is_morning_meeting:
                 logger.info("Starting morning meeting...")
 
-            meeting_complete,elapsed_time = morning_meeting(villagers,conversations,elapsed_time)
+            meeting_complete,_,remove_villager = morning_meeting(villagers,conversations,elapsed_time)
 
 
         elif elapsed_time > MORNING_MEETING_DURATION and meeting_complete and is_morning_meeting:
@@ -494,15 +495,16 @@ while running:
     else:
         blend_images(background_night, background_day, blend_factor)
     
+    for p in path:
+        p.draw(screen)
+
     for villager in [player]+villagers:
         villager.draw(screen)
 
     for task_location in task_locations:
         task_location.draw(screen)
 
-    # for p in path:
-    #     p.draw(screen)
-
+    
     pygame.display.flip()
     clock.tick(60)
 
