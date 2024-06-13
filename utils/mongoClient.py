@@ -12,9 +12,8 @@ def get_atlas_collection(db_name, collection_name):
     collection = client[db_name][collection_name]
     
     
-    # if collection_name == "conversations":
-    #     collection.delete_many({})
-    
+
+    collection.delete_many({})
     return collection
 
 
