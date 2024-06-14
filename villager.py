@@ -149,7 +149,12 @@ class Villager:
             
     def get_eliminated(self):
         logger.info(f"{self.agent_id} has been eliminated!")
+        self.add_killed_villagers(self)
         self.alive = False
+
+    @staticmethod
+    def add_killed_villagers(villager):
+        Villager.killed_villagers.append(villager) 
 
 class Werewolf(Villager):
     def __init__(self, agent_id, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):

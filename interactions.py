@@ -11,7 +11,8 @@ TALK_COOLDOWN_TIME = 60  # Time in seconds for cooldown period
 def handle_meeting(villagers, conversations,villager_remove):
     logger.info("Meeting started")
     for villager in villagers:
-          initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}"
+          initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager killed was {Villager.killed_villagers[-1].agent_id if Villager.killed_villagers else 'None'}"
+
           _,response = villager.agent.generate_reaction(observation=initial_obs)
           conversations.append({"villager1": villager.agent_id, "villager2": "meeting" , "conversation": response})
 
@@ -23,6 +24,7 @@ def handle_meeting(villagers, conversations,villager_remove):
         conversations.append({"villager1": villager.agent_id, "villager2": "meeting", "conversation": response})
         voting_results.append(response)
     
+
     villager_remove = max(voting_results, key = voting_results.count)
 
     count = 0
@@ -31,6 +33,7 @@ def handle_meeting(villagers, conversations,villager_remove):
             count += 1
  
     if count<=len(villagers)/2:
+
         villager_remove = None
 
     return True,villager_remove
@@ -65,9 +68,36 @@ def handle_player_interaction(player, villagers, conversations):
                 player.talking = False
                 villager.talking = False
 
-def handle_villager_interactions(player,villagers,conversations):
 
+def handle_dead_villager_interaction(dead_villagers, villagers, conversations):
+    for dead_villager in dead_villagers:
+        for villager in villagers:
+            distance = ((dead_villager.x - villager.x) ** 2 + (dead_villager.y - villager.y) ** 2) ** 0.5
+            if distance < TALK_DISTANCE_THRESHOLD:
+                logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id}.")
+                someone_else = False
+                distance_dict = {}
+
+                for other_villager in villagers:
+                    if other_villager.agent_id != villager.agent_id:
+                        d = ((dead_villager.x - other_villager.x) ** 2 + (dead_villager.y - other_villager.y) ** 2) ** 0.5
+                        if d < TALK_DISTANCE_THRESHOLD:
+                            distance_dict[other_villager.agent_id] = d
+
+                # the nearest villager to the dead villager 
+                if len(distance_dict.keys()) > 0:
+                    someone_else = min(distance_dict, key=distance_dict.get)
+                    print(someone_else)
+                    logger.debug(f"{villager.agent_id} also sees {someone_else.agent_id} near the dead villager. Suspicion arises.")
+
+                    villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id}. You suspect {someone_else.agent_id} is the werewolf.")
+                else:
+                    villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead. ")
+
+
+def handle_villager_interactions(player,villagers,dead_villagers,conversations):
     handle_player_interaction(player, villagers, conversations)
+    handle_dead_villager_interaction(dead_villagers, villagers, conversations)
 
     villager_list = ",".join([villager.agent_id for villager in villagers])
     current_time = time.time()
@@ -99,6 +129,7 @@ def handle_villager_interactions(player,villagers,conversations):
                                 if "killed" in result:
                                     villagers.remove(villager2)
                                     Villager.killed_villagers.append(villager2)
+                                    dead_villagers.append(villager2)
                                     villager2.alive = False
                                 conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": result})
                             else:
