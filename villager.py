@@ -167,6 +167,7 @@ class Werewolf(Villager):
                 self.current_task = None
                 self.time_to_complete_task = None
                 self.task_doing = False
+                self.kill_cooldown = 0
         else:
             if self.current_task is not None:
                 # dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y
@@ -212,10 +213,12 @@ class Werewolf(Villager):
         if self.alive == False:
             return
         logger.info(f"{self.agent_id} has eliminated {villager.agent_id}!")
+
         dist = ((self.x - villager.x)**2 + (self.y - villager.y)**2)**0.5
 
-        if dist < ELIMINATION_DISTANCE:
+        if dist < ELIMINATION_DISTANCE and time.time()>self.kill_cooldown:
             villager.get_eliminated()
+            self.kill_cooldown = time.time() + 30
     
 
 class Player(Villager):  # Inherits from the Villager class

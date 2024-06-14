@@ -535,9 +535,11 @@ while running:
 
     else:
         # Check for win conditions
-        if all(isinstance(villager, Werewolf) for villager in villagers):
+        if len([villager for villager in villagers if isinstance(villager, Villager)])<=1:
             message = "Werewolves won the game!"
             message_start_time = time.time()
+            # Remove all villagers
+            
 
         elif all(not isinstance(villager, Werewolf) for villager in villagers):
             message = "Townsfolk won the game!"
