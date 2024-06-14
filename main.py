@@ -6,6 +6,7 @@ from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_loc
 import json
 import os
 from dotenv import load_dotenv
+from pygame import mixer
 import time
 import deepl
 import pyttsx3
@@ -17,26 +18,25 @@ import math
 from langchain.retrievers import TimeWeightedVectorStoreRetriever
 from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
-from utils.mongoClient import get_atlas_collection
+from utils.mongoClient import get_atlas_collection, get_atlas_collections
+from colorama import Fore
+mixer.init()
+mixer.music.load('music/music.mp3')
+
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 deepl_auth_key = os.getenv("DEEPL_AUTH_KEY")
 names=["Sam","Jack","Ronald"]
 convo_collection_names=["Sam_convo","Jack_convo","Ronald_convo"]
 
+mongo_connection_holder = {}
+
 client_holder = {}
 convo_holder = {}
-villager1_holder = {}
-villager1_convo_holder = {}
-villager2_holder = {}
-vilager2_convo_holder = {}
-villager3_holder = {}
-villager3_convo_holder = {}
 # Define collection and index name
 db_name = "langchain_db"
 collection_name = "test"
 convo_collection_name = "conversations"
-
 vector_search_index = "vector_index"
 
 
@@ -48,26 +48,11 @@ mongo_connection_thread.start()
 convo_connection_thread = Thread(target=threaded_function, args=(convo_holder, get_atlas_collection, (db_name, convo_collection_name)))
 convo_connection_thread.start()
 
-# Create collections for each villager
-villager1_connection_thread = Thread(target=threaded_function, args=(villager1_holder, get_atlas_collection, (db_name, names[0])))
-villager1_connection_thread.start()
+collection_names = names+convo_collection_names
+collections_holder = {}
 
-villager1_convo_connection_thread = Thread(target=threaded_function, args=(villager1_convo_holder, get_atlas_collection, (db_name, convo_collection_names[0])))
-villager1_convo_connection_thread.start()
-
-villager2_connection_thread = Thread(target=threaded_function, args=(villager2_holder, get_atlas_collection, (db_name, names[1])))
-villager2_connection_thread.start()
-
-villager2_convo_connection_thread = Thread(target=threaded_function, args=(vilager2_convo_holder, get_atlas_collection, (db_name, convo_collection_names[1])))
-villager2_convo_connection_thread.start()
-
-villager3_connection_thread = Thread(target=threaded_function, args=(villager3_holder, get_atlas_collection, (db_name, names[2])))
-villager3_connection_thread.start()
-
-villager3_convo_connection_thread = Thread(target=threaded_function, args=(villager3_convo_holder, get_atlas_collection, (db_name, convo_collection_names[2])))
-villager3_convo_connection_thread.start()
-
-
+villager_mongo_connection = Thread(target=threaded_function, args=(collections_holder, get_atlas_collections, (db_name, collection_names)))
+villager_mongo_connection.start()
 
 
 from villager import Villager, Werewolf, Player
@@ -84,25 +69,16 @@ llm = AzureChatOpenAI(
 # Mongo connection thread
 mongo_connection_thread.join()
 convo_connection_thread.join()
-villager1_connection_thread.join()
-villager1_convo_connection_thread.join()
-villager2_connection_thread.join()
-villager2_convo_connection_thread.join()
-villager3_connection_thread.join()
-villager3_convo_connection_thread.join()
-
+villager_mongo_connection.join()
 atlas_collection = client_holder["result"]
 convo_collection = convo_holder["result"]
-villager_collections = {
-    names[0]: villager1_holder["result"],
-    names[1]: villager2_holder["result"],
-    names[2]: villager3_holder["result"]
-}
-villager_conv_collections = {
-    names[0]: villager1_convo_holder["result"],
-    names[1]: vilager2_convo_holder["result"],
-    names[2]: villager3_convo_holder["result"]
-}
+villager_connections = collections_holder["result"]
+
+villager_collections = {}
+
+for i,name in enumerate(names):
+    villager_collections[names[i]] = (villager_connections[i],villager_connections[len(names)+i])
+ 
 
 
 # Multithreading 
@@ -111,10 +87,10 @@ villagers_threaded = []
 # Constants
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 900
-DAY_DURATION = 120  # 60 seconds for a full day cycle
-NIGHT_DURATION = 120  # 60 seconds for a full night cycle
+DAY_DURATION = 60  # 60 seconds for a full day cycle
+NIGHT_DURATION = 60  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
-MORNING_MEETING_DURATION = 10
+MORNING_MEETING_DURATION = 20
 
 # Load background images
 background_day = pygame.image.load("images/map3.png")
@@ -150,27 +126,27 @@ backgrounds = [
 
 \
 
-werewolf_background = [
-    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks."],
-    ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
+werewolf_backgrounds = [
+    ["I am Louis ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone."],
+    # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
+werewolf_names=["Louis"]
 
 
 class Path:
     def __init__(self, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
         self.color = (100, 100, 100)  # Gray color for the obstacle
-
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
 
 path=[None for i in range(14)]
 
 #pathways leading to the meeting point
-path[0] = Path(SCREEN_WIDTH //2+60, SCREEN_HEIGHT//2-30, 800, 60)  # Example size of 50x50
-path[1] = Path(0, SCREEN_HEIGHT//2-30, 700, 60)  # Example size of 50x50
-path[2] = Path(SCREEN_WIDTH //2-30, 0, 60, 400)  # Example size of 50x50
-path[3] = Path(SCREEN_WIDTH //2-30, SCREEN_HEIGHT//2+40, 60, 400)  # Example size of 50x50
+path[0] = Path(SCREEN_WIDTH //2+60, SCREEN_HEIGHT//2-30, 800, 30)  # Example size of 50x50
+path[1] = Path(0, SCREEN_HEIGHT//2-30, 700, 30)  # Example size of 50x50
+path[2] = Path(SCREEN_WIDTH //2-30, 0, 30, 400)  # Example size of 50x50
+path[3] = Path(SCREEN_WIDTH //2-30, SCREEN_HEIGHT//2+40, 30, 400)  # Example size of 50x50
 
 #meeting point
 path[4] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-100, 200, 60)  # Example size of 50x50
@@ -180,18 +156,16 @@ path[7] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-60, 60, 150)  # Example si
 
 
 #outer horizontal path
-path[8] = Path(0, SCREEN_HEIGHT//4-30, 1500, 60)  # Example size of 50x50
-path[9] = Path(0, 3*SCREEN_HEIGHT//4-30, 1500, 60)  # Example size of 50x50
+path[8] = Path(0, SCREEN_HEIGHT//4-25, 1500, 30)  # Example size of 50x50
+path[9] = Path(0, 3*SCREEN_HEIGHT//4, 1500, 30)  # Example size of 50x50
 
 #inner vetical paths
-path[10] = Path(SCREEN_WIDTH//4-100, 0, 60, 900)  # Example size of 50x50
-path[11] = Path(3*SCREEN_WIDTH//4+100, 0, 60, 900)  # Example size of 50x50
+path[10] = Path(SCREEN_WIDTH//4-75, 0, 30, 900)  # Example size of 50x50
+path[11] = Path(3*SCREEN_WIDTH//4+25, 0, 30, 900)  # Example size of 50x50
 
 #outer veritical path
-path[12] = Path(0, 0, 60, 900)  # Example size of 50x50
-path[13] = Path(SCREEN_WIDTH-60, 0, 60, 900)  # Example size of 50x50
-
-
+path[12] = Path(30, 0, 30, 900)  # Example size of 50x50
+path[13] = Path(SCREEN_WIDTH-60, 0, 30, 900)  # Example size of 50x50
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
@@ -222,7 +196,7 @@ def create_new_memory_retriever(agent_name="Player"):
     if(agent_name=="Player"):
         agent_collection = atlas_collection
     else:    
-        agent_collection = villager_collections[agent_name]
+        agent_collection = villager_collections[agent_name][0]
     vectorstore = MongoDBAtlasVectorSearch(agent_collection, embeddings_model)
     
     # vectorstore = FAISS(
@@ -240,8 +214,8 @@ def create_new_memory_retriever(agent_name="Player"):
 villagers = []
 num_villagers = len(backgrounds)
 center_x = SCREEN_WIDTH//2
-center_y = SCREEN_HEIGHT//2+40
-radius = 100
+center_y = SCREEN_HEIGHT//2
+radius = 65
 
 for i in range(num_villagers):
     angle = i * (2 * math.pi / num_villagers)
@@ -255,6 +229,18 @@ for i in range(num_villagers):
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
 
+for i in range(len(werewolf_backgrounds)):
+    angle = i * (2 * math.pi / len(werewolf_backgrounds))
+    x = int(center_x + radius * math.cos(angle))
+    y = int(center_y + radius * math.sin(angle))
+    background_texts = werewolf_backgrounds[i]
+    ". ".join(a for a in background_texts)
+    werewolf_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
+    werewolf = Werewolf(werewolf_names[i], x, y, background_texts=background_texts,llm=llm,memory=werewolf_memory,meeting_location=(x,y))
+    werewolf.last_talk_attempt_time = 0  # Initialize last talk attempt time
+    villagers.append(werewolf)
+
+print([villager.agent_id for villager in villagers])
 # for i in range(len(werewolf_background)):
 #     x = random.randint(50, SCREEN_WIDTH - 50)
 #     y = random.randint(50, SCREEN_HEIGHT - 50)
@@ -290,7 +276,7 @@ def save_conversations_to_mongodb(conversations):
     if conversations:
         convo_collection.insert_many(conversations)
         if conversations[0]["villager1"] in villager_collections:
-            villager_conv_collections[conversations[0]["villager1"]].insert_many(conversations)
+            villager_collections[conversations[0]["villager1"]][1].insert_many(conversations)
         
         logger.info(f"Saved {len(conversations)} conversations to MongoDB.")
         
@@ -374,7 +360,7 @@ def send_game_state():
 
 # Assign tasks to villagers from LLM
 # assign_tasks_to_villagers_from_llm(villagers, task_locations)
-assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village'])
+assign_first_task(villagers,task_locations,task_names=['Cook food','Build a house','Guard the village', 'Cook food'])
 conversations = []  # List to store conversations
 
 def assign_task_thread(villager, current_task=None):
@@ -387,8 +373,11 @@ def assign_task_thread(villager, current_task=None):
 
     task_name, task_location = assign_next_task(villager, task_locations, current_task)
     task_time = task_location.task_period  # Time required for the task
-    villager.assign_task(task_name, task_location, task_time)
-    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)\n")
+    if isinstance(villager, Werewolf):
+        villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
+    else:
+        villager.assign_task(task_name, task_location, task_time)
+    logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
     villagers_threaded.remove(villager.agent_id)
 
 
@@ -398,36 +387,62 @@ def morning_meeting(villagers,conversations,elapsed_time):
     global reached
     reached = True
     temp = elapsed_time
+    meeting_complete = False
+    villager_remove = False
     for villager in villagers:
         villager.interrupt_task()
         dx, dy = villager.meeting_location[0] - villager.x, villager.meeting_location[1] - villager.y
         dist = (dx**2 + dy**2)**0.5
-        if dist > 1:
+        if dist > 2:
             villager.x += dx / dist
             villager.y += dy / dist
-            reached = False
-                
+            reached = False         
     if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
-        handle_meeting(villagers, conversations)
+        display_text(screen,"Meeting Going On......", 1)
+        meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
         elapsed_time = temp
-        return elapsed_time + MORNING_MEETING_DURATION
+        return meeting_complete,elapsed_time + MORNING_MEETING_DURATION,villager_remove
     
-    return elapsed_time
+    return meeting_complete,elapsed_time,villager_remove
     
 
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
-    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village'])
+    assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village', 'Cook food'])
 
+
+# Function to display text on the screen with a white background
+def display_text(screen, text, duration, font_size=50):
+    font = pygame.font.Font(None, font_size)
+    rendered_text = font.render(text, True, (255, 0, 0))  # Red color text
+    text_rect = rendered_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    background_rect = pygame.Rect(0, 0, text_rect.width + 20, text_rect.height + 20)
+    background_rect.center = text_rect.center
+
+    start_time = time.time()
+    while time.time() - start_time < duration:
+        screen.fill((255, 255, 255), background_rect)  # White background
+        screen.blit(rendered_text, text_rect)
+        pygame.display.flip()
+        clock.tick(60)
+
+
+
+mixer.music.play(-1)
 
 # Main game loop
 running = True
-start_time = time.time()-20
+start_time = time.time()
 is_day = True
 blend_factor = 0
 is_morning_meeting = False
+meeting_complete = False
+message = None
+message_start_time = None
+message_duration = 5  # Duration to show the message in seconds
+dead_villagers = []
 
 while running:
     
@@ -439,7 +454,7 @@ while running:
     player.update()
 
     # Update day/night cycle
-    curr = time.time()
+    curr = time.time()+20
     elapsed_time = curr - start_time
     blend_factor = 0
 
@@ -457,10 +472,20 @@ while running:
             if not is_morning_meeting:
                 logger.info("Starting morning meeting...")
 
-            elapsed_time = morning_meeting(villagers,conversations,elapsed_time)
+            
+
+            meeting_complete,_,remove_villager = morning_meeting(villagers,conversations,elapsed_time)
+
+            if remove_villager:
+                for villager in villagers:
+                    if villager.agent_id == remove_villager:
+                        villagers.remove(villager)
+                        message = f"{villager.agent_id} was kicked out"
+                        message_start_time = time.time()
+                        break
 
 
-        elif elapsed_time > MORNING_MEETING_DURATION and is_morning_meeting:
+        elif elapsed_time > MORNING_MEETING_DURATION and meeting_complete and is_morning_meeting:
             logger.info("Ending morning meeting...")
             temp = elapsed_time
             end_morning_meeting(villagers)
@@ -490,25 +515,48 @@ while running:
     save_game_state(villagers)
     save_conversations(conversations)
     if conversations:
-        print("conversations",conversations)
+        print(Fore.RED + "\nconversations")
+        for convo in conversations:
+            print(Fore.RED+ convo['villager1'] + " to " +  convo['villager2'] + " : " + convo['conversation'].split(":")[-1])
         save_conversations_to_mongodb(conversations)
     conversations.clear()  # Clear the list after saving
-    
+    dead_villagers.extend(Villager.killed_villagers)
+
     # Render game state
     if is_day:
         blend_images(background_day, background_night, blend_factor)
     else:
         blend_images(background_night, background_day, blend_factor)
     
+    for p in path:
+        p.draw(screen)
+
     for villager in [player]+villagers:
+        villager.draw(screen)
+
+    for villager in dead_villagers:
         villager.draw(screen)
 
     for task_location in task_locations:
         task_location.draw(screen)
 
-    # for p in path:
-    #     p.draw(screen)
+     # Display message if there is one
+    if message and time.time() - message_start_time < message_duration:
+        display_text(screen, message, message_duration)
 
+    else:
+        # Check for win conditions
+        if len([villager for villager in villagers if isinstance(villager, Villager)])<=1:
+            message = "Werewolves won the game!"
+            message_start_time = time.time()
+            # Remove all villagers
+            
+
+        elif all(not isinstance(villager, Werewolf) for villager in villagers):
+            message = "Townsfolk won the game!"
+            message_start_time = time.time()
+
+    
     pygame.display.flip()
     clock.tick(60)
 
