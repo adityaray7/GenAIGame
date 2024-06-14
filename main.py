@@ -389,6 +389,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
             reached = False         
     if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
+        display_text(screen,"Meeting Going On......", 1)
         meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
         elapsed_time = temp
         return meeting_complete,elapsed_time + MORNING_MEETING_DURATION,villager_remove
@@ -460,7 +461,7 @@ while running:
             if not is_morning_meeting:
                 logger.info("Starting morning meeting...")
 
-            display_text(screen,"Meeting Going On......", 1)
+            
 
             meeting_complete,_,remove_villager = morning_meeting(villagers,conversations,elapsed_time)
 
