@@ -308,6 +308,7 @@ task_locations = initialize_task_locations()
 def send_game_state():
     global villagers
     global is_day,blend_factor
+    global player_coordinates
     villagers_state = []
     num_villagers = len(villagers)
     for villager in villagers:
@@ -316,6 +317,12 @@ def send_game_state():
             "x": villager.x,
             "y": villager.y
         })
+        
+    villagers_state.append({
+        "agent_id": "Player",
+        "x": player_coordinates[0],
+        "y": player_coordinates[1]
+    })
 
     global task_locations
     tasks = task_locations
@@ -350,8 +357,8 @@ def send_game_state():
         "blendFactor": blend_factor,
         "isConvo":isConvo,
         "conversations": conversations,
-        "translatedText":result.text if result else ""
-        
+        "translatedText":result.text if result else "",
+        "is_morning_meeting": is_morning_meeting
     }
 
     # convert game_state to json
@@ -402,6 +409,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
         display_text(screen,"Meeting Going On......", 1)
         meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
         elapsed_time = temp
+        is_morning_meeting=False
         return meeting_complete,elapsed_time + MORNING_MEETING_DURATION,villager_remove
     
     return meeting_complete,elapsed_time,villager_remove
@@ -443,6 +451,7 @@ message = None
 message_start_time = None
 message_duration = 5  # Duration to show the message in seconds
 dead_villagers = []
+player_coordinates = (player.x, player.y)
 
 while running:
     
@@ -452,6 +461,7 @@ while running:
             running = False
 
     player.update()
+    player_coordinates = (player.x, player.y)
 
     # Update day/night cycle
     curr = time.time()+20
@@ -520,7 +530,7 @@ while running:
             print(Fore.RED+ convo['villager1'] + " to " +  convo['villager2'] + " : " + convo['conversation'].split(":")[-1])
         save_conversations_to_mongodb(conversations)
     conversations.clear()  # Clear the list after saving
-    dead_villagers.extend(Villager.killed_villagers)
+    # dead_villagers.extend(Villager.killed_villagers)
 
     # Render game state
     if is_day:

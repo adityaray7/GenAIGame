@@ -25,7 +25,12 @@ def handle_meeting(villagers, conversations,villager_remove):
     
     villager_remove = max(voting_results, key = voting_results.count)
 
-    if voting_results[villager_remove] < len(villagers)/2:
+    count = 0
+    for i in range(len(voting_results)):
+        if voting_results[i] == villager_remove:
+            count += 1
+ 
+    if count<=len(villagers)/2:
         villager_remove = None
 
     return True,villager_remove
