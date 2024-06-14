@@ -8,6 +8,8 @@ import os
 from dotenv import load_dotenv
 from pygame import mixer
 import time
+import deepl
+import pyttsx3
 from interactions import handle_villager_interactions,handle_meeting
 from threading import Thread
 from utils.to_be_threaded_function import threaded_function
@@ -23,6 +25,7 @@ mixer.music.load('music/music.mp3')
 
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
+deepl_auth_key = os.getenv("DEEPL_AUTH_KEY")
 names=["Sam","Jack","Ronald"]
 convo_collection_names=["Sam_convo","Jack_convo","Ronald_convo"]
 
@@ -305,6 +308,7 @@ task_locations = initialize_task_locations()
 def send_game_state():
     global villagers
     global is_day,blend_factor
+    global player_coordinates
     villagers_state = []
     num_villagers = len(villagers)
     for villager in villagers:
@@ -313,6 +317,12 @@ def send_game_state():
             "x": villager.x,
             "y": villager.y
         })
+        
+    villagers_state.append({
+        "agent_id": "Player",
+        "x": player_coordinates[0],
+        "y": player_coordinates[1]
+    })
 
     global task_locations
     tasks = task_locations
@@ -330,8 +340,14 @@ def send_game_state():
         
 
     isConvo=False
+    result = None
     if conversations:
-        isConvo=True  
+        isConvo=True
+        translator = deepl.Translator(deepl_auth_key)
+        print(conversations[0]['conversation'])
+        result = translator.translate_text(conversations[0]['conversation'], target_lang="JA")
+        print("Translated text: ", result.text)
+          
       
     game_state = {
         "numVillagers": num_villagers,
@@ -341,7 +357,8 @@ def send_game_state():
         "blendFactor": blend_factor,
         "isConvo":isConvo,
         "conversations": conversations,
-        
+        "translatedText":result.text if result else "",
+        "is_morning_meeting": is_morning_meeting
     }
 
     # convert game_state to json
@@ -393,6 +410,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
         display_text(screen,"Meeting Going On......", 1)
         meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
         elapsed_time = temp
+        is_morning_meeting=False
         return meeting_complete,elapsed_time + MORNING_MEETING_DURATION,villager_remove
     
     return meeting_complete,elapsed_time,villager_remove
@@ -435,6 +453,7 @@ message = None
 message_start_time = None
 message_duration = 5  # Duration to show the message in seconds
 dead_villagers = []
+player_coordinates = (player.x, player.y)
 
 while running:
     
@@ -444,6 +463,7 @@ while running:
             running = False
 
     player.update()
+    player_coordinates = (player.x, player.y)
 
     # Update day/night cycle
     curr = time.time()

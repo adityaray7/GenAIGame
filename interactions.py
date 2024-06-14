@@ -4,7 +4,7 @@ from utils.logger import logger
 from villager import Villager, Werewolf, Player
 
 TALK_DISTANCE_THRESHOLD = 20  # Adjust as needed
-TALK_PROBABILITY = 0.05  # Adjust as needed
+TALK_PROBABILITY = 1 # Adjust as needed
 TALK_COOLDOWN_TIME = 60  # Time in seconds for cooldown period
 # Method to handle villager interactions
 
@@ -27,7 +27,13 @@ def handle_meeting(villagers, conversations,villager_remove):
 
     villager_remove = max(voting_results, key = voting_results.count)
 
-    if voting_results.count(villager_remove) < len(villagers)/2 - 1:
+    count = 0
+    for i in range(len(voting_results)):
+        if voting_results[i] == villager_remove:
+            count += 1
+ 
+    if count<=len(villagers)/2:
+
         villager_remove = None
 
     return True,villager_remove
