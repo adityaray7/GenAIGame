@@ -24,6 +24,10 @@ def handle_meeting(villagers, conversations,villager_remove):
         voting_results.append(response)
     
     villager_remove = max(voting_results, key = voting_results.count)
+
+    if voting_results[villager_remove] < len(villagers)/2:
+        villager_remove = None
+
     return True,villager_remove
 
 
@@ -56,10 +60,10 @@ def handle_player_interaction(player, villagers, conversations):
                 player.talking = False
                 villager.talking = False
 
-
 def handle_villager_interactions(player,villagers,conversations):
 
     handle_player_interaction(player, villagers, conversations)
+
     villager_list = ",".join([villager.agent_id for villager in villagers])
     current_time = time.time()
     for villager1 in villagers:
