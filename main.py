@@ -7,6 +7,8 @@ import json
 import os
 from dotenv import load_dotenv
 import time
+import deepl
+import pyttsx3
 from interactions import handle_villager_interactions,handle_meeting
 from threading import Thread
 from utils.to_be_threaded_function import threaded_function
@@ -18,6 +20,7 @@ load_dotenv()
 from utils.mongoClient import get_atlas_collection
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
+deepl_auth_key = os.getenv("DEEPL_AUTH_KEY")
 names=["Sam","Jack","Ronald"]
 convo_collection_names=["Sam_convo","Jack_convo","Ronald_convo"]
 
@@ -344,8 +347,14 @@ def send_game_state():
         
 
     isConvo=False
+    result = None
     if conversations:
-        isConvo=True  
+        isConvo=True
+        translator = deepl.Translator(deepl_auth_key)
+        print(conversations[0]['conversation'])
+        result = translator.translate_text(conversations[0]['conversation'], target_lang="JA")
+        print("Translated text: ", result.text)
+          
       
     game_state = {
         "numVillagers": num_villagers,
@@ -355,6 +364,7 @@ def send_game_state():
         "blendFactor": blend_factor,
         "isConvo":isConvo,
         "conversations": conversations,
+        "translatedText":result.text if result else ""
         
     }
 

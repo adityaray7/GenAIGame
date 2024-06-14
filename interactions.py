@@ -3,7 +3,7 @@ import time
 from utils.logger import logger
 
 TALK_DISTANCE_THRESHOLD = 20  # Adjust as needed
-TALK_PROBABILITY = 0.05  # Adjust as needed
+TALK_PROBABILITY = 1 # Adjust as needed
 TALK_COOLDOWN_TIME = 60  # Time in seconds for cooldown period
 # Method to handle villager interactions
 
