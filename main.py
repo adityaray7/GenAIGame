@@ -354,6 +354,7 @@ assign_first_task(villagers,task_locations,task_names=['Cook food','Build a hous
 conversations = []  # List to store conversations
 
 def assign_task_thread(villager, current_task=None):
+    global task_locations
     if (villager.agent_id in villagers_threaded):
         return
     villagers_threaded.append(villager.agent_id)
@@ -400,6 +401,7 @@ def morning_meeting(villagers,conversations,elapsed_time):
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
+    Villager.killed_villagers.clear()
     assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village', 'Cook food'])
 
 
@@ -444,7 +446,7 @@ while running:
     player.update()
 
     # Update day/night cycle
-    curr = time.time()+20
+    curr = time.time()
     elapsed_time = curr - start_time
     blend_factor = 0
 
@@ -463,10 +465,10 @@ while running:
                 logger.info("Starting morning meeting...")
 
             
-
             meeting_complete,_,remove_villager = morning_meeting(villagers,conversations,elapsed_time)
 
             if remove_villager:
+                logger.info(f"Eliminating {remove_villager} from the village...")
                 for villager in villagers:
                     if villager.agent_id == remove_villager:
                         villagers.remove(villager)
@@ -499,7 +501,7 @@ while running:
 
         # Handle villager interactions
     
-    Thread(target=handle_villager_interactions, args=(player,villagers,conversations)).start()
+    Thread(target=handle_villager_interactions, args=(player,villagers,dead_villagers,conversations)).start()
 
     # Save game state periodically
     save_game_state(villagers)
@@ -510,7 +512,6 @@ while running:
             print(Fore.RED+ convo['villager1'] + " to " +  convo['villager2'] + " : " + convo['conversation'].split(":")[-1])
         save_conversations_to_mongodb(conversations)
     conversations.clear()  # Clear the list after saving
-    dead_villagers.extend(Villager.killed_villagers)
 
     # Render game state
     if is_day:
@@ -521,10 +522,7 @@ while running:
     for p in path:
         p.draw(screen)
 
-    for villager in [player]+villagers:
-        villager.draw(screen)
-
-    for villager in dead_villagers:
+    for villager in [player]+villagers+dead_villagers:
         villager.draw(screen)
 
     for task_location in task_locations:
