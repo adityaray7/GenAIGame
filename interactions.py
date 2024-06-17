@@ -70,30 +70,37 @@ def handle_player_interaction(player, villagers, conversations):
 
 
 def handle_dead_villager_interaction(dead_villagers, villagers, conversations):
+
     for dead_villager in dead_villagers:
         for villager in villagers:
-            distance = ((dead_villager.x - villager.x) ** 2 + (dead_villager.y - villager.y) ** 2) ** 0.5
-            if distance < TALK_DISTANCE_THRESHOLD:
-                logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id}.")
-                someone_else = False
-                distance_dict = {}
+            if time.time() > villager.observation_countdown:
+                distance = ((dead_villager.x - villager.x) ** 2 + (dead_villager.y - villager.y) ** 2) ** 0.5
 
-                for other_villager in villagers:
-                    if other_villager.agent_id != villager.agent_id:
-                        d = ((dead_villager.x - other_villager.x) ** 2 + (dead_villager.y - other_villager.y) ** 2) ** 0.5
-                        if d < TALK_DISTANCE_THRESHOLD:
-                            distance_dict[other_villager.agent_id] = d
+                if distance < 5*TALK_DISTANCE_THRESHOLD:
+                    villager.observation_countdown = time.time() + 10
+                    # print(villager.observation_countdown)
+                    someone_else = False
+                    distance_dict = {}
 
-                # the nearest villager to the dead villager 
-                if len(distance_dict.keys()) > 0:
-                    someone_else = min(distance_dict, key=distance_dict.get)
-                    print(someone_else)
-                    logger.debug(f"{villager.agent_id} also sees {someone_else.agent_id} near the dead villager. Suspicion arises.")
+                    for other_villager in villagers:
+                        if other_villager.agent_id != villager.agent_id:
+                            d = ((dead_villager.x - other_villager.x) ** 2 + (dead_villager.y - other_villager.y) ** 2) ** 0.5
+                            if d < TALK_DISTANCE_THRESHOLD:
+                                distance_dict[other_villager.agent_id] = d
 
-                    villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id}. You suspect {someone_else.agent_id} is the werewolf.")
-                else:
-                    villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead. ")
+                    # the nearest villager to the dead villager 
+                    if len(distance_dict.keys()) > 0:
+                        someone_else = min(distance_dict, key=distance_dict.get)
+                        someone_else = [villager for villager in villagers if villager.agent_id == someone_else][0]
 
+                        # print(someone_else)
+                        logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id}.")
+                        logger.info(f"{villager.agent_id} also sees {someone_else.agent_id} near the dead villager. Suspicion arises.")
+
+                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id}. You suspect {someone_else.agent_id} is the werewolf.")
+                    else:
+                        logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id}.")
+                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead. ")
 
 def handle_villager_interactions(player,villagers,dead_villagers,conversations):
     handle_player_interaction(player, villagers, conversations)
