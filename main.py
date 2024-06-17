@@ -303,7 +303,8 @@ def blend_images(image1, image2, blend_factor):
 
 # Initialize task locations
 task_locations = initialize_task_locations()
-
+global meetCheck
+meetCheck = False
 # Function to send game state to the 
 def send_game_state():
     global villagers
@@ -345,7 +346,12 @@ def send_game_state():
         isConvo=True
         translator = deepl.Translator(deepl_auth_key)
         print(conversations[0]['conversation'])
-        result = translator.translate_text(conversations[0]['conversation'], target_lang="JA")
+        split_text = conversations[0]['conversation'].split(':', 1)
+        if len(split_text) > 1:
+            conversation_text = split_text[1].strip()  # Remove leading/trailing whitespace
+        else:
+            conversation_text = split_text[0].strip() 
+        result = translator.translate_text(conversation_text, target_lang="JA")
         print("Translated text: ", result.text)
           
       
@@ -358,7 +364,7 @@ def send_game_state():
         "isConvo":isConvo,
         "conversations": conversations,
         "translatedText":result.text if result else "",
-        "is_morning_meeting": is_morning_meeting
+        "is_morning_meeting": meetCheck
     }
 
     # convert game_state to json
@@ -439,7 +445,7 @@ def display_text(screen, text, duration, font_size=50):
 
 
 
-mixer.music.play(-1)
+# mixer.music.play(-1)
 
 # Main game loop
 running = True
@@ -481,6 +487,7 @@ while running:
         if elapsed_time < MORNING_MEETING_DURATION:
             
             if not is_morning_meeting:
+                meetCheck=True
                 logger.info("Starting morning meeting...")
 
             
@@ -498,6 +505,7 @@ while running:
 
         elif elapsed_time > MORNING_MEETING_DURATION and meeting_complete and is_morning_meeting:
             logger.info("Ending morning meeting...")
+            meetCheck=False
             temp = elapsed_time
             end_morning_meeting(villagers)
             elapsed_time = temp    
