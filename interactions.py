@@ -1,4 +1,4 @@
-    import random
+import random
 import time
 from utils.logger import logger
 from villager import Villager, Werewolf, Player
