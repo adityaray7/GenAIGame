@@ -528,7 +528,7 @@ while running:
 
         # Handle villager interactions
     
-    Thread(target=handle_villager_interactions, args=(player,villagers,dead_villagers,conversations)).start()
+    Thread(target=handle_villager_interactions, args=(player,villagers,Villager.killed_villagers,conversations)).start()
 
     # Save game state periodically
     save_game_state(villagers)
@@ -549,7 +549,7 @@ while running:
     for p in path:
         p.draw(screen)
 
-    for villager in [player]+villagers+dead_villagers:
+    for villager in [player]+villagers+Villager.killed_villagers:
         villager.draw(screen)
 
     for task_location in task_locations:

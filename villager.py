@@ -30,6 +30,7 @@ class Villager:
         self.paths = paths
         self.font = pygame.font.SysFont(None, 24)
         self.alive = True
+        self.observation_countdown = time.time()
 
     def assign_task(self, task, location, time_to_complete_task):
         if self.alive == False:
@@ -144,7 +145,7 @@ class Villager:
         vil_image = pygame.image.load(f'images/{self.agent_id.lower()}.png')
         vil_image = pygame.transform.scale(vil_image, (60, 60))
         if not self.alive:
-            vil_image = pygame.transform.rotate(vil_image, 180)
+            vil_image = pygame.transform.rotate(vil_image, 90)
         screen.blit(vil_image, (self.x-25, self.y-25))
             
     def get_eliminated(self):
