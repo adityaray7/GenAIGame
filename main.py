@@ -87,8 +87,8 @@ villagers_threaded = []
 # Constants
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 900
-DAY_DURATION = 60  # 60 seconds for a full day cycle
-NIGHT_DURATION = 60  # 60 seconds for a full night cycle
+DAY_DURATION = 120  # 60 seconds for a full day cycle
+NIGHT_DURATION = 120  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
 MORNING_MEETING_DURATION = 20
 
@@ -410,7 +410,6 @@ def morning_meeting(villagers,conversations,elapsed_time):
         display_text(screen,"Meeting Going On......", 1)
         meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
         elapsed_time = temp
-        is_morning_meeting=False
         return meeting_complete,elapsed_time + MORNING_MEETING_DURATION,villager_remove
     
     return meeting_complete,elapsed_time,villager_remove
@@ -466,7 +465,7 @@ while running:
     player_coordinates = (player.x, player.y)
 
     # Update day/night cycle
-    curr = time.time()
+    curr = time.time()+20
     elapsed_time = curr - start_time
     blend_factor = 0
 
