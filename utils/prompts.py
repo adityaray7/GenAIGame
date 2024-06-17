@@ -21,7 +21,10 @@ agentPromptJson = {
             + "Do not embellish."
             + "\n\nSummary: ",
     
-    "_generate_reaction": "{agent_summary_description}"
+    "_generate_reaction": "You are playing a game of werewolves and villagers."
+            + "The werewolf KILLS or INTERACTS with villagers. The villagers"
+            + "complete their tasks and find who the werewolf is."
+            + "\n{agent_summary_description}"
             + "\nIt is {current_time}."
             + "\n{agent_name}'s occupation: {agent_status}"
             + "\nSummary of relevant context from {agent_name}'s memory:"
@@ -31,9 +34,11 @@ agentPromptJson = {
             + "\n\n",
     
     "generate_reaction": 
-            "What should {agent_name} say to the observation"
-            + " what would be an appropriate reply? Respond in one line."
-            + 'Write:\n{agent_name}: "what to say"',
+            "Should {agent_name} react to the observation, and if so,"
+            + " what would be an appropriate reaction? Respond in one line."
+            + 'If the action is to engage in dialogue, write:\nSAY: "what to say"'
+            + "\n otherwise, write:\nREACT: {agent_name}'s reaction (if anything)"
+            + "\n Either do nothing, react, or say something but not both.\n\n",
     
     "generate_dialogue_response": 
         "What would {agent_name} say? To end the conversation, write:"
@@ -64,7 +69,7 @@ agentMemoryPromptJson = {
             "On the scale of 1 to 10, where 1 is purely mundane"
             + " (e.g., brushing teeth, making bed) and 10 is"
             + " extremely poignant (e.g., a break up, college"
-            + " acceptance), rate the likely poignancy of the"
+            + " acceptance, death of a villager), rate the likely poignancy of the"
             + " following piece of memory. Respond with a single integer."
             + "\nMemory: {memory_content}"
             + "\nRating: "
