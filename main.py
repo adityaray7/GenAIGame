@@ -398,7 +398,6 @@ def assign_task_thread(villager, current_task=None):
 def morning_meeting(villagers,conversations,elapsed_time):
     global is_morning_meeting
     is_morning_meeting = True
-    meetCheck = is_morning_meeting
     global reached
     reached = True
     temp = elapsed_time
@@ -425,7 +424,6 @@ def morning_meeting(villagers,conversations,elapsed_time):
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
-    meetCheck = is_morning_meeting
     Villager.killed_villagers.clear()
     assign_first_task(villagers, task_locations, ['Cook food','Build a house','Guard the village', 'Cook food'])
 
@@ -489,6 +487,7 @@ while running:
         if elapsed_time < MORNING_MEETING_DURATION:
             
             if not is_morning_meeting:
+                meetCheck=True
                 logger.info("Starting morning meeting...")
 
             
@@ -506,6 +505,7 @@ while running:
 
         elif elapsed_time > MORNING_MEETING_DURATION and meeting_complete and is_morning_meeting:
             logger.info("Ending morning meeting...")
+            meetCheck=False
             temp = elapsed_time
             end_morning_meeting(villagers)
             elapsed_time = temp    
