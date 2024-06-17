@@ -1,4 +1,4 @@
-import random
+    import random
 import time
 from utils.logger import logger
 from villager import Villager, Werewolf, Player
@@ -115,8 +115,8 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                 # print("KILL")
                                 initial_obs = f"You see {villager2.agent_id} nearby."
                                 call_to_action_template = (
-                                        f"How should {villager1.agent_id} the werewolf who kills {villager_list}"
-                                        + "react to the observation, and if so,"
+                                        f"Should {villager1.agent_id}, the werewolf who kills {villager_list},"
+                                        + "react to the observation? And if so,"
                                         + " what would be an appropriate reaction? Respond in one line."
                                         + f"\nIf the action is to kill the {villager2.agent_id}, write:"
                                         + f'\nKILL: {villager2.agent_id} has been eliminated by {villager1.agent_id}'
