@@ -8,7 +8,7 @@ def initialize_task_locations():
         TaskLocation(1100, 650, "Gather food",5),
         TaskLocation(1100, 200, "Build a house",10),
         TaskLocation(1400, 100, "Collect wood",8),
-        # TaskLocation(80, 700, "Fetch water",10),
+        TaskLocation(80, 700, "Fetch water",10),
         TaskLocation(900, 450, "Guard the village",15),
         TaskLocation(400, 650, "Cook food",10),
         TaskLocation(100, 100, "Hunt for animals",15),
@@ -18,7 +18,7 @@ def initialize_task_locations():
     ]
     return task_locations
 
-def assign_first_task(villagers, task_locations,task_names):
+def assign_first_task(villagers, task_locations,task_names=['Cook food','Build a house','Guard the village', 'Fetch water',"Gather food","Build a house"]):
     for i in range(len(villagers)):
         villager = villagers[i]
         task_name = task_names[i]
@@ -97,5 +97,6 @@ def assign_next_task(villager, task_locations,previous_task):
         default_task_time = default_task_location.task_period
 
         villager.assign_task(default_task_location.task, default_task_location,default_task_time)
+        return default_task_location.task, default_task_location
 
     return task_name, task_location
