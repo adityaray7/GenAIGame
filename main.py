@@ -211,7 +211,7 @@ for i in range(num_villagers):
     villagers.append(villager)
 
 for i in range(len(werewolf_backgrounds)):
-    angle = i * (2 * math.pi / len(werewolf_backgrounds))
+    angle =2* i * (2 * math.pi / len(werewolf_backgrounds))
     x = int(center_x + radius * math.cos(angle))
     y = int(center_y + radius * math.sin(angle))
     background_texts = werewolf_backgrounds[i]
@@ -535,7 +535,7 @@ while running:
 
     else:
         # Check for win conditions
-        if len([villager for villager in villagers if isinstance(villager, Villager)])<=1:
+        if len([villager for villager in villagers if isinstance(villager, Villager)])<=2:
             message = "Werewolves won the game!"
             message_start_time = time.time()
             # Remove all villagers

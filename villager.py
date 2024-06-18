@@ -166,6 +166,7 @@ class Werewolf(Villager):
         super().__init__(agent_id, x, y, background_texts, llm, memory, occupation, meeting_location)
         print(self.agent_id)
         self.is_werewolf = True
+        self.kill_cooldown = time.time()+60
 
     def update(self):
         if self.talking:
@@ -177,7 +178,7 @@ class Werewolf(Villager):
                 self.current_task = None
                 self.time_to_complete_task = None
                 self.task_doing = False
-                self.kill_cooldown = 0
+                
         else:
             if self.current_task is not None:
                 # dx, dy = self.task_location[0] - self.x, self.task_location[1] - self.y

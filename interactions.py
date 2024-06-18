@@ -33,7 +33,7 @@ def handle_meeting(villagers, conversations,villager_remove):
         if voting_results[i] == villager_remove:
             count += 1
  
-    if count<=len(villagers)/2:
+    if count<=len(villagers)/2-1:
 
         villager_remove = None
 
@@ -152,12 +152,13 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                         + "\nEither do nothing, kill a villager, react, or say something but not both.\n\n"
                                     )
                                 StartConvo,result = villager1.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template, villager=villager2.agent_id)
-                                if "killed" in result:
+                                if "killed" in result and time.time()>villager1.kill_cooldown:
+                                    villager1.kill_cooldown = time.time() + 60
                                     villagers.remove(villager2)
                                     Villager.killed_villagers.append(villager2)
                                     dead_villagers.append(villager2)
                                     villager2.alive = False
-                                conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": result})
+                                    conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": result})
                             else:
                                 initial_obs = f"You see {villager2.agent_id} nearby. Talk about your task and ask the {villager2.agent_id} about its tasks"
                                 StartConvo,result = villager1.agent.generate_reaction(observation=initial_obs)
@@ -178,11 +179,15 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                                 + '\nwrite: SAY: "what to say next"\n\n'
                                                 )
                                             stayInConversation,result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}.Give a reply to it ", call_to_action_template=call_to_action_template, villager=other_villager.agent_id)
-                                            if "killed" in result:
+                                            if "killed" in result and time.time()>villager.kill_cooldown:
+                                                # print("*"*50)
+                                                # print("KILL")
+                                                # print("*"*50)
                                                 villagers.remove(other_villager)
+                                                villager.kill_cooldown = time.time() + 60
                                                 Villager.killed_villagers.append(other_villager)
                                                 other_villager.alive = False
-                                            conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
+                                                conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
                                         else:
                                             stayInConversation,result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}. Write a logical and suitable reply. Only write the reply and nothing else")
                                             conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
