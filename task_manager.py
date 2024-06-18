@@ -96,5 +96,6 @@ def assign_next_task(villager, task_locations,previous_task):
         default_task_time = default_task_location.task_period
 
         villager.assign_task(default_task_location.task, default_task_location,default_task_time)
+        return default_task_location.task, default_task_location
 
     return task_name, task_location

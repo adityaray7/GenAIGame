@@ -265,6 +265,5 @@ class Player(Villager):  # Inherits from the Villager class
             task_text = self.font.render(self.current_task, True, (0, 0, 0))
             screen.blit(task_text, (self.x + 10, self.y - 20))  # Display the task text above the player
         vil_image = pygame.image.load('images/vil.png')  # Assuming there's an image for the player
-        vil_image = pygame.transform.scale(vil_image, (75, 75))
-        screen.blit(vil_image, (self.x, self.y))  # Render the player image on the screen
-
+        vil_image = pygame.transform.scale(vil_image, (60, 60))
+        screen.blit(vil_image, (self.x-25, self.y-25))  # Render the player image on the screen

@@ -27,7 +27,9 @@ ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 deepl_auth_key = os.getenv("DEEPL_AUTH_KEY")
 names=["Sam","Jack","Ronald"]
+werewolf_names=["Louis"]
 convo_collection_names=["Sam_convo","Jack_convo","Ronald_convo"]
+werewolf_convo_collection_names=["Louis_convo"]
 
 mongo_connection_holder = {}
 
@@ -48,7 +50,7 @@ mongo_connection_thread.start()
 convo_connection_thread = Thread(target=threaded_function, args=(convo_holder, get_atlas_collection, (db_name, convo_collection_name)))
 convo_connection_thread.start()
 
-collection_names = names+convo_collection_names
+collection_names = names+werewolf_names+convo_collection_names+werewolf_convo_collection_names
 collections_holder = {}
 
 villager_mongo_connection = Thread(target=threaded_function, args=(collections_holder, get_atlas_collections, (db_name, collection_names)))
@@ -76,8 +78,8 @@ villager_connections = collections_holder["result"]
 
 villager_collections = {}
 
-for i,name in enumerate(names):
-    villager_collections[names[i]] = (villager_connections[i],villager_connections[len(names)+i])
+for i,name in enumerate(names+werewolf_names):
+    villager_collections[name] = (villager_connections[i],villager_connections[len(names+werewolf_names)+i])
  
 
 
@@ -130,7 +132,7 @@ werewolf_backgrounds = [
     ["I am Louis ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone."],
     # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
-werewolf_names=["Louis"]
+
 
 
 class Path:
@@ -212,13 +214,17 @@ def create_new_memory_retriever(agent_name="Player"):
 
 # Initialize villagers
 villagers = []
-num_villagers = len(backgrounds)
+num_villagers = len(names)
+num_werewolf = len(werewolf_names)
 center_x = SCREEN_WIDTH//2
 center_y = SCREEN_HEIGHT//2
 radius = 65
 
-for i in range(num_villagers):
-    angle = i * (2 * math.pi / num_villagers)
+angles = [i * (2 * math.pi / (num_villagers+num_werewolf) ) for i in range(num_villagers+num_werewolf)]
+print(angles)
+for i in range(len(backgrounds)):
+    angle = angles[i]
+    print(angle)
     x = int(center_x + radius * math.cos(angle))
     y = int(center_y + radius * math.sin(angle))
     background_texts = backgrounds[i]
@@ -228,17 +234,20 @@ for i in range(num_villagers):
     villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y),paths=path)
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
+    j=i+1
 
 for i in range(len(werewolf_backgrounds)):
-    angle =2* i * (2 * math.pi / len(werewolf_backgrounds))
+    angle = angles[j]
+    print(angle)
     x = int(center_x + radius * math.cos(angle))
     y = int(center_y + radius * math.sin(angle))
     background_texts = werewolf_backgrounds[i]
     ". ".join(a for a in background_texts)
-    werewolf_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
+    werewolf_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever(werewolf_names[i]))
     werewolf = Werewolf(werewolf_names[i], x, y, background_texts=background_texts,llm=llm,memory=werewolf_memory,meeting_location=(x,y))
     werewolf.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(werewolf)
+    j+=1
 
 print([villager.agent_id for villager in villagers])
 # for i in range(len(werewolf_background)):
@@ -250,7 +259,7 @@ print([villager.agent_id for villager in villagers])
 #     villagers.append(villager)
 
 player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
-player = Player("Player", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=path)
+player = Player("Player", SCREEN_WIDTH // 2+100, SCREEN_HEIGHT // 2 + 100, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=path)
 
 
 def villager_info(villagers):
@@ -381,7 +390,6 @@ def assign_task_thread(villager, current_task=None):
     if (villager.agent_id in villagers_threaded):
         return
     villagers_threaded.append(villager.agent_id)
-    logger.info(f"{villager.agent_id} has completed the task '{current_task}'!")
     logger.info(f"{villagers_threaded} are the villagers currently getting assigned tasks")
     logger.debug(f"Assigning next task to {villager.agent_id}...")
 
@@ -545,9 +553,6 @@ while running:
         blend_images(background_day, background_night, blend_factor)
     else:
         blend_images(background_night, background_day, blend_factor)
-    
-    for p in path:
-        p.draw(screen)
 
     for villager in [player]+villagers+Villager.killed_villagers:
         villager.draw(screen)
