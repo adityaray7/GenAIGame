@@ -398,12 +398,16 @@ def assign_task_thread(villager, current_task=None):
     logger.info(f"{villagers_threaded} are the villagers currently getting assigned tasks")
     logger.debug(f"Assigning next task to {villager.agent_id}...")
 
-    task_name, task_location = assign_next_task(villager, task_locations, current_task)
+    if isinstance(villager, Werewolf):
+        task_name, task_location = assign_next_task(villager, task_manager.completed_tasks(), current_task)
+    else:
+        task_name, task_location = assign_next_task(villager, task_manager.incomplete_tasks(), current_task)
     task_time = task_location.task_period  # Time required for the task
     task_complete_function = task_location.complete
+    task_sabotage_function = task_location.sabotage
 
     if isinstance(villager, Werewolf):
-        villager.assign_task(f"Sabotage {task_name}", task_location, task_time, task_complete_function)
+        villager.assign_task(f"Sabotage {task_name}", task_location, task_time, task_sabotage_function)
     else:
         villager.assign_task(task_name, task_location, task_time, task_complete_function)
     logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")

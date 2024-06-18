@@ -48,6 +48,19 @@ def assign_next_task(villager, task_locations,previous_task):
     # logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
     
     # return task_name, task_location
+    if len(task_locations) == 0:
+        task_locations = [
+            Task(1100, 650, "Gather food",5),
+            Task(1100, 200, "Build a house",10),
+            Task(1400, 100, "Collect wood",8),
+            Task(80, 700, "Fetch water",10),
+            Task(900, 450, "Guard the village",15),
+            Task(400, 650, "Cook food",10),
+            Task(100, 100, "Hunt for animals",15),
+            Task(600, 400, "Scout the area",10),
+            Task(400, 400, "Heal the injured",12),
+            Task(700, 200, "Teach children",10)
+        ]
     _,response = villager.agent.generate_reaction(observation=f"only assign one task from the following:{[loc.task for loc in task_locations]} other than {previous_task}",call_to_action_template="What should be the next task for "+villager.agent_id+f"? Expecting the response to be in the format Task: <task_name>. Do not assign other than from the given list. only assign one task from the following:{[loc.task for loc in task_locations]} ")
 
     print(response)

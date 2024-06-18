@@ -174,6 +174,7 @@ class Werewolf(Villager):
         if self.task_doing:
             if self.task_complete():
                 logger.info(f"{self.agent_id} (Werewolf) sabotaged the task '{self.current_task}'!")
+                self.task_complete_function()
                 self.current_task = None
                 self.time_to_complete_task = None
                 self.task_doing = False
