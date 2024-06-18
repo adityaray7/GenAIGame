@@ -189,9 +189,7 @@ class Agent:
         
         result = full_result.strip().split("\n")[0]
         if "KILL:" in result:
-            print("*"*50)
-            print("KILL")
-            print("*"*50)
+
             kill = self._clean_response(result.split("KILL:")[-1])
             self.memory.save_context(
                 {},
