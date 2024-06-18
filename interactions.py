@@ -135,7 +135,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                     )
                                 StartConvo,result = villager1.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template, villager=villager2.agent_id)
                                 if "killed" in result and time.time()>villager1.kill_cooldown:
-                                    villager1.kill_cooldown = time.time() + 60
+                                    villager1.kill_cooldown = time.time() + 120
                                     villagers.remove(villager2)
                                     Villager.killed_villagers.append(villager2)
                                     dead_villagers.append(villager2)
@@ -166,7 +166,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                                 # print("KILL")
                                                 # print("*"*50)
                                                 villagers.remove(other_villager)
-                                                villager.kill_cooldown = time.time() + 60
+                                                villager.kill_cooldown = time.time() + 120
                                                 Villager.killed_villagers.append(other_villager)
                                                 other_villager.alive = False
                                                 conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
