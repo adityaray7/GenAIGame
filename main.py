@@ -89,8 +89,8 @@ villagers_threaded = []
 # Constants
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 900
-DAY_DURATION = 120  # 60 seconds for a full day cycle
-NIGHT_DURATION = 120  # 60 seconds for a full night cycle
+DAY_DURATION = 90  # 60 seconds for a full day cycle
+NIGHT_DURATION = 90  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
 MORNING_MEETING_DURATION = 20
 
