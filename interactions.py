@@ -40,6 +40,16 @@ def handle_meeting(villagers, conversations,villager_remove):
     return True,villager_remove
 
 
+def get_nearest_task_location(villager):
+    task_locations = initialize_task_locations()
+    min_distance = float('inf') # initializing max value
+    nearest_location = None 
+    for task_location in task_locations:
+        distance = ((task_location.x - villager.x) ** 2 + (task_location.y - villager.y) ** 2) ** 0.5
+        min_distance, nearest_location = (distance, task_location) if distance < min_distance else (min_distance, nearest_location)
+    return nearest_location
+
+
 def handle_player_interaction(player, villagers, conversations):
     current_time = time.time()
     for villager in villagers:
@@ -80,6 +90,7 @@ def handle_dead_villager_interaction(dead_villagers, villagers, conversations):
                 if distance < 5*TALK_DISTANCE_THRESHOLD:
                     villager.observation_countdown = time.time() + 10
                     # print(villager.observation_countdown)
+                    nearest_task_location = get_nearest_task_location(dead_villager)
                     someone_else = False
                     distance_dict = {}
 
@@ -95,28 +106,32 @@ def handle_dead_villager_interaction(dead_villagers, villagers, conversations):
                         someone_else = [villager for villager in villagers if villager.agent_id == someone_else][0]
 
                         # print(someone_else)
-                        logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id}.")
-                        logger.info(f"{villager.agent_id} also sees {someone_else.agent_id} near the dead villager. Suspicion arises.")
+                        logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id} near {nearest_task_location.task}.")
+                        logger.info(f"{villager.agent_id} also sees {someone_else.agent_id} near the dead villager in {nearest_task_location.task}. Suspicion arises.")
 
-                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id}. You suspect {someone_else.agent_id} is the werewolf.")
+                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id} in {nearest_task_location.task}. You suspect {someone_else.agent_id} is the werewolf.")
                     else:
-                        logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id}.")
-                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead. ")
+                        logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id} near {nearest_task_location.task}.")
+                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {nearest_task_location.task}. ")
 
 
-def get_nearest_task_location(villager):
-    task_locations = initialize_task_locations()
-    min_distance = float('inf') # initializing max value
-    nearest_location = None 
-    for task_location in task_locations:
-        distance = ((task_location.x - villager.x) ** 2 + (task_location.y - villager.y) ** 2) ** 0.5
-        min_distance, nearest_location = (distance, task_location) if distance < min_distance else (min_distance, nearest_location)
-    return nearest_location
+def handle_villager_location_interactions(villagers):
+    for villager1 in villagers:
+        for villager2 in villagers:
+            if villager1 != villager2:
+                distance = ((villager1.x - villager2.x) ** 2 + (villager1.y - villager2.y) ** 2) ** 0.5
+                if distance < 5 * TALK_DISTANCE_THRESHOLD and time.time() > villager1.location_observation_countdown:
+                    villager1.location_observation_countdown = time.time() + 10
+                    nearest_task_location = get_nearest_task_location(villager2)
+                    if nearest_task_location != None:
+                        logger.info(f"{villager1.agent_id} sees {villager2.agent_id} near {nearest_task_location.task}")
+                        villager1.agent.memory.add_memory(f"You see {villager2.agent_id} near {nearest_task_location.task}")
 
 
 def handle_villager_interactions(player,villagers,dead_villagers,conversations):
     handle_player_interaction(player, villagers, conversations)
     handle_dead_villager_interaction(dead_villagers, villagers, conversations)
+    handle_villager_location_interactions(villagers)
 
     villager_list = ",".join([villager.agent_id for villager in villagers])
     current_time = time.time()
@@ -126,12 +141,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                 if villager1.talking or villager2.talking:
                     continue
                 distance = ((villager1.x - villager2.x) ** 2 + (villager1.y - villager2.y) ** 2) ** 0.5
-                if distance < 5 * TALK_DISTANCE_THRESHOLD and time.time() > villager1.location_observation_countdown:
-                    villager1.location_observation_countdown = time.time() + 10
-                    nearest_task_location = get_nearest_task_location(villager2)
-                    if nearest_task_location != None:
-                        logger.info(f"{villager1.agent_id} sees {villager2.agent_id} near {nearest_task_location.task}")
-                        villager1.agent.memory.add_memory(f"You see {villager2.agent_id} near {nearest_task_location.task}")
+                
                 if distance < TALK_DISTANCE_THRESHOLD and random.random() < TALK_PROBABILITY and current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
                             villager1.talking = True
                             villager2.talking = True
