@@ -31,9 +31,13 @@ class Villager:
         self.font = pygame.font.SysFont(None, 24)
         self.alive = True
         self.observation_countdown = time.time()
+        self.location_observation_countdown = time.time()
 
     def assign_task(self, task, location, time_to_complete_task):
+        print(self.alive)
         if self.alive == False:
+            print(self.agent_id)
+            print("the person is dead hence can't be assigned a task")
             return
         self.current_task = task
         self.task_location = (location.x, location.y)

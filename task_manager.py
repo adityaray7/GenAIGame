@@ -87,6 +87,7 @@ def assign_next_task(villager, task_locations,previous_task):
         print(task_name)
 
         task_time = task_location.task_period  # Time required for the task
+        print(villager.alive)
         villager.assign_task(task_name, task_location,task_time)
         logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
 

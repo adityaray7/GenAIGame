@@ -2,6 +2,7 @@ import random
 import time
 from utils.logger import logger
 from villager import Villager, Werewolf, Player
+from task_manager import initialize_task_locations
 
 TALK_DISTANCE_THRESHOLD = 20  # Adjust as needed
 TALK_PROBABILITY = 1 # Adjust as needed
@@ -102,6 +103,17 @@ def handle_dead_villager_interaction(dead_villagers, villagers, conversations):
                         logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id}.")
                         villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead. ")
 
+
+def get_nearest_task_location(villager):
+    task_locations = initialize_task_locations()
+    min_distance = float('inf') # initializing max value
+    nearest_location = None 
+    for task_location in task_locations:
+        distance = ((task_location.x - villager.x) ** 2 + (task_location.y - villager.y) ** 2) ** 0.5
+        min_distance, nearest_location = (distance, task_location) if distance < min_distance else (min_distance, nearest_location)
+    return nearest_location
+
+
 def handle_villager_interactions(player,villagers,dead_villagers,conversations):
     handle_player_interaction(player, villagers, conversations)
     handle_dead_villager_interaction(dead_villagers, villagers, conversations)
@@ -114,6 +126,12 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                 if villager1.talking or villager2.talking:
                     continue
                 distance = ((villager1.x - villager2.x) ** 2 + (villager1.y - villager2.y) ** 2) ** 0.5
+                if distance < 5 * TALK_DISTANCE_THRESHOLD and time.time() > villager1.location_observation_countdown:
+                    villager1.location_observation_countdown = time.time() + 10
+                    nearest_task_location = get_nearest_task_location(villager2)
+                    if nearest_task_location != None:
+                        logger.info(f"{villager1.agent_id} sees {villager2.agent_id} near {nearest_task_location.task}")
+                        villager1.agent.memory.add_memory(f"You see {villager2.agent_id} near {nearest_task_location.task}")
                 if distance < TALK_DISTANCE_THRESHOLD and random.random() < TALK_PROBABILITY and current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
                             villager1.talking = True
                             villager2.talking = True

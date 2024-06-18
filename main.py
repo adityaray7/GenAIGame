@@ -168,14 +168,7 @@ path[12] = Path(30, 0, 30, 900)  # Example size of 50x50
 path[13] = Path(SCREEN_WIDTH-60, 0, 30, 900)  # Example size of 50x50
 
 def relevance_score_fn(score: float) -> float:
-    """Return a similarity score on a scale [0, 1]."""
-    # This will differ depending on a few things:
-    # - the distance / similarity metric used by the VectorStore
-    # - the scale of your embeddings (OpenAI's are unit norm. Many others are not!)
-    # This function converts the euclidean norm of normalized embeddings
-    # (0 is most similar, sqrt(2) most dissimilar)
-    # to a similarity function (0 to 1)
-    
+    """Return a similarity score on a scale [0, 1]."""    
     # this returns negetive relevance values so temporarily made abs()
     # change this to implement cosine_similarity
     return abs(1.0 - (score / math.sqrt(2)))
@@ -188,24 +181,12 @@ def create_new_memory_retriever(agent_name="Player"):
         azure_deployment="text-embedding3",
         api_version="2024-02-01"
     )
-    # Initialize the vectorstore as empty
-    embedding_size = 3072
-
-    ###############################################
-    # index = faiss.IndexFlatL2(embedding_size)
     if(agent_name=="Player"):
         agent_collection = atlas_collection
     else:    
         agent_collection = villager_collections[agent_name][0]
     vectorstore = MongoDBAtlasVectorSearch(agent_collection, embeddings_model)
-    
-    # vectorstore = FAISS(
-    #     embedding_function=embeddings_model,
-    #     index=index,
-    #     docstore=InMemoryDocstore({}),
-    #     index_to_docstore_id={},
-    #     relevance_score_fn=relevance_score_fn,
-    # )
+
     return TimeWeightedVectorStoreRetriever(
         vectorstore=vectorstore, other_score_keys=["importance"], k=15, decay_rate=0.005
     )
@@ -241,13 +222,6 @@ for i in range(len(werewolf_backgrounds)):
     villagers.append(werewolf)
 
 print([villager.agent_id for villager in villagers])
-# for i in range(len(werewolf_background)):
-#     x = random.randint(50, SCREEN_WIDTH - 50)
-#     y = random.randint(50, SCREEN_HEIGHT - 50)
-#     background_texts = backgrounds[i]
-#     villager = Werewolf(f"werewolf_{i}", x, y, background_texts)
-#     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
-#     villagers.append(villager)
 
 player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
 player = Player("Player", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=path)
