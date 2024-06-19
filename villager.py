@@ -21,6 +21,7 @@ class Villager:
         self.agent=Agent(name=name,status=occupation,memory=memory,llm=llm,description=background_texts)
         self.current_task = None
         self.task_location = None
+        self.task_complete_function = None
         self.task_start_time = None
         self.task_end_time = 111717403133    
         self.task_doing = False
@@ -33,13 +34,13 @@ class Villager:
         self.observation_countdown = time.time()
         self.location_observation_countdown = time.time()
 
-    def assign_task(self, task, location, time_to_complete_task):
-        print(self.alive)
+    def assign_task(self, task, location, time_to_complete_task, task_complete_function):
         if self.alive == False:
             print(self.agent_id)
             print("the person is dead hence can't be assigned a task")
             return
         self.current_task = task
+        self.task_complete_function = task_complete_function
         self.task_location = (location.x, location.y)
         self.time_to_complete_task = time_to_complete_task / float(os.getenv("SPEED"))
         self.task_doing = False
@@ -78,6 +79,7 @@ class Villager:
             # Check if the task is complete
             if self.task_complete():
                 logger.info(f"{self.agent_id} has completed the task '{self.current_task}'!")
+                self.task_complete_function()
                 self.current_task = None
                 self.time_to_complete_task = None
                 self.task_doing = False
@@ -151,7 +153,7 @@ class Villager:
         if not self.alive:
             vil_image = pygame.transform.rotate(vil_image, 90)
         screen.blit(vil_image, (self.x-25, self.y-25))
-            
+
     def get_eliminated(self):
         logger.info(f"{self.agent_id} has been eliminated!")
         self.add_killed_villagers(self)
@@ -159,7 +161,7 @@ class Villager:
 
     @staticmethod
     def add_killed_villagers(villager):
-        Villager.killed_villagers.append(villager) 
+        Villager.killed_villagers.append(villager)
 
 class Werewolf(Villager):
     def __init__(self, agent_id, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
@@ -175,6 +177,7 @@ class Werewolf(Villager):
         if self.task_doing:
             if self.task_complete():
                 logger.info(f"{self.agent_id} (Werewolf) sabotaged the task '{self.current_task}'!")
+                self.task_complete_function()
                 self.current_task = None
                 self.time_to_complete_task = None
                 self.task_doing = False
@@ -230,7 +233,7 @@ class Werewolf(Villager):
         if dist < ELIMINATION_DISTANCE and time.time()>self.kill_cooldown:
             villager.get_eliminated()
             self.kill_cooldown = time.time() + 30
-    
+
 
 class Player(Villager):  # Inherits from the Villager class
 

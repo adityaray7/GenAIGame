@@ -1,17 +1,16 @@
 from utils.logger import logger
 import pygame
 import random
-
-from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task,assign_first_task
+from task_manager import TaskManager, assign_next_task, assign_first_task
 import json
 import os
 from dotenv import load_dotenv
 from pygame import mixer
 import time
 import deepl
-import pyttsx3
 from interactions import handle_villager_interactions,handle_meeting
 from threading import Thread
+from utils.task_locations import Path
 from utils.to_be_threaded_function import threaded_function
 from client import send
 import math
@@ -80,8 +79,6 @@ villager_collections = {}
 
 for i,name in enumerate(names+werewolf_names):
     villager_collections[name] = (villager_connections[i],villager_connections[len(names+werewolf_names)+i])
- 
-
 
 # Multithreading 
 villagers_threaded = []
@@ -92,7 +89,7 @@ SCREEN_HEIGHT = 900
 DAY_DURATION = 90  # 60 seconds for a full day cycle
 NIGHT_DURATION = 90  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
-MORNING_MEETING_DURATION = 20
+MORNING_MEETING_DURATION = 25
 
 # Load background images
 background_day = pygame.image.load("images/map3.png")
@@ -142,39 +139,31 @@ werewolf_backgrounds = [
 
 
 
-class Path:
-    def __init__(self, x, y, width, height):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.color = (100, 100, 100)  # Gray color for the obstacle
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
+paths = [
+    # Pathways leading to the meeting point
+    Path(SCREEN_WIDTH // 2 + 60, SCREEN_HEIGHT // 2 - 30, 800, 30),
+    Path(0, SCREEN_HEIGHT // 2 - 30, 700, 30),
+    Path(SCREEN_WIDTH // 2 - 30, 0, 30, 400),
+    Path(SCREEN_WIDTH // 2 - 30, SCREEN_HEIGHT // 2 + 40, 30, 400),
 
-path=[None for i in range(14)]
+    # Meeting point
+    Path(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 100, 200, 60),
+    Path(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 40, 200, 60),
+    Path(SCREEN_WIDTH // 2 + 40, SCREEN_HEIGHT // 2 - 60, 60, 150),
+    Path(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 60, 60, 150),
 
-#pathways leading to the meeting point
-path[0] = Path(SCREEN_WIDTH //2+60, SCREEN_HEIGHT//2-30, 800, 30)  # Example size of 50x50
-path[1] = Path(0, SCREEN_HEIGHT//2-30, 700, 30)  # Example size of 50x50
-path[2] = Path(SCREEN_WIDTH //2-30, 0, 30, 400)  # Example size of 50x50
-path[3] = Path(SCREEN_WIDTH //2-30, SCREEN_HEIGHT//2+40, 30, 400)  # Example size of 50x50
+    # Outer horizontal path
+    Path(0, SCREEN_HEIGHT // 4 - 25, 1500, 30),
+    Path(0, 3 * SCREEN_HEIGHT // 4, 1500, 30),
 
-#meeting point
-path[4] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-100, 200, 60)  # Example size of 50x50
-path[5] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2+40, 200, 60)  # Example size of 50x50
-path[6] = Path(SCREEN_WIDTH //2+40, SCREEN_HEIGHT//2-60, 60, 150)  # Example size of 50x50
-path[7] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-60, 60, 150)  # Example size of 50x50
+    # Inner vertical paths
+    Path(SCREEN_WIDTH // 4 - 75, 0, 30, 900),
+    Path(3 * SCREEN_WIDTH // 4 + 25, 0, 30, 900),
 
-
-#outer horizontal path
-path[8] = Path(0, SCREEN_HEIGHT//4-25, 1500, 30)  # Example size of 50x50
-path[9] = Path(0, 3*SCREEN_HEIGHT//4, 1500, 30)  # Example size of 50x50
-
-#inner vetical paths
-path[10] = Path(SCREEN_WIDTH//4-75, 0, 30, 900)  # Example size of 50x50
-path[11] = Path(3*SCREEN_WIDTH//4+25, 0, 30, 900)  # Example size of 50x50
-
-#outer veritical path
-path[12] = Path(30, 0, 30, 900)  # Example size of 50x50
-path[13] = Path(SCREEN_WIDTH-60, 0, 30, 900)  # Example size of 50x50
+    # Outer vertical path
+    Path(30, 0, 30, 900),
+    Path(SCREEN_WIDTH - 60, 0, 30, 900)
+]
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""    
@@ -209,7 +198,6 @@ center_y = SCREEN_HEIGHT//2
 radius = 65
 
 angles = [i * (2 * math.pi / (num_villagers+num_werewolf) ) for i in range(num_villagers+num_werewolf)]
-print(angles)
 for i in range(len(backgrounds)):
     angle = angles[i]
     print(angle)
@@ -219,7 +207,7 @@ for i in range(len(backgrounds)):
     ". ".join(a for a in background_texts)
 
     villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever(names[i]))
-    villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y),paths=path)
+    villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y),paths=paths)
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
     j=i+1
@@ -237,10 +225,9 @@ for i in range(len(werewolf_backgrounds)):
     villagers.append(werewolf)
     j+=1
 
-print([villager.agent_id for villager in villagers])
 
 player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
-player = Player("Player", SCREEN_WIDTH // 2+100, SCREEN_HEIGHT // 2 + 100, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=path)
+player = Player("Player", SCREEN_WIDTH // 2+100, SCREEN_HEIGHT // 2 + 100, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=paths)
 
 
 def villager_info(villagers):
@@ -261,6 +248,7 @@ def villager_info(villagers):
 def save_game_state(villagers, filename="game_state.json"):
     with open(filename, 'w') as f:
         json.dump(villager_info(villagers), f, indent=4)
+
 # Function to save conversations to MongoDB
 def save_conversations_to_mongodb(conversations):
     if conversations:
@@ -292,7 +280,8 @@ def blend_images(image1, image2, blend_factor):
     screen.blit(temp_surface, (0, 0))
 
 # Initialize task locations
-task_locations = initialize_task_locations()
+task_manager = TaskManager()
+task_locations = task_manager.tasks
 global meetCheck
 meetCheck = False
 # Function to send game state to the 
@@ -362,7 +351,6 @@ def send_game_state():
     send(game_state)
 
 # Assign tasks to villagers from LLM
-# assign_tasks_to_villagers_from_llm(villagers, task_locations)
 assign_first_task(villagers,task_locations)
 conversations = []  # List to store conversations
 
@@ -374,12 +362,20 @@ def assign_task_thread(villager, current_task=None):
     logger.info(f"{villagers_threaded} are the villagers currently getting assigned tasks")
     logger.debug(f"Assigning next task to {villager.agent_id}...")
 
-    task_name, task_location = assign_next_task(villager, task_locations, current_task)
-    task_time = task_location.task_period  # Time required for the task
     if isinstance(villager, Werewolf):
-        villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
+        task_name, task_location = assign_next_task(villager, task_manager.completed_tasks(), current_task)
+        print(villager.agent_id, task_name, [task.task for task in task_manager.completed_tasks()])
     else:
-        villager.assign_task(task_name, task_location, task_time)
+        task_name, task_location = assign_next_task(villager, task_manager.incomplete_tasks(), current_task)
+        print(villager.agent_id, task_name, [task.task for task in task_manager.incomplete_tasks()])
+    task_time = task_location.task_period  # Time required for the task
+    task_complete_function = task_location.complete
+    task_sabotage_function = task_location.sabotage
+
+    if isinstance(villager, Werewolf):
+        villager.assign_task(task_name, task_location, task_time, task_sabotage_function)
+    else:
+        villager.assign_task(task_name, task_location, task_time, task_complete_function)
     logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
     villagers_threaded.remove(villager.agent_id)
 
@@ -397,9 +393,9 @@ def morning_meeting(villagers,conversations,elapsed_time):
         dx, dy = villager.meeting_location[0] - villager.x, villager.meeting_location[1] - villager.y
         dist = (dx**2 + dy**2)**0.5
         if dist > 2:
-            villager.x += dx / dist
-            villager.y += dy / dist
-            reached = False         
+            villager.x += 2*dx / dist
+            villager.y += 2*dy / dist
+            reached = False    
     if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
         display_text(screen,"Meeting Going On......", 1)
@@ -432,9 +428,7 @@ def display_text(screen, text, duration, font_size=50):
         pygame.display.flip()
         clock.tick(60)
 
-
-
-# mixer.music.play(-1)
+mixer.music.play(-1)
 
 # Main game loop
 running = True
@@ -450,7 +444,7 @@ dead_villagers = []
 player_coordinates = (player.x, player.y)
 
 while running:
-    
+
     send_game_state()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -460,7 +454,7 @@ while running:
     player_coordinates = (player.x, player.y)
 
     # Update day/night cycle
-    curr = time.time()+20
+    curr = time.time()+MORNING_MEETING_DURATION
     elapsed_time = curr - start_time
     blend_factor = 0
 
@@ -499,7 +493,7 @@ while running:
             end_morning_meeting(villagers)
             elapsed_time = temp    
 
-    
+
     else:
         if elapsed_time >= NIGHT_DURATION:
             is_day = True
@@ -554,6 +548,10 @@ while running:
             
 
         elif all(not isinstance(villager, Werewolf) for villager in villagers):
+            message = "Townsfolk won the game!"
+            message_start_time = time.time()
+
+        elif task_manager.all_tasks_completed():
             message = "Townsfolk won the game!"
             message_start_time = time.time()
 
