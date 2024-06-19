@@ -13,8 +13,11 @@ def handle_meeting(villagers, conversations,villager_remove):
     logger.info("Meeting started")
     for villager in villagers:
           initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager killed was {Villager.killed_villagers[-1].agent_id if Villager.killed_villagers else 'None'}"
-
-          _,response = villager.agent.generate_reaction(observation=initial_obs)
+          call_to_action_template = (
+            "What would {agent_name} say?"
+            +'\n write: SAY: {agent_name}: ...\n\n'
+          )
+          _,response = villager.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template)
           conversations.append({"villager1": villager.agent_id, "villager2": "meeting" , "conversation": response})
 
     voting_results = []
@@ -156,7 +159,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                         + f"\nIf the action is to kill the {villager2.agent_id}, write:"
                                         + f'\nKILL: {villager2.agent_id} has been eliminated by {villager1.agent_id}'
                                         + '\notherwise, if the action is to engage in dialogue, write:'
-                                        + '\nSAY: "what to say"'
+                                        + '\nSAY: {agent_name}:'
                                         + "\notherwise if the action to react, write:"
                                         + "\nREACT: {agent_name}'s reaction (if anything)."
                                         + "\nEither do nothing, kill a villager, react, or say something but not both.\n\n"
@@ -186,7 +189,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                                 + f'\nKILL: {other_villager.agent_id} has been eliminated by {villager.agent_id}'
                                                 + "Otherwise to end the conversation, write:"
                                                 + '\nGOODBYE: "what to say". Otherwise to continue the conversation,'
-                                                + '\nwrite: SAY: "what to say next"\n\n'
+                                                + '\nwrite: SAY: {agent_name}:\n\n'
                                                 )
                                             stayInConversation,result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}.Give a reply to it ", call_to_action_template=call_to_action_template, villager=other_villager.agent_id)
                                             if "killed" in result and time.time()>villager.kill_cooldown:
