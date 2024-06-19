@@ -1,15 +1,13 @@
 from utils.logger import logger
 import pygame
 import random
-
-from task_manager import assign_tasks_to_villagers_from_llm, initialize_task_locations,assign_next_task,assign_first_task
+from task_manager import TaskManager, assign_next_task, assign_first_task
 import json
 import os
 from dotenv import load_dotenv
 from pygame import mixer
 import time
 import deepl
-import pyttsx3
 from interactions import handle_villager_interactions,handle_meeting
 from threading import Thread
 from utils.task_locations import Path
@@ -81,7 +79,7 @@ villager_collections = {}
 
 for i,name in enumerate(names+werewolf_names):
     villager_collections[name] = (villager_connections[i],villager_connections[len(names+werewolf_names)+i])
- 
+
 # Multithreading 
 villagers_threaded = []
 
@@ -269,6 +267,7 @@ def villager_info(villagers):
 def save_game_state(villagers, filename="game_state.json"):
     with open(filename, 'w') as f:
         json.dump(villager_info(villagers), f, indent=4)
+
 # Function to save conversations to MongoDB
 def save_conversations_to_mongodb(conversations):
     if conversations:
@@ -300,7 +299,8 @@ def blend_images(image1, image2, blend_factor):
     screen.blit(temp_surface, (0, 0))
 
 # Initialize task locations
-task_locations = initialize_task_locations()
+task_manager = TaskManager()
+task_locations = task_manager.tasks
 global meetCheck
 meetCheck = False
 # Function to send game state to the 
@@ -370,7 +370,6 @@ def send_game_state():
     send(game_state)
 
 # Assign tasks to villagers from LLM
-# assign_tasks_to_villagers_from_llm(villagers, task_locations)
 assign_first_task(villagers,task_locations)
 conversations = []  # List to store conversations
 
@@ -382,12 +381,18 @@ def assign_task_thread(villager, current_task=None):
     logger.info(f"{villagers_threaded} are the villagers currently getting assigned tasks")
     logger.debug(f"Assigning next task to {villager.agent_id}...")
 
-    task_name, task_location = assign_next_task(villager, task_locations, current_task)
-    task_time = task_location.task_period  # Time required for the task
     if isinstance(villager, Werewolf):
-        villager.assign_task(f"Sabotage {task_name}", task_location, task_time)
+        task_name, task_location = assign_next_task(villager, task_manager.completed_tasks(), current_task)
     else:
-        villager.assign_task(task_name, task_location, task_time)
+        task_name, task_location = assign_next_task(villager, task_manager.incomplete_tasks(), current_task)
+    task_time = task_location.task_period  # Time required for the task
+    task_complete_function = task_location.complete
+    task_sabotage_function = task_location.sabotage
+
+    if isinstance(villager, Werewolf):
+        villager.assign_task(f"Sabotage {task_name}", task_location, task_time, task_sabotage_function)
+    else:
+        villager.assign_task(task_name, task_location, task_time, task_complete_function)
     logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
     villagers_threaded.remove(villager.agent_id)
 
