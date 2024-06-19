@@ -159,7 +159,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                         + f"\nIf the action is to kill the {villager2.agent_id}, write:"
                                         + f'\nKILL: {villager2.agent_id} has been eliminated by {villager1.agent_id}'
                                         + '\notherwise, if the action is to engage in dialogue, write:'
-                                        + '\nSAY: {agent_name}:'
+                                        + '\nSAY: {agent_name}: ...'
                                         + "\notherwise if the action to react, write:"
                                         + "\nREACT: {agent_name}'s reaction (if anything)."
                                         + "\nEither do nothing, kill a villager, react, or say something but not both.\n\n"
