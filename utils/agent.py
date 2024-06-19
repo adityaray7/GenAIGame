@@ -62,7 +62,6 @@ class Agent:
     def _clean_response(self, text: str) -> str:
         return re.sub(f"^{self.name} ", "", text.strip()).strip()
     
-    #working
     @token_tracker
     def _compute_agent_summary(self) -> str:
         """"""
@@ -168,11 +167,11 @@ class Agent:
             print("*"*50)
             reaction = self._clean_response(result.split("KILL:")[-1])
             return False, f"{self.name} : {villager} has been killed"
-        if "REACT:" in result:
+        elif "REACT:" in result:
             reaction = self._clean_response(result.split("REACT:")[-1])
             return False, f"{self.name} : {reaction}"
-        if "SAY:" in result:
-            said_value = self._clean_response(result.split("SAY:")[-1])
+        elif "SAY:" in result:
+            said_value = self._clean_response(result.split(f"SAY: {self.name}:")[-1])
             return True, f"{self.name} : {said_value}"
         else:
             return False, result
@@ -200,7 +199,7 @@ class Agent:
                 }
             )
             return False, f"{self.name} : {villager} has been killed"
-        if "GOODBYE:" in result:
+        elif "GOODBYE:" in result:
             farewell = self._clean_response(result.split("GOODBYE:")[-1])
             self.memory.save_context(
                 {},
@@ -211,7 +210,7 @@ class Agent:
                 },
             )
             return False, f"{self.name} : {farewell}"
-        if "SAY:" in result:
+        elif "SAY:" in result:
             response_text = self._clean_response(result.split(":")[-1])
             self.memory.save_context(
                 {},
