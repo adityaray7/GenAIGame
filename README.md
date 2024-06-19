@@ -5,8 +5,7 @@ This is a fun simulation comprising of a mixture of mafia and among us. The vill
 
 ## Installation
 1. Clone the repository to your local machine.
-2. Navigate to the project directory: `/home/aditya/Documents/otsuka/game`.
-3. Run the `requirements.py` script to install the dependencies:
+2. Run the `requirements.py` script to install the dependencies:
     ```bash
     python requirements.py
     ```
