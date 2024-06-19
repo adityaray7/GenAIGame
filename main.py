@@ -89,7 +89,7 @@ SCREEN_HEIGHT = 900
 DAY_DURATION = 90  # 60 seconds for a full day cycle
 NIGHT_DURATION = 90  # 60 seconds for a full night cycle
 TRANSITION_DURATION = 10  # 10 seconds for a transition period
-MORNING_MEETING_DURATION = 20
+MORNING_MEETING_DURATION = 25
 
 # Load background images
 background_day = pygame.image.load("images/map3.png")
@@ -383,14 +383,16 @@ def assign_task_thread(villager, current_task=None):
 
     if isinstance(villager, Werewolf):
         task_name, task_location = assign_next_task(villager, task_manager.completed_tasks(), current_task)
+        print(villager.agent_id, task_name, [task.task for task in task_manager.completed_tasks()])
     else:
         task_name, task_location = assign_next_task(villager, task_manager.incomplete_tasks(), current_task)
+        print(villager.agent_id, task_name, [task.task for task in task_manager.incomplete_tasks()])
     task_time = task_location.task_period  # Time required for the task
     task_complete_function = task_location.complete
     task_sabotage_function = task_location.sabotage
 
     if isinstance(villager, Werewolf):
-        villager.assign_task(f"Sabotage {task_name}", task_location, task_time, task_sabotage_function)
+        villager.assign_task(task_name, task_location, task_time, task_sabotage_function)
     else:
         villager.assign_task(task_name, task_location, task_time, task_complete_function)
     logger.info(f"{villager.agent_id} is now assigned the task '{task_name}'... ({task_time} seconds)")
@@ -410,9 +412,9 @@ def morning_meeting(villagers,conversations,elapsed_time):
         dx, dy = villager.meeting_location[0] - villager.x, villager.meeting_location[1] - villager.y
         dist = (dx**2 + dy**2)**0.5
         if dist > 2:
-            villager.x += dx / dist
-            villager.y += dy / dist
-            reached = False         
+            villager.x += 2*dx / dist
+            villager.y += 2*dy / dist
+            reached = False    
     if reached and elapsed_time>5:
         logger.info("All villagers have gathered for the morning meeting.")
         display_text(screen,"Meeting Going On......", 1)
@@ -461,7 +463,7 @@ dead_villagers = []
 player_coordinates = (player.x, player.y)
 
 while running:
-    
+
     send_game_state()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -471,7 +473,7 @@ while running:
     player_coordinates = (player.x, player.y)
 
     # Update day/night cycle
-    curr = time.time()+20
+    curr = time.time()+MORNING_MEETING_DURATION
     elapsed_time = curr - start_time
     blend_factor = 0
 
@@ -510,7 +512,7 @@ while running:
             end_morning_meeting(villagers)
             elapsed_time = temp    
 
-    
+
     else:
         if elapsed_time >= NIGHT_DURATION:
             is_day = True
@@ -565,6 +567,10 @@ while running:
             
 
         elif all(not isinstance(villager, Werewolf) for villager in villagers):
+            message = "Townsfolk won the game!"
+            message_start_time = time.time()
+
+        elif task_manager.all_tasks_completed():
             message = "Townsfolk won the game!"
             message_start_time = time.time()
 
