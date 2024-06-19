@@ -1,8 +1,15 @@
 import json
 from utils.logger import logger
+import os
 
 # Function to load conversations from a JSON file
 def load_conversations(filename="conversations.json"):
+
+    if not os.path.exists(filename):
+        print(f"Creating {filename} file...")
+        with open(filename, "w") as f:
+            json.dump([], f)
+
     with open(filename, 'r') as f:
         return json.load(f)
 

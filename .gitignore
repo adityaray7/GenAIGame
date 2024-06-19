@@ -5,5 +5,4 @@ __pycache__
 game_state.json
 .env
 conversations.json
-game_state.json
 game.log

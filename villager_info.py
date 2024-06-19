@@ -1,6 +1,13 @@
 import json
+import os
 
 def read_game_state(filename="game_state.json"):
+
+    if not os.path.exists(filename):
+        print(f"Creating {filename} file...")
+        with open(filename, "w") as f:
+            json.dump([], f)
+
     with open(filename, 'r') as f:
         return json.load(f)
 

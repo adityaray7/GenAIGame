@@ -334,6 +334,12 @@ def send_game_state():
         })
     
     conversations = []  
+    if not os.path.exists("conversations.json"):
+        print("Creating conversations.json file...")
+        # create an empty file
+        with open("conversations.json", "w") as f:
+            json.dump([], f)
+
     with open ("conversations.json","r") as f:
         conversations = json.load(f)
         
@@ -446,8 +452,6 @@ def display_text(screen, text, duration, font_size=50):
         screen.blit(rendered_text, text_rect)
         pygame.display.flip()
         clock.tick(60)
-
-mixer.music.play(-1)
 
 # Main game loop
 running = True
