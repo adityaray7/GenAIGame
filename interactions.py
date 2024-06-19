@@ -2,17 +2,29 @@ import random
 import time
 from utils.logger import logger
 from villager import Villager, Werewolf, Player
-from task_manager import initialize_task_locations
+from task_manager import TaskManager
 
 TALK_DISTANCE_THRESHOLD = 20  # Adjust as needed
 TALK_PROBABILITY = 1 # Adjust as needed
 TALK_COOLDOWN_TIME = 60  # Time in seconds for cooldown period
 # Method to handle villager interactions
 
+def get_nearest_task_location(villager):
+    task_manager = TaskManager()
+    task_locations = task_manager.initialize_task_locations()
+    min_distance = float('inf') # initializing max value
+    nearest_location = None 
+    for task_location in task_locations:
+        distance = ((task_location.x - villager.x) ** 2 + (task_location.y - villager.y) ** 2) ** 0.5
+        min_distance, nearest_location = (distance, task_location) if distance < min_distance else (min_distance, nearest_location)
+    return nearest_location
+
+
 def handle_meeting(villagers, conversations,villager_remove):
     logger.info("Meeting started")
+    dead_villager_locations = [get_nearest_task_location(dead_villager).task for dead_villager in Villager.killed_villagers]
     for villager in villagers:
-          initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager killed was {Villager.killed_villagers[-1].agent_id if Villager.killed_villagers else 'None'}"
+          initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager eliminated was {Villager.killed_villagers[-1].agent_id + ' near ' + dead_villager_locations[-1] if Villager.killed_villagers else 'None'}"
           call_to_action_template = (
             "What would {agent_name} say?"
             +'\n write: SAY: {agent_name}: ...\n\n'
@@ -41,16 +53,6 @@ def handle_meeting(villagers, conversations,villager_remove):
         villager_remove = None
 
     return True,villager_remove
-
-
-def get_nearest_task_location(villager):
-    task_locations = initialize_task_locations()
-    min_distance = float('inf') # initializing max value
-    nearest_location = None 
-    for task_location in task_locations:
-        distance = ((task_location.x - villager.x) ** 2 + (task_location.y - villager.y) ** 2) ** 0.5
-        min_distance, nearest_location = (distance, task_location) if distance < min_distance else (min_distance, nearest_location)
-    return nearest_location
 
 
 def handle_player_interaction(player, villagers, conversations):
@@ -150,22 +152,21 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                             villager2.talking = True
                             
                             if isinstance(villager1, Werewolf):
-                                # print("KILL")
                                 initial_obs = f"You see {villager2.agent_id} nearby."
                                 call_to_action_template = (
-                                        f"Should {villager1.agent_id}, the werewolf who kills {villager_list},"
+                                        f"Should {villager1.agent_id}, the werewolf who eliminates {villager_list},"
                                         + "react to the observation? And if so,"
                                         + " what would be an appropriate reaction? Respond in one line."
-                                        + f"\nIf the action is to kill the {villager2.agent_id}, write:"
-                                        + f'\nKILL: {villager2.agent_id} has been eliminated by {villager1.agent_id}'
+                                        + f"\nIf the action is to eliminate the {villager2.agent_id}, write:"
+                                        + f'\nELIMINATE: {villager2.agent_id} has been eliminated by {villager1.agent_id}'
                                         + '\notherwise, if the action is to engage in dialogue, write:'
                                         + '\nSAY: {agent_name}: ...'
                                         + "\notherwise if the action to react, write:"
                                         + "\nREACT: {agent_name}'s reaction (if anything)."
-                                        + "\nEither do nothing, kill a villager, react, or say something but not both.\n\n"
+                                        + "\nEither do nothing, eliminate a villager, react, or say something but not both.\n\n"
                                     )
                                 StartConvo,result = villager1.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template, villager=villager2.agent_id)
-                                if "killed" in result and time.time()>villager1.kill_cooldown:
+                                if "eliminated" in result and time.time()>villager1.kill_cooldown:
                                     villager1.kill_cooldown = time.time() + 120
                                     villagers.remove(villager2)
                                     Villager.killed_villagers.append(villager2)
@@ -183,16 +184,16 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                         other_villager = villager1 if villager == villager2 else villager2
                                         if isinstance(villager, Werewolf):
                                             call_to_action_template = (
-                                                f"How should {villager.agent_id} the werewolf who kills {villager_list} react to the observation, and if so,"
+                                                f"How should {villager.agent_id} the werewolf who eliminates {villager_list} react to the observation, and if so,"
                                                 + " what would be an appropriate reaction? Respond in one line."
-                                                + f"\nIf the action is to kill the {other_villager.agent_id}, write:"
-                                                + f'\nKILL: {other_villager.agent_id} has been eliminated by {villager.agent_id}'
+                                                + f"\nIf the action is to eliminate the {other_villager.agent_id}, write:"
+                                                + f'\nELIMINATE: {other_villager.agent_id} has been eliminated by {villager.agent_id}'
                                                 + "Otherwise to end the conversation, write:"
-                                                + '\nGOODBYE: "what to say". Otherwise to continue the conversation,'
-                                                + '\nwrite: SAY: {agent_name}:\n\n'
+                                                + '\nGOODBYE: "goodbye". Otherwise to continue the conversation,'
+                                                + '\nwrite: SAY: {agent_name}: ...\n\n'
                                                 )
                                             stayInConversation,result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}.Give a reply to it ", call_to_action_template=call_to_action_template, villager=other_villager.agent_id)
-                                            if "killed" in result and time.time()>villager.kill_cooldown:
+                                            if "eliminated" in result and time.time()>villager.kill_cooldown:
                                                 # print("*"*50)
                                                 # print("KILL")
                                                 # print("*"*50)
@@ -200,6 +201,8 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                                 villager.kill_cooldown = time.time() + 120
                                                 Villager.killed_villagers.append(other_villager)
                                                 other_villager.alive = False
+                                                conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
+                                            elif "eliminated" not in result:
                                                 conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
                                         else:
                                             stayInConversation,result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}. Write a logical and suitable reply. Only write the reply and nothing else")

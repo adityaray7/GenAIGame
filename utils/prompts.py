@@ -22,7 +22,7 @@ agentPromptJson = {
             + "\n\nSummary: ",
     
     "_generate_reaction": "You are playing a game of werewolves and villagers."
-            + "The werewolf KILLS or INTERACTS with villagers. The villagers"
+            + "The werewolf ELIMINATES or INTERACTS with villagers. The villagers"
             + "complete their tasks and find who the werewolf is."
             + "\n{agent_summary_description}"
             + "\nIt is {current_time}."

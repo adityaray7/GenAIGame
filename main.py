@@ -133,7 +133,7 @@ backgrounds = [
 
 
 werewolf_backgrounds = [
-    ["I am Katsumi ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone."],
+    ["I am Katsumi ","I am a werewolf and I am here to sabotage the tasks and eliminate villagers.","I DO NOT reveal my identity to anyone."],
     # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
 

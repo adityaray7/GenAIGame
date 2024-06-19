@@ -14,10 +14,10 @@ class TaskManager:
             Task(80, 700, "Fetch water",10),
             Task(900, 450, "Guard the village",15),
             Task(400, 650, "Cook food",10),
-            # Task(100, 100, "Hunt for animals",15),
+            Task(100, 100, "Hunt for animals",15),
             Task(600, 400, "Scout the area",10),
             Task(400, 400, "Heal the injured",12),
-            # Task(700, 200, "Teach children",10)
+            Task(700, 200, "Teach children",10)
         ]
 
     def completed_tasks(self):

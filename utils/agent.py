@@ -161,12 +161,12 @@ class Agent:
                 self.memory.now_key: now,
             },
         )
-        if "KILL:" in result:
+        if "ELIMINATE:" in result:
             print("*"*50)
             print("KILL")
             print("*"*50)
-            reaction = self._clean_response(result.split("KILL:")[-1])
-            return False, f"{self.name} : {villager} has been killed"
+            reaction = self._clean_response(result.split("ELIMINATE:")[-1])
+            return False, f"{self.name} : {villager} has been eliminated"
         elif "REACT:" in result:
             reaction = self._clean_response(result.split("REACT:")[-1])
             return False, f"{self.name} : {reaction}"
@@ -187,18 +187,18 @@ class Agent:
         )
         
         result = full_result.strip().split("\n")[0]
-        if "KILL:" in result:
+        if "ELIMINATE:" in result:
 
-            kill = self._clean_response(result.split("KILL:")[-1])
+            kill = self._clean_response(result.split("ELIMINATE:")[-1])
             self.memory.save_context(
                 {},
                 {
                     self.memory.add_memory_key: f"{self.name} observed "
-                    f"{observation} and killed {villager}",
+                    f"{observation} and eliminated {villager}",
                     self.memory.now_key: now,
                 }
             )
-            return False, f"{self.name} : {villager} has been killed"
+            return False, f"{self.name} : {villager} has been eliminated"
         elif "GOODBYE:" in result:
             farewell = self._clean_response(result.split("GOODBYE:")[-1])
             self.memory.save_context(
