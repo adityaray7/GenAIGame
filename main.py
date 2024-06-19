@@ -133,7 +133,7 @@ backgrounds = [
 
 
 werewolf_backgrounds = [
-    ["I am Katsumi ","I am a werewolf and I am here to sabotage the tasks and kill villagers.","I DO NOT reveal my identity to anyone."],
+    ["I am Katsumi ","I am a werewolf and I am here to sabotage the tasks and eliminate villagers.","I DO NOT reveal my identity to anyone."],
     # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
 ]
 
@@ -166,14 +166,7 @@ paths = [
 ]
 
 def relevance_score_fn(score: float) -> float:
-    """Return a similarity score on a scale [0, 1]."""
-    # This will differ depending on a few things:
-    # - the distance / similarity metric used by the VectorStore
-    # - the scale of your embeddings (OpenAI's are unit norm. Many others are not!)
-    # This function converts the euclidean norm of normalized embeddings
-    # (0 is most similar, sqrt(2) most dissimilar)
-    # to a similarity function (0 to 1)
-    
+    """Return a similarity score on a scale [0, 1]."""    
     # this returns negetive relevance values so temporarily made abs()
     # change this to implement cosine_similarity
     return abs(1.0 - (score / math.sqrt(2)))
@@ -186,24 +179,12 @@ def create_new_memory_retriever(agent_name="Player"):
         azure_deployment="text-embedding3",
         api_version="2024-02-01"
     )
-    # Initialize the vectorstore as empty
-    embedding_size = 3072
-
-    ###############################################
-    # index = faiss.IndexFlatL2(embedding_size)
     if(agent_name=="Player"):
         agent_collection = atlas_collection
     else:    
         agent_collection = villager_collections[agent_name][0]
     vectorstore = MongoDBAtlasVectorSearch(agent_collection, embeddings_model)
-    
-    # vectorstore = FAISS(
-    #     embedding_function=embeddings_model,
-    #     index=index,
-    #     docstore=InMemoryDocstore({}),
-    #     index_to_docstore_id={},
-    #     relevance_score_fn=relevance_score_fn,
-    # )
+
     return TimeWeightedVectorStoreRetriever(
         vectorstore=vectorstore, other_score_keys=["importance"], k=15, decay_rate=0.005
     )

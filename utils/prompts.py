@@ -22,7 +22,7 @@ agentPromptJson = {
             + "\n\nSummary: ",
     
     "_generate_reaction": "You are playing a game of werewolves and villagers."
-            + "The werewolf KILLS or INTERACTS with villagers. The villagers"
+            + "The werewolf ELIMINATES or INTERACTS with villagers. The villagers"
             + "complete their tasks and find who the werewolf is."
             + "\n{agent_summary_description}"
             + "\nIt is {current_time}."
@@ -36,14 +36,14 @@ agentPromptJson = {
     "generate_reaction": 
             "Should {agent_name} react to the observation, and if so,"
             + " what would be an appropriate reaction? Respond in one line."
-            + 'If the action is to engage in dialogue, write:\nSAY: "what to say"'
+            + 'If the action is to engage in dialogue, write:\nSAY: {agent_name}: ...'
             + "\n otherwise, write:\nREACT: {agent_name}'s reaction (if anything)"
-            + "\n Either do nothing, react, or say something but not both.\n\n",
+            + "\n Either DO NOTHING, REACT, or SAY something but not both.\n\n",
     
     "generate_dialogue_response": 
-        "What would {agent_name} say? To end the conversation, write:"
-        ' GOODBYE: "what to say". Otherwise to continue the conversation,'
-        ' write: SAY: "what to say next"\n\n'
+        "What would {agent_name} say? To end the conversation,\n write:"
+        ' GOODBYE: "Goodbye".\n Otherwise to continue the conversation,'
+        '\n write: SAY: {agent_name}: ...\n\n'
 }
 
 agentMemoryPromptJson = {
