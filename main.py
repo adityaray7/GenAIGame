@@ -10,6 +10,7 @@ import time
 import deepl
 from interactions import handle_villager_interactions,handle_meeting
 from threading import Thread
+from utils.task_locations import Path
 from utils.to_be_threaded_function import threaded_function
 from client import send
 import math
@@ -79,7 +80,6 @@ villager_collections = {}
 for i,name in enumerate(names+werewolf_names):
     villager_collections[name] = (villager_connections[i],villager_connections[len(names+werewolf_names)+i])
 
-
 # Multithreading 
 villagers_threaded = []
 
@@ -139,39 +139,31 @@ werewolf_backgrounds = [
 
 
 
-class Path:
-    def __init__(self, x, y, width, height):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.color = (100, 100, 100)  # Gray color for the obstacle
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
+paths = [
+    # Pathways leading to the meeting point
+    Path(SCREEN_WIDTH // 2 + 60, SCREEN_HEIGHT // 2 - 30, 800, 30),
+    Path(0, SCREEN_HEIGHT // 2 - 30, 700, 30),
+    Path(SCREEN_WIDTH // 2 - 30, 0, 30, 400),
+    Path(SCREEN_WIDTH // 2 - 30, SCREEN_HEIGHT // 2 + 40, 30, 400),
 
-path=[None for i in range(14)]
+    # Meeting point
+    Path(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 100, 200, 60),
+    Path(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 40, 200, 60),
+    Path(SCREEN_WIDTH // 2 + 40, SCREEN_HEIGHT // 2 - 60, 60, 150),
+    Path(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 60, 60, 150),
 
-#pathways leading to the meeting point
-path[0] = Path(SCREEN_WIDTH //2+60, SCREEN_HEIGHT//2-30, 800, 30)  # Example size of 50x50
-path[1] = Path(0, SCREEN_HEIGHT//2-30, 700, 30)  # Example size of 50x50
-path[2] = Path(SCREEN_WIDTH //2-30, 0, 30, 400)  # Example size of 50x50
-path[3] = Path(SCREEN_WIDTH //2-30, SCREEN_HEIGHT//2+40, 30, 400)  # Example size of 50x50
+    # Outer horizontal path
+    Path(0, SCREEN_HEIGHT // 4 - 25, 1500, 30),
+    Path(0, 3 * SCREEN_HEIGHT // 4, 1500, 30),
 
-#meeting point
-path[4] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-100, 200, 60)  # Example size of 50x50
-path[5] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2+40, 200, 60)  # Example size of 50x50
-path[6] = Path(SCREEN_WIDTH //2+40, SCREEN_HEIGHT//2-60, 60, 150)  # Example size of 50x50
-path[7] = Path(SCREEN_WIDTH //2-100, SCREEN_HEIGHT//2-60, 60, 150)  # Example size of 50x50
+    # Inner vertical paths
+    Path(SCREEN_WIDTH // 4 - 75, 0, 30, 900),
+    Path(3 * SCREEN_WIDTH // 4 + 25, 0, 30, 900),
 
-
-#outer horizontal path
-path[8] = Path(0, SCREEN_HEIGHT//4-25, 1500, 30)  # Example size of 50x50
-path[9] = Path(0, 3*SCREEN_HEIGHT//4, 1500, 30)  # Example size of 50x50
-
-#inner vetical paths
-path[10] = Path(SCREEN_WIDTH//4-75, 0, 30, 900)  # Example size of 50x50
-path[11] = Path(3*SCREEN_WIDTH//4+25, 0, 30, 900)  # Example size of 50x50
-
-#outer veritical path
-path[12] = Path(30, 0, 30, 900)  # Example size of 50x50
-path[13] = Path(SCREEN_WIDTH-60, 0, 30, 900)  # Example size of 50x50
+    # Outer vertical path
+    Path(30, 0, 30, 900),
+    Path(SCREEN_WIDTH - 60, 0, 30, 900)
+]
 
 def relevance_score_fn(score: float) -> float:
     """Return a similarity score on a scale [0, 1]."""
@@ -225,7 +217,6 @@ center_y = SCREEN_HEIGHT//2
 radius = 65
 
 angles = [i * (2 * math.pi / (num_villagers+num_werewolf) ) for i in range(num_villagers+num_werewolf)]
-print(angles)
 for i in range(len(backgrounds)):
     angle = angles[i]
     print(angle)
@@ -235,7 +226,7 @@ for i in range(len(backgrounds)):
     ". ".join(a for a in background_texts)
 
     villager_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever(names[i]))
-    villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y),paths=path)
+    villager = Villager(names[i], x, y, background_texts=background_texts,llm=llm,memory=villager_memory,meeting_location=(x,y),paths=paths)
     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
     villagers.append(villager)
     j=i+1
@@ -253,17 +244,9 @@ for i in range(len(werewolf_backgrounds)):
     villagers.append(werewolf)
     j+=1
 
-print([villager.agent_id for villager in villagers])
-# for i in range(len(werewolf_background)):
-#     x = random.randint(50, SCREEN_WIDTH - 50)
-#     y = random.randint(50, SCREEN_HEIGHT - 50)
-#     background_texts = backgrounds[i]
-#     villager = Werewolf(f"werewolf_{i}", x, y, background_texts)
-#     villager.last_talk_attempt_time = 0  # Initialize last talk attempt time
-#     villagers.append(villager)
 
 player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
-player = Player("Player", SCREEN_WIDTH // 2+100, SCREEN_HEIGHT // 2 + 100, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=path)
+player = Player("Player", SCREEN_WIDTH // 2+100, SCREEN_HEIGHT // 2 + 100, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=paths)
 
 
 def villager_info(villagers):
@@ -462,9 +445,7 @@ def display_text(screen, text, duration, font_size=50):
         pygame.display.flip()
         clock.tick(60)
 
-
-
-# mixer.music.play(-1)
+mixer.music.play(-1)
 
 # Main game loop
 running = True

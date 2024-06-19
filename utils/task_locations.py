@@ -19,6 +19,7 @@ class Task:
         else:
             task_text = self.font.render(self.task, True, (0, 0, 0), (255, 255, 255))  # Set white background color
         screen.blit(task_text, (self.x + 10, self.y - 10))
+
     
     def complete(self):
         self.completed = True
@@ -29,3 +30,12 @@ class Task:
         self.completed = False
         self.sabotaged = True
         print(f"{self.task} was sabotaged through the transferred functions")
+
+
+class Path:
+    def __init__(self, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = (100, 100, 100)  # Gray color for the obstacle
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+
