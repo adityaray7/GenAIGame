@@ -156,8 +156,8 @@ backgrounds = [
 ]
 
 werewolf_backgrounds = [
-    ["I am Katsumi ","I am a werewolf and I am here to sabotage the tasks and eliminate villagers.","I DO NOT reveal my identity to anyone."],
-    ["I am Uchiha Madara ","I am a werewolf and I am here to sabotage the tasks.","I DO NOT reveal my identity to anyone."]
+    ["I am Katsumi ","I am a werewolf and I am here to sabotage the tasks and eliminate villagers.","I DO NOT reveal my identity to anyone. DO NOT take the name of the werewolf in the meeting and blame others."],
+    ["I am Uchiha Madara ","I am a werewolf and I am here to sabotage the tasks.","I DO NOT reveal my identity to anyone. DO NOT take the name of the werewolf in the meeting and blame others."]
 ]
 
 

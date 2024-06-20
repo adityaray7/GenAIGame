@@ -209,23 +209,6 @@ class Villager:
             vil_image = pygame.transform.rotate(vil_image, 90)
         screen.blit(vil_image, (self.x - 25, self.y - 25))
 
-    def get_eliminated(self):
-        """
-        Eliminate the villager.
-        """
-        logger.info(f"{self.agent_id} has been eliminated!")
-        self.add_killed_villagers(self)
-        self.alive = False
-
-    @staticmethod
-    def add_killed_villagers(villager):
-        """
-        Add a villager to the list of killed villagers.
-
-        Parameters:
-            villager (Villager): The villager to add.
-        """
-        Villager.killed_villagers.append(villager)
 
 class Werewolf(Villager):
     """
