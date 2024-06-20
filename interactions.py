@@ -220,6 +220,7 @@ def handle_villager_interactions(player, villagers, dead_villagers, conversation
                     villager2.talking = True
 
                     StartConvo = False
+                    stayInConversation = False
                             
                     if isinstance(villager1, Werewolf) and not isinstance(villager2, Werewolf):
                         initial_obs = f"You see {villager2.agent_id} nearby."
