@@ -23,35 +23,50 @@ def get_nearest_task_location(villager):
 def handle_meeting(villagers, conversations,villager_remove):
     logger.info("Meeting started")
     dead_villager_locations = [get_nearest_task_location(dead_villager).task for dead_villager in Villager.killed_villagers]
-    for villager in villagers:
-          initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager eliminated was {Villager.killed_villagers[-1].agent_id + ' near ' + dead_villager_locations[-1] if Villager.killed_villagers else 'None'}"
-          call_to_action_template = (
-            "What would {agent_name} say?"
-            +'\n write: SAY: {agent_name}: ...\n\n'
-          )
-          _,response = villager.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template)
-          conversations.append({"villager1": villager.agent_id, "villager2": "meeting" , "conversation": response})
-
     voting_results = []
+    villager_remove = None
     for villager in villagers:
-        initial_obs =f"Based on your interactions ONLY SAY THE NAME OF THE VILLAGER WHO YOU THINK IS THE WEREWOLF from the list {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}"
-        call_to_action_template = f"Who do you think is the werewolf other than {villager.agent_id} from the following: {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}? ONLY SAY THE NAME AND NOTHING ELSE"
-        _,response = villager.agent.generate_reaction(observation=initial_obs,call_to_action_template=call_to_action_template)
-        conversations.append({"villager1": villager.agent_id, "villager2": "meeting", "conversation": response})
-        voting_results.append(response)
+        initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager eliminated was {Villager.killed_villagers[-1].agent_id + ' near ' + dead_villager_locations[-1] if Villager.killed_villagers else 'None'}"
+        call_to_action_template = (
+        "What would {agent_name} say?\n"
+        "Respond in the format 'I suspect: NAME. REASON'\n\n"
+        )
+        response=""
+        # Extract the name and reason from the response
+        try:
+            _,response = villager.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template)
+            print(f"{villager.agent_id}: {response}")
+            response_lines = response.strip().split('.')
+            for line in response_lines:
+                if line.startswith("I suspect"):
+                    agent_name = line.split(":")[1].strip()
+                    voting_results.append(f"{agent_name}")
+                    break
+        except Exception as e:
+            logger.error(f"Error parsing response from {villager.agent_id}: {e}")
+
+        conversations.append({"villager1": villager.agent_id, "villager2": "meeting" , "conversation": response})
+
     
+    # for villager in villagers:
+    #     initial_obs =f"Based on your interactions ONLY SAY THE NAME OF THE VILLAGER WHO YOU THINK IS THE WEREWOLF from the list {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}"
+    #     call_to_action_template = f"Who do you think is the werewolf other than {villager.agent_id} from the following: {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}? ONLY SAY THE NAME AND NOTHING ELSE"
+    #     _,response = villager.agent.generate_reaction(observation=initial_obs,call_to_action_template=call_to_action_template)
+    #     conversations.append({"villager1": villager.agent_id, "villager2": "meeting", "conversation": response})
+    #     voting_results.append(response)
+    
+    logger.info(f"Voting results: {voting_results}")
 
-    villager_remove = max(voting_results, key = voting_results.count)
+    if voting_results:
+        villager_remove = max(voting_results, key = voting_results.count)
 
-    count = 0
-    for i in range(len(voting_results)):
-        if voting_results[i] == villager_remove:
-            count += 1
+        count = 0
+        for i in range(len(voting_results)):
+            if voting_results[i] == villager_remove:
+                count += 1
  
-    if count<=len(villagers)/2-1:
-
-        villager_remove = None
-
+        if count<=len(villagers)/2-1:
+            villager_remove = None
     return True,villager_remove
 
 
@@ -151,7 +166,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                             villager1.talking = True
                             villager2.talking = True
                             
-                            if isinstance(villager1, Werewolf):
+                            if isinstance(villager1, Werewolf) and not isinstance(villager2, Werewolf):
                                 initial_obs = f"You see {villager2.agent_id} nearby."
                                 call_to_action_template = (
                                         f"Should {villager1.agent_id}, the werewolf who eliminates {villager_list},"
@@ -166,8 +181,8 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                         + "\nEither do nothing, eliminate a villager, react, or say something but not both.\n\n"
                                     )
                                 StartConvo,result = villager1.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template, villager=villager2.agent_id)
-                                if "eliminated" in result and time.time()>villager1.kill_cooldown:
-                                    villager1.kill_cooldown = time.time() + 120
+                                if "eliminated" in result and time.time()>villager1.kill_cooldown :
+                                    villager1.kill_cooldown = time.time() + 60
                                     villagers.remove(villager2)
                                     Villager.killed_villagers.append(villager2)
                                     dead_villagers.append(villager2)
@@ -182,7 +197,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                 for _ in range(2):
                                     for villager in [villager2,villager1]:
                                         other_villager = villager1 if villager == villager2 else villager2
-                                        if isinstance(villager, Werewolf):
+                                        if isinstance(villager, Werewolf) and not isinstance(other_villager, Werewolf):
                                             call_to_action_template = (
                                                 f"How should {villager.agent_id} the werewolf who eliminates {villager_list} react to the observation, and if so,"
                                                 + " what would be an appropriate reaction? Respond in one line."
@@ -198,7 +213,7 @@ def handle_villager_interactions(player,villagers,dead_villagers,conversations):
                                                 # print("KILL")
                                                 # print("*"*50)
                                                 villagers.remove(other_villager)
-                                                villager.kill_cooldown = time.time() + 120
+                                                villager.kill_cooldown = time.time() + 60
                                                 Villager.killed_villagers.append(other_villager)
                                                 other_villager.alive = False
                                                 conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
