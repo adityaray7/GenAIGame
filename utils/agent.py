@@ -62,7 +62,6 @@ class Agent:
     def _clean_response(self, text: str) -> str:
         return re.sub(f"^{self.name} ", "", text.strip()).strip()
     
-    #working
     @token_tracker
     def _compute_agent_summary(self) -> str:
         """"""
@@ -100,7 +99,7 @@ class Agent:
     
     @token_tracker
     def _generate_reaction(
-        self, observation: str, suffix: str, now: Optional[datetime] = None, last_k : Optional[int] = 4
+        self, observation: str, suffix: str, now: Optional[datetime] = None, last_k : Optional[int] = 15
     ) -> str:
         """React to a given observation or dialogue act."""
         prompt = PromptTemplate.from_template(agentPromptJson['_generate_reaction'] + suffix)
@@ -162,17 +161,17 @@ class Agent:
                 self.memory.now_key: now,
             },
         )
-        if "KILL:" in result:
+        if "ELIMINATE:" in result:
             print("*"*50)
             print("KILL")
             print("*"*50)
-            reaction = self._clean_response(result.split("KILL:")[-1])
-            return False, f"{self.name} : {villager} has been killed"
-        if "REACT:" in result:
+            reaction = self._clean_response(result.split("ELIMINATE:")[-1])
+            return False, f"{self.name} : {villager} has been eliminated"
+        elif "REACT:" in result:
             reaction = self._clean_response(result.split("REACT:")[-1])
             return False, f"{self.name} : {reaction}"
-        if "SAY:" in result:
-            said_value = self._clean_response(result.split("SAY:")[-1])
+        elif "SAY:" in result:
+            said_value = self._clean_response(result.split(f"SAY: {self.name}:")[-1])
             return True, f"{self.name} : {said_value}"
         else:
             return False, result
@@ -188,19 +187,19 @@ class Agent:
         )
         
         result = full_result.strip().split("\n")[0]
-        if "KILL:" in result:
+        if "ELIMINATE:" in result:
 
-            kill = self._clean_response(result.split("KILL:")[-1])
+            kill = self._clean_response(result.split("ELIMINATE:")[-1])
             self.memory.save_context(
                 {},
                 {
                     self.memory.add_memory_key: f"{self.name} observed "
-                    f"{observation} and killed {villager}",
+                    f"{observation} and eliminated {villager}",
                     self.memory.now_key: now,
                 }
             )
-            return False, f"{self.name} : {villager} has been killed"
-        if "GOODBYE:" in result:
+            return False, f"{self.name} : {villager} has been eliminated"
+        elif "GOODBYE:" in result:
             farewell = self._clean_response(result.split("GOODBYE:")[-1])
             self.memory.save_context(
                 {},
@@ -211,7 +210,7 @@ class Agent:
                 },
             )
             return False, f"{self.name} : {farewell}"
-        if "SAY:" in result:
+        elif "SAY:" in result:
             response_text = self._clean_response(result.split(":")[-1])
             self.memory.save_context(
                 {},

@@ -19,8 +19,8 @@ services:
   server:
     build: 
       context: .
-    # ports:
-      # - 6789:6789
+    ports:
+      - 6789:6789
     env_file: .env
     command: python3 server.py
 
