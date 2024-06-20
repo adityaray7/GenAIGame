@@ -19,43 +19,6 @@ from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
 from utils.mongoClient import get_atlas_collection, get_atlas_collections
 from colorama import Fore
-mixer.init()
-mixer.music.load('music/music.mp3')
-
-ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
-
-deepl_auth_key = os.getenv("DEEPL_AUTH_KEY")
-names=["Akio","Chiyo","Hana","Izumi","Kaio"]
-werewolf_names=["Katsumi","Madara"]
-convo_collection_names=["Akio_convo","Chiyo_convo","hana_convo","Izumi_convo","Kaio_convo"]
-werewolf_convo_collection_names=["Katsumi_convo","Madara_convo"]
-
-mongo_connection_holder = {}
-
-client_holder = {}
-convo_holder = {}
-# Define collection and index name
-db_name = "langchain_db"
-collection_name = "test"
-convo_collection_name = "conversations"
-vector_search_index = "vector_index"
-
-
-# Connect to your Atlas cluster
-mongo_connection_thread = Thread(target=threaded_function, args=(client_holder, get_atlas_collection, (db_name, collection_name)))
-mongo_connection_thread.start()
-
-# Connect to your Atlas cluster
-convo_connection_thread = Thread(target=threaded_function, args=(convo_holder, get_atlas_collection, (db_name, convo_collection_name)))
-convo_connection_thread.start()
-
-collection_names = names+werewolf_names+convo_collection_names+werewolf_convo_collection_names
-collections_holder = {}
-
-villager_mongo_connection = Thread(target=threaded_function, args=(collections_holder, get_atlas_collections, (db_name, collection_names)))
-villager_mongo_connection.start()
-
-
 from villager import Villager, Werewolf, Player
 from utils.agentmemory import AgentMemory
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
@@ -65,23 +28,6 @@ llm = AzureChatOpenAI(
     api_version="2024-02-01",
     temperature=0
 )
-
-
-# Mongo connection thread
-mongo_connection_thread.join()
-convo_connection_thread.join()
-villager_mongo_connection.join()
-atlas_collection = client_holder["result"]
-convo_collection = convo_holder["result"]
-villager_connections = collections_holder["result"]
-
-villager_collections = {}
-
-for i,name in enumerate(names+werewolf_names):
-    villager_collections[name] = (villager_connections[i],villager_connections[len(names+werewolf_names)+i])
-
-# Multithreading 
-villagers_threaded = []
 
 # Constants
 SCREEN_WIDTH = 1500
@@ -97,11 +43,91 @@ background_night = pygame.image.load("images/night3.png")
 background_day = pygame.transform.scale(background_day, (SCREEN_WIDTH, SCREEN_HEIGHT))
 background_night = pygame.transform.scale(background_night, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
+
+'''
+Initialize the mixer
+'''
+mixer.init()
+mixer.music.load('music/music.mp3')
+
+
+'''Initialize the pygame'''
+names=["Akio","Chiyo","Hana","Izumi","Kaio"]
+werewolf_names=["Katsumi","Madara"]
+convo_collection_names=["Akio_convo","Chiyo_convo","hana_convo","Izumi_convo","Kaio_convo"]
+werewolf_convo_collection_names=["Katsumi_convo","Madara_convo"]
+
+
+'''Initialize the mongo connection'''
+ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
+deepl_auth_key = os.getenv("DEEPL_AUTH_KEY")
+mongo_connection_holder = {}
+client_holder = {}
+convo_holder = {}
+# Define collection and index name
+db_name = "langchain_db"
+collection_name = "test"
+convo_collection_name = "conversations"
+vector_search_index = "vector_index"
+
+# Connect to your Atlas cluster
+mongo_connection_thread = Thread(target=threaded_function, args=(client_holder, get_atlas_collection, (db_name, collection_name)))
+mongo_connection_thread.start()
+
+# Connect to your Atlas cluster
+convo_connection_thread = Thread(target=threaded_function, args=(convo_holder, get_atlas_collection, (db_name, convo_collection_name)))
+convo_connection_thread.start()
+
+collection_names = names+werewolf_names+convo_collection_names+werewolf_convo_collection_names
+collections_holder = {}
+
+villager_mongo_connection = Thread(target=threaded_function, args=(collections_holder, get_atlas_collections, (db_name, collection_names)))
+villager_mongo_connection.start()
+
+# Mongo connection thread
+mongo_connection_thread.join()
+convo_connection_thread.join()
+villager_mongo_connection.join()
+atlas_collection = client_holder["result"]
+convo_collection = convo_holder["result"]
+villager_connections = collections_holder["result"]
+
+villager_collections = {}
+
+for i,name in enumerate(names+werewolf_names):
+    villager_collections[name] = (villager_connections[i],villager_connections[len(names+werewolf_names)+i])
+
+def create_new_memory_retriever(agent_name="Player"):
+    """Create a new vector store retriever unique to the agent."""
+    # Define your embedding model
+    print("creating memory retriever for",agent_name)
+    embeddings_model = AzureOpenAIEmbeddings(
+        azure_deployment="text-embedding3",
+        api_version="2024-02-01"
+    )
+    if(agent_name=="Player"):
+        agent_collection = atlas_collection
+    else:    
+        agent_collection = villager_collections[agent_name][0]
+    vectorstore = MongoDBAtlasVectorSearch(agent_collection, embeddings_model)
+
+    return TimeWeightedVectorStoreRetriever(
+        vectorstore=vectorstore, other_score_keys=["importance"], k=15, decay_rate=0.005
+    )
+
+# Multithreading 
+villagers_threaded = []
+
+
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
+
+'''
+Initialize the backgrounds
+'''
 backgrounds = [
     ["I am Akio. I enjoy exploring the woods and gathering herbs. The forest is my sanctuary, where I feel most alive and connected to nature.",
     "I often cook meals for my fellow villagers. Using the herbs and plants I gather, I create nutritious and flavorful dishes that keep everyone in good health and spirits.",
@@ -129,16 +155,15 @@ backgrounds = [
     "Keep an eye on other villagers while talking, and in the meeting, raise your suspicion on the werewolf"]
 ]
 
-
-
-
 werewolf_backgrounds = [
     ["I am Katsumi ","I am a werewolf and I am here to sabotage the tasks and eliminate villagers.","I DO NOT reveal my identity to anyone."],
     ["I am Uchiha Madara ","I am a werewolf and I am here to sabotage the tasks.","I DO NOT reveal my identity to anyone."]
 ]
 
 
-
+'''
+walkable paths
+'''
 paths = [
     # Pathways leading to the meeting point
     Path(SCREEN_WIDTH // 2 + 60, SCREEN_HEIGHT // 2 - 30, 800, 30),
@@ -165,31 +190,10 @@ paths = [
     Path(SCREEN_WIDTH - 60, 0, 30, 900)
 ]
 
-def relevance_score_fn(score: float) -> float:
-    """Return a similarity score on a scale [0, 1]."""    
-    # this returns negetive relevance values so temporarily made abs()
-    # change this to implement cosine_similarity
-    return abs(1.0 - (score / math.sqrt(2)))
 
-def create_new_memory_retriever(agent_name="Player"):
-    """Create a new vector store retriever unique to the agent."""
-    # Define your embedding model
-    print("creating memory retriever for",agent_name)
-    embeddings_model = AzureOpenAIEmbeddings(
-        azure_deployment="text-embedding3",
-        api_version="2024-02-01"
-    )
-    if(agent_name=="Player"):
-        agent_collection = atlas_collection
-    else:    
-        agent_collection = villager_collections[agent_name][0]
-    vectorstore = MongoDBAtlasVectorSearch(agent_collection, embeddings_model)
-
-    return TimeWeightedVectorStoreRetriever(
-        vectorstore=vectorstore, other_score_keys=["importance"], k=15, decay_rate=0.005
-    )
-
-# Initialize villagers
+'''
+Initialize the villagers
+'''
 villagers = []
 num_villagers = len(names)
 num_werewolf = len(werewolf_names)
@@ -223,7 +227,9 @@ for i in range(len(werewolf_backgrounds)):
     villagers.append(werewolf)
     j+=1
 
-
+'''
+Initialize the player
+'''
 player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
 player = Player("Player", SCREEN_WIDTH // 2+100, SCREEN_HEIGHT // 2 + 100, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=paths)
 
@@ -242,6 +248,10 @@ def villager_info(villagers):
             "talking": villager.talking
         })
     return info
+
+'''
+Functions to save the conversations
+'''
 
 def save_game_state(villagers, filename="game_state.json"):
     with open(filename, 'w') as f:
@@ -264,6 +274,9 @@ def save_conversations(conversations, filename="conversations.json"):
     with open(filename, 'w') as f:
         json.dump(conversations, f, indent=4)
 
+'''
+utility functions
+'''
 
 def blend_images(image1, image2, blend_factor):
     """Blend two images together based on the blend_factor (0.0 to 1.0)"""
@@ -277,11 +290,30 @@ def blend_images(image1, image2, blend_factor):
     temp_surface.set_alpha(int(255 * blend_factor))
     screen.blit(temp_surface, (0, 0))
 
+# Function to display text on the screen with a white background
+def display_text(screen, text, duration, font_size=50):
+    font = pygame.font.Font(None, font_size)
+    rendered_text = font.render(text, True, (255, 0, 0))  # Red color text
+    text_rect = rendered_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    background_rect = pygame.Rect(0, 0, text_rect.width + 20, text_rect.height + 20)
+    background_rect.center = text_rect.center
+
+    start_time = time.time()
+    while time.time() - start_time < duration:
+        screen.fill((255, 255, 255), background_rect)  # White background
+        screen.blit(rendered_text, text_rect)
+        pygame.display.flip()
+        clock.tick(60)
+
 # Initialize task locations
 task_manager = TaskManager()
 task_locations = task_manager.tasks
 global meetCheck
 meetCheck = False
+
+'''
+Game state functions
+'''
 # Function to send game state to the 
 def send_game_state():
     global villagers
@@ -348,7 +380,10 @@ def send_game_state():
     game_state = json.dumps(game_state)
     send(game_state)
 
-# Assign tasks to villagers from LLM
+
+'''
+Task assignment thread
+'''
 assign_first_task(villagers,task_locations,task_manager.completed_tasks(),task_manager.incomplete_tasks())
 conversations = []  # List to store conversations
 
@@ -378,6 +413,10 @@ def assign_task_thread(villager, current_task=None):
     villagers_threaded.remove(villager.agent_id)
 
 
+
+'''
+Morning meeting functions
+'''
 def morning_meeting(villagers,conversations,elapsed_time):
     global is_morning_meeting
     is_morning_meeting = True
@@ -400,10 +439,8 @@ def morning_meeting(villagers,conversations,elapsed_time):
         meeting_complete,villager_remove =handle_meeting(villagers, conversations,villager_remove)
         elapsed_time = temp
         return meeting_complete,elapsed_time + MORNING_MEETING_DURATION,villager_remove
-    
     return meeting_complete,elapsed_time,villager_remove
     
-
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
@@ -413,24 +450,11 @@ def end_morning_meeting(villagers):
     assign_first_task(villagers, task_locations,task_manager.completed_tasks(),task_manager.incomplete_tasks())
 
 
-# Function to display text on the screen with a white background
-def display_text(screen, text, duration, font_size=50):
-    font = pygame.font.Font(None, font_size)
-    rendered_text = font.render(text, True, (255, 0, 0))  # Red color text
-    text_rect = rendered_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-    background_rect = pygame.Rect(0, 0, text_rect.width + 20, text_rect.height + 20)
-    background_rect.center = text_rect.center
-
-    start_time = time.time()
-    while time.time() - start_time < duration:
-        screen.fill((255, 255, 255), background_rect)  # White background
-        screen.blit(rendered_text, text_rect)
-        pygame.display.flip()
-        clock.tick(60)
-
 mixer.music.play(-1)
 
-# Main game loop
+'''
+MAIN GAME LOOP
+'''
 running = True
 start_time = time.time()
 is_day = True
@@ -439,7 +463,7 @@ is_morning_meeting = False
 meeting_complete = False
 message = None
 message_start_time = None
-message_duration = 5  # Duration to show the message in seconds
+message_duration = 5
 dead_villagers = []
 player_coordinates = (player.x, player.y)
 
@@ -453,14 +477,11 @@ while running:
     player.update()
     player_coordinates = (player.x, player.y)
 
-    # Update day/night cycle
-    curr = time.time() + MORNING_MEETING_DURATION
+    curr = time.time() + MORNING_MEETING_DURATION  #increased so that first meeting is skipped
     elapsed_time = curr - start_time
     blend_factor = 0
 
-
     if is_day:
-
         if elapsed_time >= DAY_DURATION:
             is_day = False
             start_time = curr
@@ -468,12 +489,9 @@ while running:
             blend_factor = (elapsed_time - (DAY_DURATION - TRANSITION_DURATION)) / TRANSITION_DURATION
 
         if elapsed_time < MORNING_MEETING_DURATION:
-            
             if not is_morning_meeting:
                 meetCheck=True
-                logger.info("Starting morning meeting...")
-
-            
+                logger.info("Starting morning meeting...")   
             meeting_complete,_,remove_villager = morning_meeting(villagers,conversations,elapsed_time)
 
             if remove_villager:
