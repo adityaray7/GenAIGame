@@ -200,7 +200,6 @@ radius = 65
 angles = [i * (2 * math.pi / (num_villagers+num_werewolf) ) for i in range(num_villagers+num_werewolf)]
 for i in range(len(backgrounds)):
     angle = angles[i]
-    print(angle)
     x = int(center_x + radius * math.cos(angle))
     y = int(center_y + radius * math.sin(angle))
     background_texts = backgrounds[i]
@@ -214,7 +213,6 @@ for i in range(len(backgrounds)):
 
 for i in range(len(werewolf_backgrounds)):
     angle = angles[j]
-    print(angle)
     x = int(center_x + radius * math.cos(angle))
     y = int(center_y + radius * math.sin(angle))
     background_texts = werewolf_backgrounds[i]
@@ -364,10 +362,10 @@ def assign_task_thread(villager, current_task=None):
 
     if isinstance(villager, Werewolf):
         task_name, task_location = assign_next_task(villager, task_manager.completed_tasks(), current_task)
-        print(villager.agent_id, task_name,  task_manager.completed_tasks())
+        # print(villager.agent_id, task_name,  task_manager.completed_tasks())
     else:
         task_name, task_location = assign_next_task(villager, task_manager.incomplete_tasks(), current_task)
-        print(villager.agent_id, task_name,  task_manager.incomplete_tasks())
+        # print(villager.agent_id, task_name,  task_manager.incomplete_tasks())
     task_time = task_location.task_period  # Time required for the task
     task_complete_function = task_location.complete
     task_sabotage_function = task_location.sabotage
@@ -412,7 +410,7 @@ def end_morning_meeting(villagers):
     for villager in villagers:
         villager.talking = False    
     Villager.killed_villagers.clear()
-    assign_first_task(villagers, task_locations)
+    assign_first_task(villagers, task_locations,task_manager.completed_tasks(),task_manager.incomplete_tasks())
 
 
 # Function to display text on the screen with a white background

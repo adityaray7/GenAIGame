@@ -32,9 +32,6 @@ class TaskManager:
 
 
 def assign_first_task(villagers, task_locations,complete,incomplete):
-
-    print(complete)
-    print(incomplete)
     for i in range(len(villagers)):
         villager = villagers[i]
 
@@ -54,7 +51,6 @@ def assign_first_task(villagers, task_locations,complete,incomplete):
         else:
             task = random.choice(incomplete)
             task_name = task.task
-            print([loc for loc in task_locations if loc.task == task_name])
             task_location = [loc for loc in task_locations if loc.task == task_name][0]
             task_time = task_location.task_period
             task_complete_function = task_location.complete
@@ -80,9 +76,7 @@ def assign_next_task(villager, task_locations,previous_task):
         task_name = response.strip().split(':')[1].strip()
         task_location = [loc for loc in task_locations if loc.task == task_name][0]
         
-        print("*"*50)
-        print(task_name)
-
+    
         task_time = task_location.task_period  # Time required for the task
         task_complete_function = task_location.complete
         # villager.assign_task(task_name, task_location,task_time, task_complete_function)

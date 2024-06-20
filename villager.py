@@ -10,6 +10,7 @@ import os
 load_dotenv()
 
 ELIMINATION_DISTANCE = 10
+SPEED = 2
 class Villager:
     killed_villagers = []
     def __init__(self, name, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0),paths=[]):
@@ -36,8 +37,7 @@ class Villager:
 
     def assign_task(self, task, location, time_to_complete_task, task_complete_function):
         if self.alive == False:
-            print(self.agent_id)
-            print("the person is dead hence can't be assigned a task")
+            print(f"{self.agent_id} is dead hence can't be assigned a task")
             return
         self.current_task = task
         self.task_complete_function = task_complete_function
@@ -102,11 +102,9 @@ class Villager:
                 moved = False
 
                 for direction in directions:
-                    next_x = self.x + direction[0]
-                    next_y = self.y + direction[1]
-                    # print(self.agent_id)
-                    # print(self.is_on_path(next_x, next_y, self.paths) , self.distance_to_target(next_x, next_y) , current_distance)
-
+                    next_x = self.x + SPEED*direction[0]
+                    next_y = self.y + SPEED*direction[1]
+               
                     if self.distance_to_target(next_x, next_y) < current_distance:
                         self.x = next_x
                         self.y = next_y
@@ -115,7 +113,7 @@ class Villager:
 
                 if not moved:
                     # Move to the left if no valid move was found
-                    next_x = self.x+ 1
+                    next_x = self.x+ 1*SPEED
                     next_y = self.y
                     if self.is_on_path(next_x, next_y, self.paths):
                         self.x = next_x
@@ -166,7 +164,6 @@ class Villager:
 class Werewolf(Villager):
     def __init__(self, agent_id, x, y, background_texts, llm : BaseLanguageModel, memory : AgentMemory,occupation="",meeting_location = (0,0)):
         super().__init__(agent_id, x, y, background_texts, llm, memory, occupation, meeting_location)
-        print(self.agent_id)
         self.is_werewolf = True
         self.kill_cooldown = time.time()+60
 
@@ -201,11 +198,9 @@ class Werewolf(Villager):
                 moved = False
 
                 for direction in directions:
-                    next_x = self.x + direction[0]
-                    next_y = self.y + direction[1]
-                    # print(self.agent_id)
-                    # print(self.is_on_path(next_x, next_y, self.paths) , self.distance_to_target(next_x, next_y) , current_distance)
-
+                    next_x = self.x + SPEED*direction[0]
+                    next_y = self.y + SPEED*direction[1]
+                   
                     if self.distance_to_target(next_x, next_y) < current_distance:
                         self.x = next_x
                         self.y = next_y
@@ -214,7 +209,7 @@ class Werewolf(Villager):
 
                 if not moved:
                     # Move to the left if no valid move was found
-                    next_x = self.x+ 1
+                    next_x = self.x+ 1*SPEED
                     next_y = self.y
                     if self.is_on_path(next_x, next_y, self.paths):
                         self.x = next_x

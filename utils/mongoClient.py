@@ -23,7 +23,7 @@ def get_atlas_collections(db_name, collection_names):
 
     for collection_name in collection_names:
         collection = db[collection_name]
-        # collection.delete_many({})
+        collection.delete_many({})
         collections.append(collection)
     
     return collections
