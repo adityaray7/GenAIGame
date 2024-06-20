@@ -1,6 +1,7 @@
 from utils.task_locations import Task
 from utils.logger import logger
 import random
+from villager import Werewolf
 
 class TaskManager:
     def __init__(self) -> None:
@@ -30,15 +31,35 @@ class TaskManager:
         return all(task.completed for task in self.tasks)
 
 
-def assign_first_task(villagers, task_locations,task_names=['Cook food','Build a house','Guard the village', 'Fetch water',"Gather food","Build a house"]):
+def assign_first_task(villagers, task_locations,complete,incomplete):
+
+    print(complete)
+    print(incomplete)
     for i in range(len(villagers)):
         villager = villagers[i]
-        task_name = task_names[i]
-        task_location = [loc for loc in task_locations if loc.task == task_name][0]
-        task_time = task_location.task_period  # Time required for the task
-        task_complete_function = task_location.complete
-        villager.assign_task(task_name, task_location, task_time, task_complete_function)
-        logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
+
+        if isinstance(villager,Werewolf):
+            if complete:
+                task = random.choice(complete)
+                task_name = task.task
+            else:
+                task= random.choice(incomplete)
+                task_name = task.task
+            task_location = [loc for loc in task_locations if loc.task == task_name][0]
+            task_time = task_location.task_period  # Time required for the task
+            task_sabotage_function = task_location.sabotage
+            villager.assign_task(task_name, task_location, task_time, task_sabotage_function)
+            logger.debug(f"Sabotage task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
+
+        else:
+            task = random.choice(incomplete)
+            task_name = task.task
+            print([loc for loc in task_locations if loc.task == task_name])
+            task_location = [loc for loc in task_locations if loc.task == task_name][0]
+            task_time = task_location.task_period
+            task_complete_function = task_location.complete
+            villager.assign_task(task_name, task_location, task_time, task_complete_function)
+            logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
 
 
 def assign_next_task(villager, task_locations,previous_task):
