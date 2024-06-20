@@ -26,9 +26,9 @@ ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 
 deepl_auth_key = os.getenv("DEEPL_AUTH_KEY")
 names=["Akio","Chiyo","Hana","Izumi","Kaio"]
-werewolf_names=["Katsumi"]
+werewolf_names=["Katsumi","Madara"]
 convo_collection_names=["Akio_convo","Chiyo_convo","hana_convo","Izumi_convo","Kaio_convo"]
-werewolf_convo_collection_names=["Katsumi_convo"]
+werewolf_convo_collection_names=["Katsumi_convo","Madara_convo"]
 
 mongo_connection_holder = {}
 
@@ -134,7 +134,7 @@ backgrounds = [
 
 werewolf_backgrounds = [
     ["I am Katsumi ","I am a werewolf and I am here to sabotage the tasks and eliminate villagers.","I DO NOT reveal my identity to anyone."],
-    # ["I am Harvey ","I am a werewolf and I am here to sabotage the tasks."]
+    ["I am Uchiha Madara ","I am a werewolf and I am here to sabotage the tasks.","I DO NOT reveal my identity to anyone."]
 ]
 
 
@@ -351,7 +351,7 @@ def send_game_state():
     send(game_state)
 
 # Assign tasks to villagers from LLM
-assign_first_task(villagers,task_locations)
+assign_first_task(villagers,task_locations,task_manager.completed_tasks(),task_manager.incomplete_tasks())
 conversations = []  # List to store conversations
 
 def assign_task_thread(villager, current_task=None):
@@ -364,10 +364,10 @@ def assign_task_thread(villager, current_task=None):
 
     if isinstance(villager, Werewolf):
         task_name, task_location = assign_next_task(villager, task_manager.completed_tasks(), current_task)
-        print(villager.agent_id, task_name, [task.task for task in task_manager.completed_tasks()])
+        print(villager.agent_id, task_name,  task_manager.completed_tasks())
     else:
         task_name, task_location = assign_next_task(villager, task_manager.incomplete_tasks(), current_task)
-        print(villager.agent_id, task_name, [task.task for task in task_manager.incomplete_tasks()])
+        print(villager.agent_id, task_name,  task_manager.incomplete_tasks())
     task_time = task_location.task_period  # Time required for the task
     task_complete_function = task_location.complete
     task_sabotage_function = task_location.sabotage
@@ -409,6 +409,8 @@ def morning_meeting(villagers,conversations,elapsed_time):
 def end_morning_meeting(villagers):
     global is_morning_meeting
     is_morning_meeting = False
+    for villager in villagers:
+        villager.talking = False    
     Villager.killed_villagers.clear()
     assign_first_task(villagers, task_locations)
 
@@ -454,7 +456,7 @@ while running:
     player_coordinates = (player.x, player.y)
 
     # Update day/night cycle
-    curr = time.time()+MORNING_MEETING_DURATION
+    curr = time.time() + MORNING_MEETING_DURATION
     elapsed_time = curr - start_time
     blend_factor = 0
 
