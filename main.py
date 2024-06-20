@@ -19,8 +19,8 @@ from langchain_mongodb import MongoDBAtlasVectorSearch
 load_dotenv()
 from utils.mongoClient import get_atlas_collection, get_atlas_collections
 from colorama import Fore
-mixer.init()
-mixer.music.load('music/music.mp3')
+# mixer.init()
+# mixer.music.load('music/music.mp3')
 
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
 

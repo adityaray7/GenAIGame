@@ -21,8 +21,10 @@ async def echo(websocket, path):
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
-start_server = websockets.serve(echo, "localhost", os.getenv("WEBSOCKET_PORT"))
+host = "0.0.0.0"
 
-print('Server started at ws://localhost:' + os.getenv("WEBSOCKET_PORT"))
+start_server = websockets.serve(echo,host, os.getenv("WEBSOCKET_PORT"))
+
+print(f'Server started at ws://{host}:' + os.getenv("WEBSOCKET_PORT"))
 loop.run_until_complete(start_server)
 loop.run_forever()
