@@ -2,7 +2,7 @@ from utils.task_locations import Task
 from utils.logger import logger
 import random
 from villager import Werewolf
-
+from utils.logger import logger
 class TaskManager:
     def __init__(self) -> None:
         self.tasks = self.initialize_task_locations()
@@ -82,8 +82,8 @@ def assign_next_task(villager, task_locations,previous_task):
         # villager.assign_task(task_name, task_location,task_time, task_complete_function)
         logger.debug(f"Assigned task '{task_name}' to {villager.agent_id} at location ({task_location.x}, {task_location.y})")
 
-    except IndexError:
-        logger.error(f"Unexpected response format: {response}\n")
+    except Exception as e:
+        logger.error(f"Error assigning task to {villager.agent_id}: {e}")
         default_task_location = random.choice(task_locations)
         # default_task_time = default_task_location.task_period
         # task_complete_function = default_task_location.complete
