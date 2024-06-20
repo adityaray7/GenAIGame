@@ -99,7 +99,7 @@ class Agent:
     
     @token_tracker
     def _generate_reaction(
-        self, observation: str, suffix: str, now: Optional[datetime] = None, last_k : Optional[int] = 4
+        self, observation: str, suffix: str, now: Optional[datetime] = None, last_k : Optional[int] = 15
     ) -> str:
         """React to a given observation or dialogue act."""
         prompt = PromptTemplate.from_template(agentPromptJson['_generate_reaction'] + suffix)
