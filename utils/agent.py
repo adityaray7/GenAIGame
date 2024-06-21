@@ -160,6 +160,7 @@ class Agent:
                 f"{observation} and reacted by {result}",
                 self.memory.now_key: now,
             },
+            str(self.name)
         )
         if "ELIMINATE:" in result:
             print("*"*50)
@@ -196,7 +197,8 @@ class Agent:
                     self.memory.add_memory_key: f"{self.name} observed "
                     f"{observation} and eliminated {villager}",
                     self.memory.now_key: now,
-                }
+                },
+                str(self.name)
             )
             return False, f"{self.name} : {villager} has been eliminated"
         elif "GOODBYE:" in result:
@@ -208,6 +210,7 @@ class Agent:
                     f"{observation} and said {farewell}",
                     self.memory.now_key: now,
                 },
+                str(self.name)
             )
             return False, f"{self.name} : {farewell}"
         elif "SAY:" in result:
@@ -219,6 +222,7 @@ class Agent:
                     f"{observation} and said {response_text}",
                     self.memory.now_key: now,
                 },
+                str(self.name)
             )
             return True, f"{self.name} : {response_text}"
         else:

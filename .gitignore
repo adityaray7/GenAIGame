@@ -1,4 +1,6 @@
 otsuka-venv
+venv/
+memories/
 genai-venv/
 __pycache__
 
