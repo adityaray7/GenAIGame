@@ -57,6 +57,16 @@ werewolf_names=["Katsumi","Madara"]
 convo_collection_names=["Akio_convo","Chiyo_convo","hana_convo","Izumi_convo","Kaio_convo"]
 werewolf_convo_collection_names=["Katsumi_convo","Madara_convo"]
 
+'''Initalize local memory'''
+memory_directory = "memories"
+if not os.path.exists(memory_directory):
+    os.makedirs(memory_directory)
+
+for name in names+werewolf_names:
+    file_path = f"{memory_directory}/{name}_memories.json"
+    with open(file_path,"w") as f:
+        json.dump([],f)
+
 
 '''Initialize the mongo connection'''
 ATLAS_CONNECTION_STRING=os.getenv("ATLAS_CONNECTION_STRING")
@@ -344,19 +354,24 @@ def send_game_state():
             "task": task.task
         })
     
-    conversations = []  
+    conversations = []
     if not os.path.exists("conversations.json"):
-        print("Creating conversations.json file...")
-        # create an empty file
-        with open("conversations.json", "w") as f:
-            json.dump([], f)
-
+        with open("conversations.json","w") as f:
+            json.dump([],f)  
     with open ("conversations.json","r") as f:
         conversations = json.load(f)
         
+    villager_memories = {}
+    for villager in villagers:
+        with open(f"memories/{villager.agent_id}_memories.json", 'r') as file:
+            memories = json.load(file)
+            villager_memories[villager.agent_id] = memories
+            
+        
+        
 
     isConvo=False
-    result = None
+    result = ""
     if conversations:
         isConvo=True
         translator = deepl.Translator(deepl_auth_key)
@@ -380,7 +395,8 @@ def send_game_state():
         "isConvo":isConvo,
         "conversations": conversations,
         "translatedText":result.text if result else "",
-        "is_morning_meeting": meetCheck
+        "is_morning_meeting": meetCheck,
+        "villager_memories":villager_memories
     }
 
     # convert game_state to json

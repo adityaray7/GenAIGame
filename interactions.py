@@ -65,7 +65,7 @@ def handle_meeting(villagers, conversations, villager_remove):
     voting_results = []
     villager_remove = None
     for villager in villagers:
-        initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager eliminated was {Villager.killed_villagers[-1].agent_id + ' near ' + dead_villager_locations[-1] if Villager.killed_villagers else 'None'}"
+        initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager eliminated was {Villager.killed_villagers[-1].agent_id if Villager.killed_villagers else 'None' + ' near ' + dead_villager_locations[-1] if Villager.killed_villagers else 'None'}"
         call_to_action_template = (
             "What would {agent_name} say?\n"
             "Respond in the format 'I suspect: NAME. REASON'\n\n"
@@ -73,7 +73,7 @@ def handle_meeting(villagers, conversations, villager_remove):
         response = ""
         try:
             _, response = villager.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template)
-            print(f"{villager.agent_id}: {response}")
+            logger.info(f"{villager.agent_id}: {response}")
             response_lines = response.strip().split('.')
             for line in response_lines:
                 if line.startswith("I suspect"):
@@ -169,10 +169,10 @@ def handle_dead_villager_interaction(dead_villagers, villagers, conversations):
                         logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id} near {nearest_task_location.task}.")
                         logger.info(f"{villager.agent_id} also sees {someone_else.agent_id} near the dead villager in {nearest_task_location.task}. Suspicion arises.")
 
-                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id} in {nearest_task_location.task}. You suspect {someone_else.agent_id} is the werewolf.")
+                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id} in {nearest_task_location.task}. You suspect {someone_else.agent_id} is the werewolf.", agent_name=villager.agent_id)
                     else:
                         logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id} near {nearest_task_location.task}.")
-                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {nearest_task_location.task}.")
+                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {nearest_task_location.task}.", agent_name=villager.agent_id)
 
 def handle_villager_location_interactions(villagers):
     """
@@ -190,7 +190,7 @@ def handle_villager_location_interactions(villagers):
                     nearest_task_location = get_nearest_task_location(villager2)
                     if nearest_task_location is not None:
                         logger.info(f"{villager1.agent_id} sees {villager2.agent_id} near {nearest_task_location.task}")
-                        villager1.agent.memory.add_memory(f"You see {villager2.agent_id} near {nearest_task_location.task}")
+                        villager1.agent.memory.add_memory(f"You see {villager2.agent_id} near {nearest_task_location.task}", agent_name=villager1.agent_id)
 
 def handle_villager_interactions(player, villagers, dead_villagers, conversations):
     """

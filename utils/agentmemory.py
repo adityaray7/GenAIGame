@@ -9,6 +9,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 from concurrent.futures import ThreadPoolExecutor
 import concurrent.futures
+import json
 from utils.prompts import agentMemoryPromptJson
 
 class AgentMemory(BaseMemory):
@@ -53,7 +54,7 @@ class AgentMemory(BaseMemory):
         return [re.sub(r"^\s*\d+\.\s*", "", line).strip() for line in lines]
     
     # add memories function
-    def pause_to_reflect(self, now: Optional[datetime] = None) -> List[str]:
+    def pause_to_reflect(self, now: Optional[datetime] = None,agent_name: str = "agent") -> List[str]:
         """Reflect on recent observations and generate 'insights'."""
         # if self.verbose:
         #     logger.info("Character is reflecting")
@@ -63,7 +64,7 @@ class AgentMemory(BaseMemory):
             insights_threads = [executor.submit(self._get_insights_on_topic, topic, now=now) for topic in topics]
             for insights in concurrent.futures.as_completed(insights_threads):
                 for insight in insights:
-                    self.add_memory(insight, now=now)
+                    self.add_memory(insight, now=now,agent_name=agent_name)
                 new_insights.extend(insights)
         return new_insights
 
@@ -81,9 +82,16 @@ class AgentMemory(BaseMemory):
             return 0.0
     
     def add_memory(
-        self, memory_content: str, now: Optional[datetime] = None
+        self, memory_content: str, now: Optional[datetime] = None,agent_name: str = "agent"
     ) -> List[str]:
         """Add an observation or memory to the agent's memory."""
+        with open(f"memories/{agent_name}_memories.json", 'r+') as file:
+                # print(f"saving memory of{agent_name}")
+                memories = json.load(file)
+                memories.append({'memory': memory_content, 'timestamp': datetime.now().isoformat()})
+                file.seek(0)
+                json.dump(memories, file, indent=4)
+        
         importance_score = self._score_memory_importance(memory_content)
         self.aggregate_importance += importance_score
         document = Document(
@@ -97,7 +105,7 @@ class AgentMemory(BaseMemory):
             and not self.reflecting
         ):
             self.reflecting = True
-            self.pause_to_reflect(now=now)
+            self.pause_to_reflect(now=now,agent_name=agent_name)
             # Hack to clear the importance from reflection
             self.aggregate_importance = 0.0
             self.reflecting = False
@@ -161,9 +169,11 @@ class AgentMemory(BaseMemory):
     def memory_variables(self):
         return []
 
-    def save_context(self, inputs: Dict[str, Any], outputs: Dict[str, Any]):
+
+    def save_context(self, inputs: Dict[str, Any], outputs: Dict[str, Any],agent_name: str):
         mem = outputs.get(self.add_memory_key)
         now = outputs.get(self.now_key)
+        
         if mem:
-            self.add_memory(mem, now=now)
+            self.add_memory(mem, now=now,agent_name=agent_name)
     
