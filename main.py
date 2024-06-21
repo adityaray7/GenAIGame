@@ -366,8 +366,9 @@ def send_game_state():
             conversation_text = split_text[1].strip()  # Remove leading/trailing whitespace
         else:
             conversation_text = split_text[0].strip() 
-        result = translator.translate_text(conversation_text, target_lang="JA")
-        print("Translated text: ", result.text)
+        if conversation_text:
+            result = translator.translate_text(conversation_text, target_lang="JA")
+            print("Translated text: ", result.text)
           
       
     game_state = {
