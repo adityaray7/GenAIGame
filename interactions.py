@@ -169,10 +169,10 @@ def handle_dead_villager_interaction(dead_villagers, villagers, conversations):
                         logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id} near {nearest_task_location.task}.")
                         logger.info(f"{villager.agent_id} also sees {someone_else.agent_id} near the dead villager in {nearest_task_location.task}. Suspicion arises.")
 
-                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id} in {nearest_task_location.task}. You suspect {someone_else.agent_id} is the werewolf.")
+                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {someone_else.agent_id} in {nearest_task_location.task}. You suspect {someone_else.agent_id} is the werewolf.", agent_name=villager.agent_id)
                     else:
                         logger.info(f"{villager.agent_id} sees dead villager {dead_villager.agent_id} near {nearest_task_location.task}.")
-                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {nearest_task_location.task}.")
+                        villager.agent.memory.add_memory(f"You see {dead_villager.agent_id} dead near {nearest_task_location.task}.", agent_name=villager.agent_id)
 
 def handle_villager_location_interactions(villagers):
     """
@@ -190,7 +190,7 @@ def handle_villager_location_interactions(villagers):
                     nearest_task_location = get_nearest_task_location(villager2)
                     if nearest_task_location is not None:
                         logger.info(f"{villager1.agent_id} sees {villager2.agent_id} near {nearest_task_location.task}")
-                        villager1.agent.memory.add_memory(f"You see {villager2.agent_id} near {nearest_task_location.task}")
+                        villager1.agent.memory.add_memory(f"You see {villager2.agent_id} near {nearest_task_location.task}", agent_name=villager1.agent_id)
 
 def handle_villager_interactions(player, villagers, dead_villagers, conversations):
     """

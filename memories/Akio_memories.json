@@ -1,0 +1,74 @@
+[
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:37:22.217219"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:37:31.960944"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:37:42.222567"
+    },
+    {
+        "memory": "Akio observed You see Chiyo nearby. Talk about your task and ask the Chiyo about its tasks and reacted by SAY: Akio: \"Hello Chiyo, I see you're near the village guard. What are your tasks for today?\"",
+        "timestamp": "2024-06-21T11:37:44.178326"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:37:53.884078"
+    },
+    {
+        "memory": "Akio observed Chiyo says Chiyo : \"Hello Akio, I'm just patrolling the village perimeter and ensuring everything is secure. What about you, what brings you near the village guard today?\". Write a logical and suitable reply. Only write the reply and nothing else and said \"I'm also here to report for my shift. Just making sure everything is in order. Goodbye.\"",
+        "timestamp": "2024-06-21T11:38:01.738713"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:38:04.030526"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:38:14.105769"
+    },
+    {
+        "memory": "You see Izumi dead near Madara in Scout the area. You suspect Madara is the werewolf.",
+        "timestamp": "2024-06-21T11:38:21.819232"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:38:24.239711"
+    },
+    {
+        "memory": "Akio observed Chiyo says Chiyo : \"Goodbye, Akio. Take care.\". Write a logical and suitable reply. Only write the reply and nothing else and said \"Goodbye\"",
+        "timestamp": "2024-06-21T11:38:28.888258"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:38:32.320029"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:38:34.574950"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:38:42.328574"
+    },
+    {
+        "memory": "Akio observed You see Chiyo nearby. Talk about your task and ask the Chiyo about its tasks and reacted by REACT: Akio's reaction",
+        "timestamp": "2024-06-21T11:38:42.735316"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:38:44.671927"
+    },
+    {
+        "memory": "You see Izumi dead near Chiyo in Scout the area. You suspect Chiyo is the werewolf.",
+        "timestamp": "2024-06-21T11:38:52.469973"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:38:54.769544"
+    }
+]

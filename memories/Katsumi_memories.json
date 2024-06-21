@@ -1,0 +1,430 @@
+[
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:24.442634"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:34.651794"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:45.748378"
+    },
+    {
+        "memory": "Katsumi observed Kaio says Kaio : Hello Katsumi, I see you nearby. How are your tasks coming along?. Give a reply to it  and said \"Tasks are coming along just fine, thank you for asking.\"",
+        "timestamp": "2024-06-21T11:37:46.174072"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:56.153976"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:38:07.037892"
+    },
+    {
+        "memory": "You see Izumi near Scout the area",
+        "timestamp": "2024-06-21T11:38:16.904628"
+    },
+    {
+        "memory": "Katsumi observed only assign one task from the following:['Guard the village'] other than Heal the injured and reacted by Task: Guard the village",
+        "timestamp": "2024-06-21T11:38:49.658569"
+    },
+    {
+        "memory": "You see Madara near Scout the area",
+        "timestamp": "2024-06-21T11:39:01.678921"
+    },
+    {
+        "memory": "You see Akio dead near Hana in Scout the area. You suspect Hana is the werewolf.",
+        "timestamp": "2024-06-21T11:39:05.130066"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:39:13.187244"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:15.425070"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:39:25.248614"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:25.580213"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:36.079092"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:39:36.500799"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:46.223024"
+    },
+    {
+        "memory": "You see Madara near Guard the village",
+        "timestamp": "2024-06-21T11:39:46.549142"
+    },
+    {
+        "memory": "You see Madara near Guard the village",
+        "timestamp": "2024-06-21T11:39:56.503907"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:58.326794"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:40:06.657113"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:08.493625"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:40:16.735011"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:18.575608"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:26.840464"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:29.453850"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:37.055021"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:39.223122"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:47.065189"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:49.319050"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:57.062713"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:59.403335"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:07.456521"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:09.459272"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:17.494807"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:19.451777"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:27.663402"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:29.534754"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:37.686094"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:39.598405"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:47.774082"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:49.638800"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:57.891102"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:59.658191"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:07.917378"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:09.739185"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:18.022732"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:19.740039"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:28.105848"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:29.784229"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:38.170407"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:39.837607"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:48.174887"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:49.866216"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:58.333611"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:59.931257"
+    },
+    {
+        "memory": "Katsumi observed You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : Chiyo,Hana,Kaio,Madara\n Last day the villager eliminated was Akio near Scout the area and reacted by I suspect: Chiyo. REASON: I have repeatedly seen Chiyo near the village guard, and the last day the villager eliminated was Akio near the same area.",
+        "timestamp": "2024-06-21T11:43:31.766572"
+    },
+    {
+        "memory": "You see Izumi dead near Kaio in Scout the area. You suspect Kaio is the werewolf.",
+        "timestamp": "2024-06-21T11:43:42.883985"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:43:45.413270"
+    },
+    {
+        "memory": "You see Chiyo near Teach children",
+        "timestamp": "2024-06-21T11:43:55.418836"
+    },
+    {
+        "memory": "You see Chiyo near Build a house",
+        "timestamp": "2024-06-21T11:44:06.416344"
+    },
+    {
+        "memory": "You see Chiyo near Build a house",
+        "timestamp": "2024-06-21T11:44:16.382884"
+    },
+    {
+        "memory": "Katsumi observed only assign one task from the following:['Gather food', 'Guard the village', 'Cook food', 'Scout the area'] other than Build a house and reacted by Task: Scout the area",
+        "timestamp": "2024-06-21T11:44:20.793926"
+    },
+    {
+        "memory": "You see Kaio near Gather food",
+        "timestamp": "2024-06-21T11:44:26.360782"
+    },
+    {
+        "memory": "You see Kaio near Guard the village",
+        "timestamp": "2024-06-21T11:44:36.428684"
+    },
+    {
+        "memory": "Katsumi observed Kaio says Kaio : Hey Katsumi, what task are you working on?. Give a reply to it  and said \"I'm currently working on the task of scouting the area, Kaio.\"",
+        "timestamp": "2024-06-21T11:44:39.255269"
+    },
+    {
+        "memory": "You see Kaio near Guard the village",
+        "timestamp": "2024-06-21T11:44:47.669398"
+    },
+    {
+        "memory": "Katsumi observed Kaio says Kaio : \"That's great, Katsumi. Keep up the good work. Goodbye.\". Give a reply to it  and eliminated Kaio",
+        "timestamp": "2024-06-21T11:44:51.217187"
+    },
+    {
+        "memory": "You see Kaio dead near Guard the village.",
+        "timestamp": "2024-06-21T11:44:52.469155"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:45:19.546984"
+    },
+    {
+        "memory": "Katsumi observed only assign one task from the following:['Gather food', 'Collect wood', 'Guard the village', 'Cook food', 'Hunt for animals', 'Scout the area'] other than Scout the area and reacted by Task: Guard the village",
+        "timestamp": "2024-06-21T11:45:28.488593"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:45:30.569261"
+    },
+    {
+        "memory": "Katsumi observed Chiyo says Chiyo : Hey Katsumi, what task have you been assigned?. Give a reply to it  and eliminated Chiyo",
+        "timestamp": "2024-06-21T11:45:33.953157"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:45:35.519511"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:45:47.368627"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:45:58.327159"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:46:09.479191"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:46:20.510294"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:46:31.309282"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:46:42.277185"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:46:53.527473"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:47:04.369736"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:47:15.205021"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:47:25.871872"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:47:36.621597"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:47:47.428550"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:47:58.215601"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:48:08.957375"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:48:19.733400"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:48:30.465988"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:48:41.211295"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:48:51.932883"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:49:02.573046"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:49:13.410148"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:49:24.272103"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:49:35.042146"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:49:45.984328"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:49:56.752937"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:50:07.608012"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:50:18.650984"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:50:29.488550"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:50:40.427685"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:50:51.382787"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:51:02.368209"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:51:13.778113"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:51:24.687161"
+    },
+    {
+        "memory": "You see Chiyo dead near Scout the area.",
+        "timestamp": "2024-06-21T11:51:35.613662"
+    }
+]

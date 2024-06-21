@@ -1,0 +1,282 @@
+[
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:23.115206"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:33.364743"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:44.686232"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:54.974062"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:38:06.266638"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:38:16.166976"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:38:26.269295"
+    },
+    {
+        "memory": "Hana observed only assign one task from the following:['Gather food', 'Build a house', 'Collect wood', 'Fetch water', 'Cook food', 'Hunt for animals', 'Scout the area', 'Heal the injured', 'Teach children'] other than Guard the village and reacted by Task: Scout the area",
+        "timestamp": "2024-06-21T11:38:33.247115"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:38:36.457669"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:38:42.993533"
+    },
+    {
+        "memory": "You see Akio near Scout the area",
+        "timestamp": "2024-06-21T11:38:46.512895"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:38:53.103052"
+    },
+    {
+        "memory": "You see Akio near Scout the area",
+        "timestamp": "2024-06-21T11:38:56.730069"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:03.231731"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:39:06.636288"
+    },
+    {
+        "memory": "Hana observed You see Chiyo nearby. Talk about your task and ask the Chiyo about its tasks and reacted by SAY: Hana: Chiyo, I noticed you near the task of Guard the village. Did you see anything suspicious while you were there?",
+        "timestamp": "2024-06-21T11:39:10.169446"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:13.415241"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:39:16.998980"
+    },
+    {
+        "memory": "Hana observed Chiyo says Chiyo : No, everything seemed quiet while I was on duty.. Write a logical and suitable reply. Only write the reply and nothing else and said Thank you for your vigilance, Chiyo. Keep up the good work. Goodbye.",
+        "timestamp": "2024-06-21T11:39:21.129939"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:24.502487"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:39:27.226142"
+    },
+    {
+        "memory": "Hana observed Chiyo says Chiyo : Thank you, Hana. I will continue to be vigilant. Goodbye.. Write a logical and suitable reply. Only write the reply and nothing else and said \"Goodbye\"",
+        "timestamp": "2024-06-21T11:39:33.192111"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:34.509176"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:39:37.343526"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:44.798354"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:39:47.294778"
+    },
+    {
+        "memory": "Hana observed only assign one task from the following:['Gather food', 'Collect wood', 'Fetch water', 'Cook food', 'Hunt for animals', 'Heal the injured', 'Teach children'] other than Scout the area and reacted by Task: Hunt for animals",
+        "timestamp": "2024-06-21T11:39:53.989376"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:39:54.891538"
+    },
+    {
+        "memory": "You see Katsumi near Guard the village",
+        "timestamp": "2024-06-21T11:40:01.769220"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:04.866045"
+    },
+    {
+        "memory": "You see Chiyo near Scout the area",
+        "timestamp": "2024-06-21T11:40:12.342018"
+    },
+    {
+        "memory": "You see Izumi dead near Chiyo in Scout the area. You suspect Chiyo is the werewolf.",
+        "timestamp": "2024-06-21T11:40:15.101241"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:22.914578"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:25.224881"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:32.862653"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:35.331697"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:42.882816"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:45.325659"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:52.894676"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:55.343764"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:03.023596"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:05.415842"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:13.177227"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:15.506707"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:23.227711"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:25.496941"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:33.335714"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:35.538751"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:43.236052"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:45.892820"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:53.351548"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:55.891121"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:03.380524"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:05.918943"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:13.458159"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:15.995965"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:23.551287"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:26.152277"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:33.568255"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:36.205231"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:43.997864"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:46.384835"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:54.018684"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:56.488550"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:43:04.379305"
+    },
+    {
+        "memory": "Hana observed You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : Chiyo,Kaio,Katsumi,Madara\n Last day the villager eliminated was Akio near Scout the area and reacted by I suspect: Madara. REASON: Madara has been consistently near the village guard, which is suspicious behavior given the recent elimination of Akio near the scout area.",
+        "timestamp": "2024-06-21T11:43:18.808840"
+    },
+    {
+        "memory": "You see Izumi dead near Kaio in Scout the area. You suspect Kaio is the werewolf.",
+        "timestamp": "2024-06-21T11:43:39.952254"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:43:45.200255"
+    },
+    {
+        "memory": "Hana observed only assign one task from the following:['Gather food', 'Collect wood', 'Fetch water', 'Hunt for animals', 'Heal the injured', 'Teach children'] other than Cook food and reacted by Task: Hunt for animals",
+        "timestamp": "2024-06-21T11:44:16.505332"
+    },
+    {
+        "memory": "Hana observed only assign one task from the following:['Build a house', 'Fetch water', 'Heal the injured', 'Teach children'] other than Hunt for animals and reacted by Task: Heal the injured",
+        "timestamp": "2024-06-21T11:45:16.684756"
+    }
+]

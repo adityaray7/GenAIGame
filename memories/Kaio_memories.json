@@ -1,0 +1,210 @@
+[
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:24.098100"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:34.231476"
+    },
+    {
+        "memory": "Kaio observed You see Katsumi nearby. Talk about your task and ask the Katsumi about its tasks and reacted by SAY: Kaio: Hello Katsumi, I see you nearby. How are your tasks coming along?",
+        "timestamp": "2024-06-21T11:37:40.988868"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:45.489205"
+    },
+    {
+        "memory": "Kaio observed Katsumi says Katsumi : \"Tasks are coming along just fine, thank you for asking.\". Write a logical and suitable reply. Only write the reply and nothing else and said \"Goodbye\"",
+        "timestamp": "2024-06-21T11:37:50.810052"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:37:55.866461"
+    },
+    {
+        "memory": "You see Akio near Guard the village",
+        "timestamp": "2024-06-21T11:38:06.659904"
+    },
+    {
+        "memory": "Kaio observed only assign one task from the following:['Gather food', 'Collect wood', 'Fetch water', 'Cook food', 'Hunt for animals', 'Scout the area', 'Heal the injured', 'Teach children'] other than Build a house and reacted by Task: Gather food",
+        "timestamp": "2024-06-21T11:39:12.787742"
+    },
+    {
+        "memory": "You see Madara near Guard the village",
+        "timestamp": "2024-06-21T11:40:12.712805"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:20.157712"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:23.270785"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:30.311489"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:33.415696"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:40.442667"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:43.370512"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:40:50.777743"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:40:53.516229"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:00.865814"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:03.466341"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:10.938823"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:13.546354"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:20.925143"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:23.573509"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:31.024256"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:33.699130"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:41.046079"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:43.821305"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:41:51.080597"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:41:53.860812"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:01.081159"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:03.934580"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:11.122301"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:13.983588"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:21.140741"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:23.996147"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:31.212317"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:34.033234"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:41.248585"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:44.111203"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:42:51.258991"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:42:54.102053"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:43:01.322050"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:43:06.082902"
+    },
+    {
+        "memory": "Kaio observed You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : Chiyo,Hana,Katsumi,Madara\n Last day the villager eliminated was Akio near Scout the area and reacted by I suspect: Madara. REASON: Madara was seen near the area where Izumi was found dead multiple times, and there is no logical reason for Madara to be in that area so frequently.",
+        "timestamp": "2024-06-21T11:43:25.747605"
+    },
+    {
+        "memory": "You see Izumi dead near Scout the area.",
+        "timestamp": "2024-06-21T11:43:41.437232"
+    },
+    {
+        "memory": "You see Chiyo near Guard the village",
+        "timestamp": "2024-06-21T11:43:45.315858"
+    },
+    {
+        "memory": "Kaio observed only assign one task from the following:['Collect wood', 'Fetch water', 'Hunt for animals', 'Heal the injured', 'Teach children'] other than Gather food and reacted by Task: Hunt for animals",
+        "timestamp": "2024-06-21T11:44:19.542069"
+    },
+    {
+        "memory": "You see Katsumi near Build a house",
+        "timestamp": "2024-06-21T11:44:25.767467"
+    },
+    {
+        "memory": "Kaio observed You see Katsumi nearby. Talk about your task and ask the Katsumi about its tasks and reacted by SAY: Kaio: Hey Katsumi, what task are you working on?",
+        "timestamp": "2024-06-21T11:44:33.487566"
+    },
+    {
+        "memory": "You see Katsumi near Build a house",
+        "timestamp": "2024-06-21T11:44:36.201213"
+    },
+    {
+        "memory": "Kaio observed Katsumi says Katsumi : \"I'm currently working on the task of scouting the area, Kaio.\". Write a logical and suitable reply. Only write the reply and nothing else and said \"That's great, Katsumi. Keep up the good work. Goodbye.\"",
+        "timestamp": "2024-06-21T11:44:44.778529"
+    },
+    {
+        "memory": "You see Katsumi near Build a house",
+        "timestamp": "2024-06-21T11:44:47.575150"
+    }
+]
