@@ -65,7 +65,7 @@ def handle_meeting(villagers, conversations, villager_remove):
     voting_results = []
     villager_remove = None
     for villager in villagers:
-        initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager eliminated was {Villager.killed_villagers[-1].agent_id + ' near ' + dead_villager_locations[-1] if Villager.killed_villagers else 'None'}"
+        initial_obs = f"You are in a meeting with all the villagers. Tell your suspicions about who the werewolf is followed by the reason. If you have no logical reason to suspect someone then don't make up facts. ONLY CHOOSE THE VILLAGER FROM THE FOLLOWING LIST : {','.join([v.agent_id for v in villagers if v.agent_id != villager.agent_id])}\n Last day the villager eliminated was {Villager.killed_villagers[-1].agent_id if Villager.killed_villagers else 'None' + ' near ' + dead_villager_locations[-1] if Villager.killed_villagers else 'None'}"
         call_to_action_template = (
             "What would {agent_name} say?\n"
             "Respond in the format 'I suspect: NAME. REASON'\n\n"
@@ -73,7 +73,7 @@ def handle_meeting(villagers, conversations, villager_remove):
         response = ""
         try:
             _, response = villager.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template)
-            print(f"{villager.agent_id}: {response}")
+            logger.info(f"{villager.agent_id}: {response}")
             response_lines = response.strip().split('.')
             for line in response_lines:
                 if line.startswith("I suspect"):
