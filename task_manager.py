@@ -9,15 +9,15 @@ class TaskManager:
 
     def initialize_task_locations(self):
         return [
-            Task(1100, 650, "Gather food",5),
-            Task(1100, 200, "Build a house",10),
-            Task(1400, 100, "Collect wood",8),
-            Task(80, 700, "Fetch water",10),
-            Task(900, 450, "Guard the village",15),
-            Task(400, 650, "Cook food",10),
-            Task(100, 100, "Hunt for animals",15),
+            Task(1150, 650, "Gather food",5),
+            Task(1150, 200, "Build a house",10),
+            Task(750, 650, "Collect wood",8),
+            Task(60, 400, "Fetch water",10),
+            Task(880, 400, "Guard the village",15),
+            Task(380, 650, "Cook food",10),
+            Task(80, 200, "Hunt for animals",15),
             Task(600, 400, "Scout the area",10),
-            Task(400, 400, "Heal the injured",12),
+            Task(380, 400, "Heal the injured",12),
             Task(700, 200, "Teach children",10)
         ]
 
