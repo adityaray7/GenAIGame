@@ -86,7 +86,7 @@ class AgentMemory(BaseMemory):
     ) -> List[str]:
         """Add an observation or memory to the agent's memory."""
         with open(f"memories/{agent_name}_memories.json", 'r+') as file:
-                print(f"saving memory of{agent_name}")
+                # print(f"saving memory of{agent_name}")
                 memories = json.load(file)
                 memories.append({'memory': memory_content, 'timestamp': datetime.now().isoformat()})
                 file.seek(0)
