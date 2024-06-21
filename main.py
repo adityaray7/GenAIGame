@@ -5,7 +5,7 @@ from task_manager import TaskManager, assign_next_task, assign_first_task
 import json
 import os
 from dotenv import load_dotenv
-from pygame import mixer
+# from pygame import mixer
 import time
 import deepl
 from interactions import handle_villager_interactions,handle_meeting
@@ -366,8 +366,9 @@ def send_game_state():
             conversation_text = split_text[1].strip()  # Remove leading/trailing whitespace
         else:
             conversation_text = split_text[0].strip() 
-        result = translator.translate_text(conversation_text, target_lang="JA")
-        print("Translated text: ", result.text)
+        if conversation_text:
+            result = translator.translate_text(conversation_text, target_lang="JA")
+            print("Translated text: ", result.text)
           
       
     game_state = {
@@ -455,6 +456,8 @@ def end_morning_meeting(villagers):
     Villager.killed_villagers.clear()
     assign_first_task(villagers, task_locations,task_manager.completed_tasks(),task_manager.incomplete_tasks())
 
+
+# mixer.music.play(-1)
 
 '''
 MAIN GAME LOOP

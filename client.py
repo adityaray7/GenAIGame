@@ -7,7 +7,7 @@ from utils.logger import logger
 load_dotenv()
 
 async def hello(message):
-    async with websockets.connect(f"ws://server:{os.getenv('WEBSOCKET_PORT')}") as websocket:
+    async with websockets.connect(f"ws://{os.getenv('WEBSOCKET_HOST')}:{os.getenv('WEBSOCKET_PORT')}") as websocket:
         await websocket.send(message)
         response = await websocket.recv()
         # logger.info(f"Received from server: {response}")

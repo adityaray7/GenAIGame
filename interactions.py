@@ -19,6 +19,27 @@ get_nearest_task_location
 
 '''
 
+'''
+handle_villager_interactions
+|
+|-- handle_player_interaction
+|
+|-- handle_dead_villager_interaction
+|   |
+|   |-- get_nearest_task_location
+|
+|-- handle_villager_location_interactions
+    |
+    |-- get_nearest_task_location
+
+handle_meeting
+|
+|-- get_nearest_task_location
+
+get_nearest_task_location
+
+'''
+
 import random
 import time
 from utils.logger import logger
@@ -100,6 +121,14 @@ def handle_meeting(villagers, conversations, villager_remove):
     return True, villager_remove
 
 def handle_player_interaction(player, villagers, conversations):
+    """
+    Handle interactions between the player and villagers.
+
+    Args:
+        player (Player): The player object.
+        villagers (list): List of living villagers.
+        conversations (list): List to store conversations.
+    """
     """
     Handle interactions between the player and villagers.
 
@@ -218,6 +247,9 @@ def handle_villager_interactions(player, villagers, dead_villagers, conversation
                 if distance < TALK_DISTANCE_THRESHOLD and random.random() < TALK_PROBABILITY and current_time - villager1.last_talk_attempt_time >= TALK_COOLDOWN_TIME:
                     villager1.talking = True
                     villager2.talking = True
+
+                    StartConvo = False
+                    stayInConversation = False
                             
                     if isinstance(villager1, Werewolf) and not isinstance(villager2, Werewolf):
                         initial_obs = f"You see {villager2.agent_id} nearby."
@@ -233,19 +265,26 @@ def handle_villager_interactions(player, villagers, dead_villagers, conversation
                                 + "\nREACT: {agent_name}'s reaction (if anything)."
                                 + "\nEither do nothing, eliminate a villager, react, or say something but not both.\n\n"
                             )
-                        StartConvo, result = villager1.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template, villager=villager2.agent_id)
-                        if "eliminated" in result and time.time() > villager1.kill_cooldown:
-                            villager1.kill_cooldown = time.time() + 30
-                            villagers.remove(villager2)
-                            Villager.killed_villagers.append(villager2)
-                            dead_villagers.append(villager2)
-                            villager2.alive = False
-                            conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": result})
+                        try:
+                            StartConvo, result = villager1.agent.generate_reaction(observation=initial_obs, call_to_action_template=call_to_action_template, villager=villager2.agent_id)
+                            if "eliminated" in result and time.time() > villager1.kill_cooldown:
+                                villager1.kill_cooldown = time.time() + 30
+                                villagers.remove(villager2)
+                                Villager.killed_villagers.append(villager2)
+                                dead_villagers.append(villager2)
+                                villager2.alive = False
+                                conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": result})
+                        except Exception as e:
+                            logger.error(f" {e}")
+     
                     else:
-                        initial_obs = f"You see {villager2.agent_id} nearby. Talk about your task and ask the {villager2.agent_id} about its tasks"
-                        StartConvo, result = villager1.agent.generate_reaction(observation=initial_obs)
-                        conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": result})
-
+                        try:
+                            initial_obs = f"You see {villager2.agent_id} nearby. Talk about your task and ask the {villager2.agent_id} about its tasks"
+                            StartConvo, result = villager1.agent.generate_reaction(observation=initial_obs)
+                            conversations.append({"villager1": villager1.agent_id, "villager2": villager2.agent_id, "conversation": result})
+                        except Exception as e:
+                            logger.error(f"{e}")
+     
                     if StartConvo:
                         for _ in range(2):
                             for villager in [villager2, villager1]:
@@ -260,19 +299,24 @@ def handle_villager_interactions(player, villagers, dead_villagers, conversation
                                         + '\nGOODBYE: "goodbye". Otherwise to continue the conversation,'
                                         + '\nwrite: SAY: {agent_name}: ...\n\n'
                                     )
-                                    stayInConversation, result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}. Give a reply to it ", call_to_action_template=call_to_action_template, villager=other_villager.agent_id)
-                                    if "eliminated" in result and time.time() > villager.kill_cooldown:
-                                        villagers.remove(other_villager)
-                                        villager.kill_cooldown = time.time() + 30
-                                        Villager.killed_villagers.append(other_villager)
-                                        other_villager.alive = False
-                                        conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
-                                    elif "eliminated" not in result:
-                                        conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
+                                    try:
+                                        stayInConversation, result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}. Give a reply to it ", call_to_action_template=call_to_action_template, villager=other_villager.agent_id)
+                                        if "eliminated" in result and time.time() > villager.kill_cooldown:
+                                            villagers.remove(other_villager)
+                                            villager.kill_cooldown = time.time() + 30
+                                            Villager.killed_villagers.append(other_villager)
+                                            other_villager.alive = False
+                                            conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
+                                        elif "eliminated" not in result:
+                                            conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
+                                    except Exception as e:
+                                        logger.error(f"{e}")
                                 else:
-                                    stayInConversation, result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}. Write a logical and suitable reply. Only write the reply and nothing else")
-                                    conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
-
+                                    try:
+                                        stayInConversation, result = villager.agent.generate_dialogue_response(observation=f"{other_villager.agent_id} says {result}. Write a logical and suitable reply. Only write the reply and nothing else")
+                                        conversations.append({"villager1": villager.agent_id, "villager2": other_villager.agent_id, "conversation": result})
+                                    except Exception as e:
+                                        logger.error(f"{e}")
                                 if not stayInConversation:
                                     StartConvo = False
                                     break
