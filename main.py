@@ -335,13 +335,15 @@ def send_game_state():
         villagers_state.append({
             "agent_id": villager.agent_id,
             "x": villager.x,
-            "y": villager.y
+            "y": villager.y,
+            "alive": villager.alive
         })
         
     villagers_state.append({
         "agent_id": "Player",
         "x": player_coordinates[0],
-        "y": player_coordinates[1]
+        "y": player_coordinates[1],
+        "alive": True
     })
 
     global task_locations
@@ -351,7 +353,9 @@ def send_game_state():
         task_info.append({
             "x": task.x,
             "y": task.y,
-            "task": task.task
+            "label": task.task,
+            "completed": task.completed,
+            "sabotaged": task.sabotaged
         })
     
     conversations = []
@@ -364,10 +368,11 @@ def send_game_state():
     villager_memories = {}
     for villager in villagers:
         with open(f"memories/{villager.agent_id}_memories.json", 'r') as file:
-            memories = json.load(file)
-            villager_memories[villager.agent_id] = memories
-            
-        
+            try:
+                memories = json.load(file)
+            except:
+                memories = []
+                villager_memories[villager.agent_id] = memories
         
 
     isConvo=False
