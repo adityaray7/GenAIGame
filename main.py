@@ -338,6 +338,14 @@ def send_game_state():
             "y": villager.y,
             "alive": villager.alive
         })
+
+    for dead_villager in Villager.killed_villagers:
+        villagers_state.append({
+            "agent_id": dead_villager.agent_id,
+            "x": dead_villager.x,
+            "y": dead_villager.y,
+            "alive": False
+        })
         
     villagers_state.append({
         "agent_id": "Player",
