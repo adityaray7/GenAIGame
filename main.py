@@ -176,8 +176,8 @@ walkable paths
 '''
 paths = [
     # Pathways leading to the meeting point
-    Path(SCREEN_WIDTH // 2 + 60, SCREEN_HEIGHT // 2 - 30, 800, 30),
-    Path(0, SCREEN_HEIGHT // 2 - 30, 700, 30),
+    Path(SCREEN_WIDTH // 2 + 60, SCREEN_HEIGHT // 2 - 50, 800, 30),
+    Path(0, SCREEN_HEIGHT // 2 - 50, 700, 30),
     Path(SCREEN_WIDTH // 2 - 30, 0, 30, 400),
     Path(SCREEN_WIDTH // 2 - 30, SCREEN_HEIGHT // 2 + 40, 30, 400),
 
@@ -188,16 +188,28 @@ paths = [
     Path(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 60, 60, 150),
 
     # Outer horizontal path
-    Path(0, SCREEN_HEIGHT // 4 - 25, 1500, 30),
-    Path(0, 3 * SCREEN_HEIGHT // 4, 1500, 30),
+    Path(0, SCREEN_HEIGHT // 4 - 50, 1500, 30),
+    Path(0, 3 * SCREEN_HEIGHT // 4-50, 1500, 30),
 
     # Inner vertical paths
-    Path(SCREEN_WIDTH // 4 - 75, 0, 30, 900),
+    Path(SCREEN_WIDTH // 4 - 25, 0, 30, 900),
     Path(3 * SCREEN_WIDTH // 4 + 25, 0, 30, 900),
 
     # Outer vertical path
     Path(30, 0, 30, 900),
-    Path(SCREEN_WIDTH - 60, 0, 30, 900)
+    Path(SCREEN_WIDTH - 60, 0, 30, 900),
+
+    #inner inner vertical paths
+    Path(SCREEN_WIDTH // 3+25 ,0, 30, 1000),
+    Path(2*SCREEN_WIDTH // 3-50, 0, 30, 1000),
+
+    #inner horizontal paths
+    Path(SCREEN_WIDTH//2 - 200, SCREEN_HEIGHT // 2 - 100, 400, 30),
+    Path(SCREEN_WIDTH//2 - 200, SCREEN_HEIGHT // 2 + 100, 400, 30),
+
+    Path(SCREEN_WIDTH//2 +60, SCREEN_HEIGHT // 2 , 30, 200),
+    Path(SCREEN_WIDTH//2 -90, SCREEN_HEIGHT // 2 , 30, 200)
+
 ]
 
 
@@ -209,7 +221,7 @@ num_villagers = len(names)
 num_werewolf = len(werewolf_names)
 center_x = SCREEN_WIDTH//2
 center_y = SCREEN_HEIGHT//2
-radius = 65
+radius = 80
 
 angles = [i * (2 * math.pi / (num_villagers+num_werewolf) ) for i in range(num_villagers+num_werewolf)]
 for i in range(len(backgrounds)):
@@ -368,22 +380,21 @@ def send_game_state():
             villager_memories[villager.agent_id] = memories
             
         
-        
-
+    
     isConvo=False
     result = ""
-    if conversations:
-        isConvo=True
-        translator = deepl.Translator(deepl_auth_key)
-        print(conversations[0]['conversation'])
-        split_text = conversations[0]['conversation'].split(':', 1)
-        if len(split_text) > 1:
-            conversation_text = split_text[1].strip()  # Remove leading/trailing whitespace
-        else:
-            conversation_text = split_text[0].strip() 
-        if conversation_text:
-            result = translator.translate_text(conversation_text, target_lang="JA")
-            print("Translated text: ", result.text)
+    # if conversations:
+    #     isConvo=True
+    #     translator = deepl.Translator(deepl_auth_key)
+    #     print(conversations[0]['conversation'])
+    #     split_text = conversations[0]['conversation'].split(':', 1)
+    #     if len(split_text) > 1:
+    #         conversation_text = split_text[1].strip()  # Remove leading/trailing whitespace
+    #     else:
+    #         conversation_text = split_text[0].strip() 
+    #     if conversation_text:
+    #         result = translator.translate_text(conversation_text, target_lang="JA")
+    #         print("Translated text: ", result.text)
           
       
     game_state = {
@@ -575,6 +586,9 @@ while running:
 
     for task_location in task_locations:
         task_location.draw(screen)
+
+    # for p in paths:
+    #     p.draw(screen)
 
      # Display message if there is one
     if message and time.time() - message_start_time < message_duration:

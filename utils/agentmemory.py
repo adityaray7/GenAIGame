@@ -176,4 +176,3 @@ class AgentMemory(BaseMemory):
         
         if mem:
             self.add_memory(mem, now=now,agent_name=agent_name)
-    

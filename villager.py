@@ -10,7 +10,6 @@ import os
 
 load_dotenv()
 
-ELIMINATION_DISTANCE = 40
 SPEED = 2
 
 class Villager:
@@ -251,7 +250,7 @@ class Werewolf(Villager):
                     next_x = self.x + SPEED * direction[0]
                     next_y = self.y + SPEED * direction[1]
 
-                    if self.distance_to_target(next_x, next_y) < current_distance:
+                    if self.distance_to_target(next_x, next_y) < current_distance :
                         self.x = next_x
                         self.y = next_y
                         moved = True
