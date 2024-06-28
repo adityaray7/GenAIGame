@@ -266,17 +266,20 @@ class Werewolf(Villager):
                 if current_distance <= 2:
                     self.start_task()
 
+# Player class update to handle team tasks
 class Player(Villager):
     """
     Represents a player in the game, inheriting from Villager.
 
     Attributes:
         speed (int): The speed at which the player moves.
+        is_werewolf (bool): Indicates if the player is a werewolf.
     """
 
-    def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0), paths=[]):
+    def __init__(self, name, x, y, background_texts, llm: BaseLanguageModel, memory: AgentMemory, occupation="", meeting_location=(0, 0), paths=[], is_werewolf=False):
         super().__init__(name, x, y, background_texts, llm, memory, occupation, meeting_location, paths=paths)
-        self.speed = 1
+        self.speed = 2
+        self.is_werewolf = is_werewolf
 
     def handle_input(self):
         """
@@ -304,6 +307,42 @@ class Player(Villager):
         self.handle_input()
         super().update()
 
+        # Check if near a task location to complete it
+        if self.current_task is not None and not self.task_doing and self.distance_to_target(self.x, self.y) <= 2:
+            self.start_task()
+
+    def distance_to_task(self, x, y):
+        """
+        Calculate the distance to the target task location.
+
+        Parameters:
+            x (int): X-coordinate of the current position.
+            y (int): Y-coordinate of the current position.
+
+        Returns:
+            float: Distance to the target task location.
+        """
+        dx = self.x - x
+        dy = self.y - y
+        return (dx ** 2 + dy ** 2) ** 0.5
+    
+    def distance_to_villager(self,vil):
+        """
+        Calculate the distance to the target task location.
+
+        Parameters:
+            x (int): X-coordinate of the current position.
+            y (int): Y-coordinate of the current position.
+
+        Returns:
+            float: Distance to the target task location.
+        """
+
+        dx = self.x - vil.x
+        dy = self.y - vil.y
+        return (dx ** 2 + dy ** 2) ** 0.5
+
+
     def draw(self, screen):
         """
         Draw the player on the screen.
@@ -311,11 +350,12 @@ class Player(Villager):
         Parameters:
             screen (pygame.Surface): The screen to draw on.
         """
-        color = (0, 255, 0)
+        color = (0, 255, 0) if not self.is_werewolf else (255, 0, 0)
         pygame.draw.circle(screen, color, (int(self.x), int(self.y)), 5)
         agent_id_text = self.font.render(self.agent_id, True, (0, 0, 0))
         screen.blit(agent_id_text, (self.x - 25, self.y - 40))
 
-        vil_image = pygame.image.load('images/vil.png')
+        vil_image = pygame.image.load('images/akio.png') if not self.is_werewolf else pygame.image.load('images/werewolf.png')
         vil_image = pygame.transform.scale(vil_image, (60, 60))
         screen.blit(vil_image, (self.x - 25, self.y - 25))
+

@@ -1,7 +1,7 @@
 from utils.task_locations import Task
 from utils.logger import logger
 import random
-from villager import Werewolf
+from villager import Villager,Werewolf,Player
 from utils.logger import logger
 class TaskManager:
     def __init__(self) -> None:
@@ -29,6 +29,24 @@ class TaskManager:
     
     def all_tasks_completed(self):
         return all(task.completed for task in self.tasks)
+    
+    def update_tasks(self, player):
+        """
+        Update tasks based on player proximity.
+
+        Parameters:
+            player (Player): The player object.
+
+        Returns:
+            None
+        """
+        
+        for task in self.tasks:
+            if player.distance_to_task(task.x, task.y) < 20:
+                if not player.is_werewolf:
+                    task.complete()
+                else:
+                    task.sabotage()
 
 
 def assign_first_task(villagers, task_locations,complete,incomplete):

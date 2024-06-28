@@ -125,6 +125,62 @@ def create_new_memory_retriever(agent_name="Player"):
         vectorstore=vectorstore, other_score_keys=["importance"], k=15, decay_rate=0.005
     )
 
+def team_selection_screen(screen):
+    """
+    Display a screen for the player to select their team.
+
+    Parameters:
+        screen (pygame.Surface): The screen to draw on.
+
+    Returns:
+        bool: True if the player selected werewolf, False if villager.
+    """
+    # Load images
+    background_image = pygame.image.load('images/night3.png')
+    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    villager_image = pygame.image.load('images/akio.png')
+    werewolf_image = pygame.image.load('images/werewolf.png')
+    
+    # Scale images
+    villager_image = pygame.transform.scale(villager_image, (200, 200))
+    werewolf_image = pygame.transform.scale(werewolf_image, (200, 200))
+    
+    font = pygame.font.SysFont(None, 48)
+    villager_text = font.render("Press V to be a Villager", True, (255, 255, 255))
+    werewolf_text = font.render("Press W to be a Werewolf", True, (255, 255, 255))
+    
+    # Get dimensions
+    screen_width, screen_height = screen.get_size()
+    
+    # Calculate positions
+    villager_x = (screen_width // 2) -500
+    werewolf_x = (screen_width // 2) + 200
+    text_y = (screen_height // 2) + 200
+    
+    while True:
+        # Draw background
+        screen.blit(background_image, (0, 0))
+        
+        # Draw images and text
+        screen.blit(villager_image, (villager_x, 150))
+        screen.blit(werewolf_image, (werewolf_x, 150))
+        screen.blit(villager_text, (villager_x, text_y))
+        screen.blit(werewolf_text, (werewolf_x, text_y))
+        
+        pygame.display.flip()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_v:
+                    return False
+                if event.key == pygame.K_w:
+                    return True
+
+
 # Multithreading 
 villagers_threaded = []
 
@@ -132,6 +188,12 @@ villagers_threaded = []
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Villagers and Werewolves")
+is_werewolf = team_selection_screen(screen)
+font = pygame.font.Font(None, 36)
+kill_button = pygame.Rect(50, 50, 180, 40)  # Button coordinates and size
+button_text = font.render("Kill Villager", True, (255, 255, 255))
+
 clock = pygame.time.Clock()
 
 
@@ -253,7 +315,7 @@ for i in range(len(werewolf_backgrounds)):
 Initialize the player
 '''
 player_memory = AgentMemory(llm=llm, memory_retriever=create_new_memory_retriever())
-player = Player("Player", SCREEN_WIDTH // 2+100, SCREEN_HEIGHT // 2 + 100, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=paths)
+player = Player("Player", SCREEN_WIDTH // 2+100, SCREEN_HEIGHT // 2 + 100, ["I am Aditya.I am the village head. I am just on a round to make sure everything is going good"], llm,memory = player_memory, meeting_location=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2),paths=paths,is_werewolf=is_werewolf)
 
 
 def villager_info(villagers):
@@ -461,6 +523,7 @@ def assign_task_thread(villager, current_task=None):
 
 
 
+
 '''
 Morning meeting functions
 '''
@@ -519,10 +582,23 @@ while running:
     send_game_state()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            running = False       
+            
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Left mouse button click
+                if kill_button.collidepoint(event.pos):
+                    if player.is_werewolf and len(villagers) > 0 :
+                        # Logic to kill a villager
+                        for villager in villagers:
+                            if villager.alive and player.distance_to_villager(villager) < 20:   
+                                villager.alive = False
+                                Villager.killed_villagers.append(villager)
+                                logger.info(f"{villager.agent_id} was killed by the werewolf.")
+                                break
 
     player.update()
     player_coordinates = (player.x, player.y)
+    task_manager.update_tasks(player)
 
     curr = time.time() + MORNING_MEETING_DURATION  #increased so that first meeting is skipped
     elapsed_time = curr - start_time
@@ -622,6 +698,11 @@ while running:
         elif task_manager.all_tasks_completed():
             message = "Townsfolk won the game!"
             message_start_time = time.time()
+
+    if is_werewolf:
+        # Drawing the button
+        pygame.draw.rect(screen, (255, 0, 0), kill_button)
+        screen.blit(button_text, (55, 55))
 
     
     pygame.display.flip()
