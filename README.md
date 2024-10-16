@@ -1,5 +1,7 @@
 # Townsfolks vs werewolves 
 
+This game implements the research paper: Generative Agents: Interactive Simulacra of Human Behavior(https://arxiv.org/abs/2304.03442).
+
 ## Description
 This is a fun simulation comprising of a mixture of mafia and among us. The villagers and werewolves are agents with seperate memories which are implemented using langchain. The Generative AI agents take decisions using opeai's LLM Model and decide to vote out suspicious villagers using their memories.
 
